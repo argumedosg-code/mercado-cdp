@@ -27,9 +27,9 @@ if (typeof window !== "undefined" && !document.getElementById("tailwind-cdn")) {
 }
 
 // ==========================================
-// ÍCONOS INTEGRADOS (Sin dependencias externas)
+// ÍCONOS INTEGRADOS (Compatibles con TypeScript para Vercel)
 // ==========================================
-const SvgIcon = ({ children, ...props }) => (
+const SvgIcon = ({ children, ...props }: any) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -46,30 +46,30 @@ const SvgIcon = ({ children, ...props }) => (
   </svg>
 );
 
-const IconMail = (props) => (
+const IconMail = (props: any) => (
   <SvgIcon {...props}>
     <rect width="20" height="16" x="2" y="4" rx="2" />
     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
   </SvgIcon>
 );
-const IconLock = (props) => (
+const IconLock = (props: any) => (
   <SvgIcon {...props}>
     <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
   </SvgIcon>
 );
-const IconUser = (props) => (
+const IconUser = (props: any) => (
   <SvgIcon {...props}>
     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
   </SvgIcon>
 );
-const IconPhone = (props) => (
+const IconPhone = (props: any) => (
   <SvgIcon {...props}>
     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
   </SvgIcon>
 );
-const IconFileText = (props) => (
+const IconFileText = (props: any) => (
   <SvgIcon {...props}>
     <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
     <polyline points="14 2 14 8 20 8" />
@@ -78,37 +78,37 @@ const IconFileText = (props) => (
     <line x1="10" x2="8" y1="9" y2="9" />
   </SvgIcon>
 );
-const IconChevronRight = (props) => (
+const IconChevronRight = (props: any) => (
   <SvgIcon {...props}>
     <path d="m9 18 6-6-6-6" />
   </SvgIcon>
 );
-const IconLogOut = (props) => (
+const IconLogOut = (props: any) => (
   <SvgIcon {...props}>
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
     <polyline points="16 17 21 12 16 7" />
     <line x1="21" x2="9" y1="12" y2="12" />
   </SvgIcon>
 );
-const IconShield = (props) => (
+const IconShield = (props: any) => (
   <SvgIcon {...props}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </SvgIcon>
 );
-const IconCheckCircle = (props) => (
+const IconCheckCircle = (props: any) => (
   <SvgIcon {...props}>
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
     <path d="M22 4L12 14.01l-3-3" />
   </SvgIcon>
 );
-const IconAlertCircle = (props) => (
+const IconAlertCircle = (props: any) => (
   <SvgIcon {...props}>
     <circle cx="12" cy="12" r="10" />
     <line x1="12" x2="12" y1="8" y2="12" />
     <line x1="12" x2="12.01" y1="16" y2="16" />
   </SvgIcon>
 );
-const IconTrash2 = (props) => (
+const IconTrash2 = (props: any) => (
   <SvgIcon {...props}>
     <path d="M3 6h18" />
     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
@@ -117,19 +117,19 @@ const IconTrash2 = (props) => (
     <line x1="14" x2="14" y1="11" y2="17" />
   </SvgIcon>
 );
-const IconEdit = (props) => (
+const IconEdit = (props: any) => (
   <SvgIcon {...props}>
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
   </SvgIcon>
 );
-const IconCreditCard = (props) => (
+const IconCreditCard = (props: any) => (
   <SvgIcon {...props}>
     <rect width="20" height="14" x="2" y="5" rx="2" />
     <line x1="2" x2="22" y1="10" y2="10" />
   </SvgIcon>
 );
-const IconBuilding = (props) => (
+const IconBuilding = (props: any) => (
   <SvgIcon {...props}>
     <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
     <path d="M9 22v-4h6v4" />
@@ -144,26 +144,26 @@ const IconBuilding = (props) => (
     <path d="M8 14h.01" />
   </SvgIcon>
 );
-const IconSettings = (props) => (
+const IconSettings = (props: any) => (
   <SvgIcon {...props}>
     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
     <circle cx="12" cy="12" r="3" />
   </SvgIcon>
 );
-const IconX = (props) => (
+const IconX = (props: any) => (
   <SvgIcon {...props}>
     <path d="M18 6 6 18" />
     <path d="m6 6 12 12" />
   </SvgIcon>
 );
-const IconInfo = (props) => (
+const IconInfo = (props: any) => (
   <SvgIcon {...props}>
     <circle cx="12" cy="12" r="10" />
     <path d="M12 16v-4" />
     <path d="M12 8h.01" />
   </SvgIcon>
 );
-const IconCloud = (props) => (
+const IconCloud = (props: any) => (
   <SvgIcon {...props}>
     <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
   </SvgIcon>
@@ -172,9 +172,9 @@ const IconCloud = (props) => (
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
 // ==========================================
-const SESSION_KEY = "cdp_session_v21";
+const SESSION_KEY = "cdp_session_v22";
 
-// Llaves de Mercado CDP Violetas
+// Tus llaves exactas del Club de Campo Viñas en las Violetas
 const codeSandboxFirebaseConfig = {
   apiKey: "AIzaSyAKURp61wvvL-YfYhfUQzVsl4sQX69TCHc",
   authDomain: "mercado-cdp-violetas.firebaseapp.com",
@@ -185,26 +185,29 @@ const codeSandboxFirebaseConfig = {
 };
 
 const firebaseConfig =
-  typeof __firebase_config !== "undefined"
-    ? JSON.parse(__firebase_config)
+  typeof (window as any).__firebase_config !== "undefined"
+    ? JSON.parse((window as any).__firebase_config)
     : codeSandboxFirebaseConfig;
 
-let app, auth, db, appId;
+let app: any, auth: any, db: any, appId: string;
 
 if (firebaseConfig) {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
-  appId = typeof __app_id !== "undefined" ? __app_id : "mi-mercado-cdp";
+  appId =
+    typeof (window as any).__app_id !== "undefined"
+      ? (window as any).__app_id
+      : "mi-mercado-cdp";
 }
 
-const formatId = (num) => `#${String(num).padStart(4, "0")}`;
+const formatId = (num: number) => `#${String(num).padStart(4, "0")}`;
 
 // ==========================================
 // COMPONENTES UI REUTILIZABLES
 // ==========================================
 
-const Spinner = ({ className = "w-5 h-5" }) => (
+const Spinner = ({ className = "w-5 h-5" }: any) => (
   <svg
     className={`animate-spin ${className}`}
     xmlns="http://www.w3.org/2000/svg"
@@ -234,10 +237,10 @@ const Button = ({
   icon: Icon,
   className = "",
   ...props
-}) => {
+}: any) => {
   const baseStyle =
     "flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed";
-  const variants = {
+  const variants: any = {
     primary:
       "bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/30 hover:shadow-lg hover:shadow-violet-500/40",
     secondary:
@@ -260,7 +263,7 @@ const Button = ({
   );
 };
 
-const InputField = ({ label, icon: Icon, error, ...props }) => (
+const InputField = ({ label, icon: Icon, error, ...props }: any) => (
   <div className="flex flex-col gap-1 w-full">
     {label && (
       <label className="text-sm font-semibold text-slate-600 ml-1">
@@ -290,7 +293,7 @@ const InputField = ({ label, icon: Icon, error, ...props }) => (
   </div>
 );
 
-const Card = ({ children, className = "" }) => (
+const Card = ({ children, className = "" }: any) => (
   <div
     className={`bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 ${className}`}
   >
@@ -311,10 +314,10 @@ const GlobalModal = ({
   onCancel,
   confirmText = "Aceptar",
   cancelText = "Cancelar",
-}) => {
+}: any) => {
   if (!isOpen) return null;
 
-  const icons = {
+  const icons: any = {
     success: <IconCheckCircle className="w-12 h-12 text-green-500" />,
     error: <IconAlertCircle className="w-12 h-12 text-red-500" />,
     info: <IconInfo className="w-12 h-12 text-violet-500" />,
@@ -350,19 +353,24 @@ const GlobalModal = ({
   );
 };
 
-const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }) => {
+const AdminEditModal = ({
+  user,
+  onClose,
+  onUpdate,
+  showGlobalMessage,
+}: any) => {
   const [formData, setFormData] = useState({ ...user });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData((prev: any) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
     await onUpdate(user.id, formData);
@@ -486,14 +494,19 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }) => {
 // VISTAS DE LA APLICACIÓN
 // ==========================================
 
-const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }) => {
+const LoginView = ({
+  users,
+  setView,
+  setCurrentUser,
+  showGlobalMessage,
+}: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: any) => {
     e.preventDefault();
     const user = users.find(
-      (u) => u.email === email.toLowerCase() && u.password === password
+      (u: any) => u.email === email.toLowerCase() && u.password === password
     );
 
     if (user) {
@@ -518,7 +531,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }) => {
       );
       return;
     }
-    const user = users.find((u) => u.email === email.toLowerCase());
+    const user = users.find((u: any) => u.email === email.toLowerCase());
     if (user) {
       showGlobalMessage(
         "success",
@@ -557,7 +570,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }) => {
             type="email"
             placeholder="ejemplo@correo.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e: any) => setEmail(e.target.value)}
             required
           />
           <InputField
@@ -566,7 +579,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }) => {
             type="password"
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: any) => setPassword(e.target.value)}
             required
           />
           <div className="flex justify-end">
@@ -602,7 +615,7 @@ const RegisterView = ({
   setView,
   setCurrentUser,
   showGlobalMessage,
-}) => {
+}: any) => {
   const [formData, setFormData] = useState({
     nombres: "",
     apellidos: "",
@@ -613,12 +626,12 @@ const RegisterView = ({
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
 
     const emailLower = formData.email.toLowerCase();
-    if (users.some((u) => u.email === emailLower)) {
+    if (users.some((u: any) => u.email === emailLower)) {
       showGlobalMessage(
         "error",
         "Email duplicado",
@@ -675,7 +688,7 @@ const RegisterView = ({
               icon={IconUser}
               label="Nombres"
               value={formData.nombres}
-              onChange={(e) =>
+              onChange={(e: any) =>
                 setFormData({ ...formData, nombres: e.target.value })
               }
               required
@@ -684,7 +697,7 @@ const RegisterView = ({
               icon={IconUser}
               label="Apellidos"
               value={formData.apellidos}
-              onChange={(e) =>
+              onChange={(e: any) =>
                 setFormData({ ...formData, apellidos: e.target.value })
               }
               required
@@ -694,14 +707,16 @@ const RegisterView = ({
             icon={IconFileText}
             label="CUIT / CUIL"
             value={formData.cuit}
-            onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
+            onChange={(e: any) =>
+              setFormData({ ...formData, cuit: e.target.value })
+            }
             required
           />
           <InputField
             icon={IconPhone}
             label="Teléfono (WhatsApp)"
             value={formData.telefono}
-            onChange={(e) =>
+            onChange={(e: any) =>
               setFormData({ ...formData, telefono: e.target.value })
             }
             required
@@ -711,7 +726,7 @@ const RegisterView = ({
             label="Correo Electrónico"
             type="email"
             value={formData.email}
-            onChange={(e) =>
+            onChange={(e: any) =>
               setFormData({ ...formData, email: e.target.value })
             }
             required
@@ -721,7 +736,7 @@ const RegisterView = ({
             label="Contraseña"
             type="password"
             value={formData.password}
-            onChange={(e) =>
+            onChange={(e: any) =>
               setFormData({ ...formData, password: e.target.value })
             }
             required
@@ -735,7 +750,7 @@ const RegisterView = ({
   );
 };
 
-const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
+const ValidationView = ({ user, onUpdate, setView, setCurrentUser }: any) => {
   const [formData, setFormData] = useState({
     nombres: user.nombres,
     apellidos: user.apellidos,
@@ -744,7 +759,7 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
     const updatedUser = { ...user, ...formData, isValidated: true };
@@ -800,7 +815,7 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
               <InputField
                 label="Nombres"
                 value={formData.nombres}
-                onChange={(e) =>
+                onChange={(e: any) =>
                   setFormData({ ...formData, nombres: e.target.value })
                 }
                 required
@@ -808,7 +823,7 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
               <InputField
                 label="Apellidos"
                 value={formData.apellidos}
-                onChange={(e) =>
+                onChange={(e: any) =>
                   setFormData({ ...formData, apellidos: e.target.value })
                 }
                 required
@@ -817,7 +832,7 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
             <InputField
               label="CUIT / CUIL"
               value={formData.cuit}
-              onChange={(e) =>
+              onChange={(e: any) =>
                 setFormData({ ...formData, cuit: e.target.value })
               }
               required
@@ -825,7 +840,7 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
             <InputField
               label="Teléfono de Contacto"
               value={formData.telefono}
-              onChange={(e) =>
+              onChange={(e: any) =>
                 setFormData({ ...formData, telefono: e.target.value })
               }
               required
@@ -847,7 +862,7 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
   );
 };
 
-const DashboardView = ({ user, setView, handleLogout }) => {
+const DashboardView = ({ user, setView, handleLogout }: any) => {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
@@ -1001,10 +1016,10 @@ const AdminView = ({
   onUpdate,
   onDelete,
   showGlobalMessage,
-}) => {
-  const [editingUser, setEditingUser] = useState(null);
+}: any) => {
+  const [editingUser, setEditingUser] = useState<any>(null);
 
-  const handleDeleteRequest = (userToDelete) => {
+  const handleDeleteRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) {
       showGlobalMessage(
         "error",
@@ -1085,7 +1100,7 @@ const AdminView = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {users.map((u) => (
+                {users.map((u: any) => (
                   <tr
                     key={u.id}
                     className="hover:bg-slate-50/50 transition-colors"
@@ -1155,7 +1170,7 @@ const AdminView = ({
         <AdminEditModal
           user={editingUser}
           onClose={() => setEditingUser(null)}
-          onUpdate={(id, data) => {
+          onUpdate={(id: string, data: any) => {
             onUpdate(id, data);
             if (id === currentUser.id) {
               setCurrentUser(data);
@@ -1175,16 +1190,16 @@ const AdminView = ({
 
 export default function App() {
   const [currentView, setCurrentView] = useState("login");
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Estados de Firebase
-  const [firebaseUser, setFirebaseUser] = useState(null);
-  const [users, setUsers] = useState([]);
+  const [firebaseUser, setFirebaseUser] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [dbError, setDbError] = useState(null); // NUEVO ESTADO PARA CAPTURAR ERRORES
+  const [dbError, setDbError] = useState<string | null>(null);
 
-  const [modalConfig, setModalConfig] = useState({
+  const [modalConfig, setModalConfig] = useState<any>({
     isOpen: false,
     type: "info",
     title: "",
@@ -1201,10 +1216,13 @@ export default function App() {
     const initAuth = async () => {
       try {
         if (
-          typeof __initial_auth_token !== "undefined" &&
-          __initial_auth_token
+          typeof (window as any).__initial_auth_token !== "undefined" &&
+          (window as any).__initial_auth_token
         ) {
-          await signInWithCustomToken(auth, __initial_auth_token);
+          await signInWithCustomToken(
+            auth,
+            (window as any).__initial_auth_token
+          );
         } else {
           await signInAnonymously(auth);
         }
@@ -1218,9 +1236,8 @@ export default function App() {
     };
     initAuth();
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user: any) => {
       setFirebaseUser(user);
-      // Si onAuthStateChanged devuelve null pero no hay un error previo, no hacemos nada extra aquí
     });
 
     return () => unsubscribe();
@@ -1242,8 +1259,8 @@ export default function App() {
 
     const unsubscribe = onSnapshot(
       usersRef,
-      (snapshot) => {
-        const usersData = snapshot.docs.map((doc) => ({
+      (snapshot: any) => {
+        const usersData = snapshot.docs.map((doc: any) => ({
           id: doc.id,
           ...doc.data(),
         }));
@@ -1251,7 +1268,7 @@ export default function App() {
         setIsDbReady(true);
         setDbError(null);
       },
-      (error) => {
+      (error: any) => {
         console.error("Error de lectura DB:", error);
         setDbError(
           "Error de permisos en la base de datos. Asegúrate de que las reglas de Firestore estén configuradas para permitir lectura/escritura (Modo de prueba)."
@@ -1263,12 +1280,12 @@ export default function App() {
     return () => unsubscribe();
   }, [firebaseUser]);
 
-  // 3. Restaurar Sesión del Usuario (Si ya estaba logueado en esta compu)
+  // 3. Restaurar Sesión del Usuario
   useEffect(() => {
     if (isDbReady && isInitializing) {
       const sessionId = localStorage.getItem(SESSION_KEY);
       if (sessionId) {
-        const user = users.find((u) => u.id === sessionId);
+        const user = users.find((u: any) => u.id === sessionId);
         if (user) {
           setCurrentUser(user);
           setCurrentView(user.isValidated ? "dashboard" : "validation");
@@ -1281,7 +1298,7 @@ export default function App() {
   }, [isDbReady, users, isInitializing]);
 
   // Funciones de Base de Datos
-  const handleRegisterUser = async (newUser) => {
+  const handleRegisterUser = async (newUser: any) => {
     try {
       await setDoc(
         doc(
@@ -1300,7 +1317,7 @@ export default function App() {
     }
   };
 
-  const handleUpdateUser = async (id, data) => {
+  const handleUpdateUser = async (id: string, data: any) => {
     try {
       await updateDoc(
         doc(db, "artifacts", appId, "public", "data", "fiduciantes", id),
@@ -1311,7 +1328,7 @@ export default function App() {
     }
   };
 
-  const handleDeleteUser = async (id) => {
+  const handleDeleteUser = async (id: string) => {
     try {
       await deleteDoc(
         doc(db, "artifacts", appId, "public", "data", "fiduciantes", id)
@@ -1322,11 +1339,11 @@ export default function App() {
   };
 
   const showGlobalMessage = (
-    type,
-    title,
-    message,
-    onConfirmCallback = null,
-    onCancelCallback = null,
+    type: string,
+    title: string,
+    message: string,
+    onConfirmCallback: any = null,
+    onCancelCallback: any = null,
     confirmText = "Aceptar"
   ) => {
     setModalConfig({
@@ -1337,11 +1354,11 @@ export default function App() {
       confirmText,
       cancelText: "Cancelar",
       onConfirm: () => {
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        setModalConfig((prev: any) => ({ ...prev, isOpen: false }));
         if (onConfirmCallback) onConfirmCallback();
       },
       onCancel: () => {
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        setModalConfig((prev: any) => ({ ...prev, isOpen: false }));
         if (onCancelCallback) onCancelCallback();
       },
     });
@@ -1360,7 +1377,7 @@ export default function App() {
     );
   };
 
-  // PANTALLAS DE ERROR O CARGA
+  // PANTALLAS DE CARGA O ERROR
   if (!firebaseConfig) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
@@ -1370,36 +1387,20 @@ export default function App() {
             ¡Casi listo para la Nube!
           </h2>
           <p className="text-amber-800 mb-6">
-            Esta versión está lista para conectarse a una base de datos real.
-            Para que funcione en CodeSandbox o en tu página web, debes crear un
-            proyecto gratuito en Firebase y pegar tus "claves" en la línea 127
-            del código.
+            Configura Firebase en la línea 127 del código.
           </p>
-          <div className="bg-white p-4 rounded-xl text-left border border-amber-200">
-            <p className="text-sm font-bold text-slate-700 mb-1">
-              Pasos a seguir:
-            </p>
-            <ol className="text-sm text-slate-600 list-decimal list-inside space-y-1">
-              <li>Ve a console.firebase.google.com</li>
-              <li>Crea un proyecto (ej: mercado-cdp)</li>
-              <li>Crea una base de datos "Firestore" (en modo prueba)</li>
-              <li>Añade una "App Web" (icono de código `{"</>"}`)</li>
-              <li>Copia el `firebaseConfig` y pégalo en el código.</li>
-            </ol>
-          </div>
         </Card>
       </div>
     );
   }
 
-  // SI HAY UN ERROR EN LA CONEXIÓN (Como la falta de autenticación anónima)
   if (dbError) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
         <Card className="max-w-lg text-center border-red-200 bg-red-50">
           <IconAlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-red-900 mb-2">
-            Falta un permiso en Firebase
+            Error de conexión
           </h2>
           <p className="text-red-800 mb-6 font-medium">{dbError}</p>
           <Button onClick={() => window.location.reload()}>
