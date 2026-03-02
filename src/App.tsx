@@ -1,20 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  signInAnonymously,
-  onAuthStateChanged,
-  signInWithCustomToken,
-} from "firebase/auth";
-import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-  updateDoc,
-} from "firebase/firestore";
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc } from "firebase/firestore";
 
 // ==========================================
 // INYECCIÓN FORZADA DE DISEÑO (TAILWIND CSS)
@@ -27,273 +14,105 @@ if (typeof window !== "undefined" && !document.getElementById("tailwind-cdn")) {
 }
 
 // ==========================================
-// ÍCONOS INTEGRADOS (Sin dependencias externas)
+// ÍCONOS INTEGRADOS (Compatibles con TypeScript para Vercel)
 // ==========================================
-const SvgIcon = ({ children, ...props }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+const SvgIcon = ({ children, ...props }: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     {children}
   </svg>
 );
 
-const IconMail = (props) => (
-  <SvgIcon {...props}>
-    <rect width="20" height="16" x="2" y="4" rx="2" />
-    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-  </SvgIcon>
-);
-const IconLock = (props) => (
-  <SvgIcon {...props}>
-    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-  </SvgIcon>
-);
-const IconUser = (props) => (
-  <SvgIcon {...props}>
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
-  </SvgIcon>
-);
-const IconPhone = (props) => (
-  <SvgIcon {...props}>
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-  </SvgIcon>
-);
-const IconFileText = (props) => (
-  <SvgIcon {...props}>
-    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" x2="8" y1="13" y2="13" />
-    <line x1="16" x2="8" y1="17" y2="17" />
-    <line x1="10" x2="8" y1="9" y2="9" />
-  </SvgIcon>
-);
-const IconChevronRight = (props) => (
-  <SvgIcon {...props}>
-    <path d="m9 18 6-6-6-6" />
-  </SvgIcon>
-);
-const IconLogOut = (props) => (
-  <SvgIcon {...props}>
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-    <polyline points="16 17 21 12 16 7" />
-    <line x1="21" x2="9" y1="12" y2="12" />
-  </SvgIcon>
-);
-const IconShield = (props) => (
-  <SvgIcon {...props}>
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-  </SvgIcon>
-);
-const IconCheckCircle = (props) => (
-  <SvgIcon {...props}>
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-    <path d="M22 4L12 14.01l-3-3" />
-  </SvgIcon>
-);
-const IconAlertCircle = (props) => (
-  <SvgIcon {...props}>
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" x2="12" y1="8" y2="12" />
-    <line x1="12" x2="12.01" y1="16" y2="16" />
-  </SvgIcon>
-);
-const IconTrash2 = (props) => (
-  <SvgIcon {...props}>
-    <path d="M3 6h18" />
-    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-    <line x1="10" x2="10" y1="11" y2="17" />
-    <line x1="14" x2="14" y1="11" y2="17" />
-  </SvgIcon>
-);
-const IconEdit = (props) => (
-  <SvgIcon {...props}>
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-  </SvgIcon>
-);
-const IconCreditCard = (props) => (
-  <SvgIcon {...props}>
-    <rect width="20" height="14" x="2" y="5" rx="2" />
-    <line x1="2" x2="22" y1="10" y2="10" />
-  </SvgIcon>
-);
-const IconBuilding = (props) => (
-  <SvgIcon {...props}>
-    <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
-    <path d="M9 22v-4h6v4" />
-    <path d="M8 6h.01" />
-    <path d="M16 6h.01" />
-    <path d="M12 6h.01" />
-    <path d="M12 10h.01" />
-    <path d="M12 14h.01" />
-    <path d="M16 10h.01" />
-    <path d="M16 14h.01" />
-    <path d="M8 10h.01" />
-    <path d="M8 14h.01" />
-  </SvgIcon>
-);
-const IconSettings = (props) => (
-  <SvgIcon {...props}>
-    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-    <circle cx="12" cy="12" r="3" />
-  </SvgIcon>
-);
-const IconX = (props) => (
-  <SvgIcon {...props}>
-    <path d="M18 6 6 18" />
-    <path d="m6 6 12 12" />
-  </SvgIcon>
-);
-const IconInfo = (props) => (
-  <SvgIcon {...props}>
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 16v-4" />
-    <path d="M12 8h.01" />
-  </SvgIcon>
-);
-const IconCloud = (props) => (
-  <SvgIcon {...props}>
-    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-  </SvgIcon>
-);
+const IconMail = (props: any) => <SvgIcon {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></SvgIcon>;
+const IconLock = (props: any) => <SvgIcon {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></SvgIcon>;
+const IconUser = (props: any) => <SvgIcon {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></SvgIcon>;
+const IconPhone = (props: any) => <SvgIcon {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></SvgIcon>;
+const IconFileText = (props: any) => <SvgIcon {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></SvgIcon>;
+const IconChevronRight = (props: any) => <SvgIcon {...props}><path d="m9 18 6-6-6-6" /></SvgIcon>;
+const IconLogOut = (props: any) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></SvgIcon>;
+const IconShield = (props: any) => <SvgIcon {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></SvgIcon>;
+const IconCheckCircle = (props: any) => <SvgIcon {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></SvgIcon>;
+const IconAlertCircle = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></SvgIcon>;
+const IconTrash2 = (props: any) => <SvgIcon {...props}><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></SvgIcon>;
+const IconEdit = (props: any) => <SvgIcon {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></SvgIcon>;
+const IconCreditCard = (props: any) => <SvgIcon {...props}><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></SvgIcon>;
+const IconBuilding = (props: any) => <SvgIcon {...props}><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /><path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" /><path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" /><path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" /></SvgIcon>;
+const IconSettings = (props: any) => <SvgIcon {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></SvgIcon>;
+const IconX = (props: any) => <SvgIcon {...props}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></SvgIcon>;
+const IconInfo = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></SvgIcon>;
+const IconCloud = (props: any) => <SvgIcon {...props}><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
 // ==========================================
-const SESSION_KEY = "cdp_session_v21";
+const SESSION_KEY = "cdp_session_v22";
 
-// Llaves de Mercado CDP Violetas
+// Tus llaves exactas del Club de Campo Viñas en las Violetas
 const codeSandboxFirebaseConfig = {
   apiKey: "AIzaSyAKURp61wvvL-YfYhfUQzVsl4sQX69TCHc",
   authDomain: "mercado-cdp-violetas.firebaseapp.com",
   projectId: "mercado-cdp-violetas",
   storageBucket: "mercado-cdp-violetas.firebasestorage.app",
   messagingSenderId: "1035972951086",
-  appId: "1:1035972951086:web:6ff86cbf17dd4c1a0533bf",
+  appId: "1:1035972951086:web:6ff86cbf17dd4c1a0533bf"
 };
 
-const firebaseConfig =
-  typeof __firebase_config !== "undefined"
-    ? JSON.parse(__firebase_config)
-    : codeSandboxFirebaseConfig;
+const firebaseConfig = typeof (window as any).__firebase_config !== 'undefined' ? JSON.parse((window as any).__firebase_config) : codeSandboxFirebaseConfig;
 
-let app, auth, db, appId;
+let app: any, auth: any, db: any, appId: string;
 
 if (firebaseConfig) {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
-  appId = typeof __app_id !== "undefined" ? __app_id : "mi-mercado-cdp";
+  appId = typeof (window as any).__app_id !== 'undefined' ? (window as any).__app_id : 'mi-mercado-cdp';
 }
 
-const formatId = (num) => `#${String(num).padStart(4, "0")}`;
+const formatId = (num: number) => `#${String(num).padStart(4, "0")}`;
 
 // ==========================================
 // COMPONENTES UI REUTILIZABLES
 // ==========================================
 
-const Spinner = ({ className = "w-5 h-5" }) => (
-  <svg
-    className={`animate-spin ${className}`}
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    ></circle>
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-    ></path>
+const Spinner = ({ className = "w-5 h-5" }: any) => (
+  <svg className={`animate-spin ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
   </svg>
 );
 
-const Button = ({
-  children,
-  variant = "primary",
-  isLoading = false,
-  icon: Icon,
-  className = "",
-  ...props
-}) => {
-  const baseStyle =
-    "flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed";
-  const variants = {
-    primary:
-      "bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/30 hover:shadow-lg hover:shadow-violet-500/40",
-    secondary:
-      "bg-slate-800 hover:bg-slate-900 text-white shadow-md shadow-slate-900/20",
-    danger:
-      "bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/30",
-    outline:
-      "border-2 border-slate-200 hover:border-violet-500 text-slate-700 hover:text-violet-700 bg-transparent",
+const Button = ({ children, variant = "primary", isLoading = false, icon: Icon, className = "", ...props }: any) => {
+  const baseStyle = "flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed";
+  const variants: any = {
+    primary: "bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/30 hover:shadow-lg hover:shadow-violet-500/40",
+    secondary: "bg-slate-800 hover:bg-slate-900 text-white shadow-md shadow-slate-900/20",
+    danger: "bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/30",
+    outline: "border-2 border-slate-200 hover:border-violet-500 text-slate-700 hover:text-violet-700 bg-transparent",
   };
 
   return (
-    <button
-      className={`${baseStyle} ${variants[variant]} ${className}`}
-      disabled={isLoading || props.disabled}
-      {...props}
-    >
+    <button className={`${baseStyle} ${variants[variant]} ${className}`} disabled={isLoading || props.disabled} {...props}>
       {isLoading ? <Spinner /> : Icon && <Icon className="w-5 h-5" />}
       {children}
     </button>
   );
 };
 
-const InputField = ({ label, icon: Icon, error, ...props }) => (
+const InputField = ({ label, icon: Icon, error, ...props }: any) => (
   <div className="flex flex-col gap-1 w-full">
-    {label && (
-      <label className="text-sm font-semibold text-slate-600 ml-1">
-        {label}
-      </label>
-    )}
+    {label && <label className="text-sm font-semibold text-slate-600 ml-1">{label}</label>}
     <div className="relative">
-      {Icon && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-          <Icon className="w-5 h-5" />
-        </div>
-      )}
+      {Icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icon className="w-5 h-5" /></div>}
       <input
-        className={`w-full bg-slate-50 border ${
-          error
-            ? "border-red-400 focus:ring-red-500"
-            : "border-slate-200 focus:ring-violet-500"
-        } text-slate-800 rounded-2xl py-3 px-4 ${
-          Icon ? "pl-12" : ""
-        } outline-none focus:ring-2 transition-all`}
+        className={`w-full bg-slate-50 border ${error ? "border-red-400 focus:ring-red-500" : "border-slate-200 focus:ring-violet-500"} text-slate-800 rounded-2xl py-3 px-4 ${Icon ? "pl-12" : ""} outline-none focus:ring-2 transition-all`}
         {...props}
       />
     </div>
-    {error && (
-      <span className="text-xs text-red-500 font-medium ml-1">{error}</span>
-    )}
+    {error && <span className="text-xs text-red-500 font-medium ml-1">{error}</span>}
   </div>
 );
 
-const Card = ({ children, className = "" }) => (
-  <div
-    className={`bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 ${className}`}
-  >
+const Card = ({ children, className = "" }: any) => (
+  <div className={`bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 ${className}`}>
     {children}
   </div>
 );
@@ -302,19 +121,10 @@ const Card = ({ children, className = "" }) => (
 // MODALES GLOBALES Y ESPECÍFICOS
 // ==========================================
 
-const GlobalModal = ({
-  isOpen,
-  type,
-  title,
-  message,
-  onConfirm,
-  onCancel,
-  confirmText = "Aceptar",
-  cancelText = "Cancelar",
-}) => {
+const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confirmText = "Aceptar", cancelText = "Cancelar" }: any) => {
   if (!isOpen) return null;
 
-  const icons = {
+  const icons: any = {
     success: <IconCheckCircle className="w-12 h-12 text-green-500" />,
     error: <IconAlertCircle className="w-12 h-12 text-red-500" />,
     info: <IconInfo className="w-12 h-12 text-violet-500" />,
@@ -323,158 +133,67 @@ const GlobalModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in"
-        onClick={type === "confirm" ? onCancel : onConfirm}
-      ></div>
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={type === "confirm" ? onCancel : onConfirm}></div>
       <div className="bg-white rounded-3xl p-8 max-w-sm w-full relative z-10 shadow-2xl scale-100 animate-in zoom-in-95 flex flex-col items-center text-center">
         <div className="mb-4 bg-slate-50 p-4 rounded-full">{icons[type]}</div>
         <h3 className="text-2xl font-bold text-slate-800 mb-2">{title}</h3>
         <p className="text-slate-600 mb-8">{message}</p>
         <div className="flex gap-3 w-full">
-          {type === "confirm" && (
-            <Button variant="outline" className="flex-1" onClick={onCancel}>
-              {cancelText}
-            </Button>
-          )}
-          <Button
-            variant={type === "error" ? "danger" : "primary"}
-            className="flex-1"
-            onClick={onConfirm}
-          >
-            {confirmText}
-          </Button>
+          {type === "confirm" && <Button variant="outline" className="flex-1" onClick={onCancel}>{cancelText}</Button>}
+          <Button variant={type === "error" ? "danger" : "primary"} className="flex-1" onClick={onConfirm}>{confirmText}</Button>
         </div>
       </div>
     </div>
   );
 };
 
-const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }) => {
+const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ ...user });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setFormData((prev: any) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
     await onUpdate(user.id, formData);
     setIsLoading(false);
-    showGlobalMessage(
-      "success",
-      "Usuario Actualizado",
-      "Los datos se guardaron correctamente en la nube."
-    );
+    showGlobalMessage("success", "Usuario Actualizado", "Los datos se guardaron correctamente en la nube.");
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-        onClick={onClose}
-      ></div>
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
       <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">
-            Editar Fiduciante
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-          >
-            <IconX className="w-6 h-6 text-slate-500" />
-          </button>
+          <h2 className="text-2xl font-bold text-slate-800">Editar Fiduciante</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
-              label="Nombres"
-              name="nombres"
-              value={formData.nombres}
-              onChange={handleChange}
-              required
-            />
-            <InputField
-              label="Apellidos"
-              name="apellidos"
-              value={formData.apellidos}
-              onChange={handleChange}
-              required
-            />
-            <InputField
-              label="CUIT/CUIL"
-              name="cuit"
-              value={formData.cuit}
-              onChange={handleChange}
-              required
-            />
-            <InputField
-              label="Teléfono"
-              name="telefono"
-              value={formData.telefono}
-              onChange={handleChange}
-              required
-            />
-            <InputField
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-            <InputField
-              label="Contraseña"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <InputField label="Nombres" name="nombres" value={formData.nombres} onChange={handleChange} required />
+            <InputField label="Apellidos" name="apellidos" value={formData.apellidos} onChange={handleChange} required />
+            <InputField label="CUIT/CUIL" name="cuit" value={formData.cuit} onChange={handleChange} required />
+            <InputField label="Teléfono" name="telefono" value={formData.telefono} onChange={handleChange} required />
+            <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+            <InputField label="Contraseña" name="password" value={formData.password} onChange={handleChange} required />
           </div>
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 mt-4">
             <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="isAdmin"
-                checked={formData.isAdmin}
-                onChange={handleChange}
-                className="w-5 h-5 rounded text-violet-600 focus:ring-violet-500 border-gray-300"
-              />
+              <input type="checkbox" name="isAdmin" checked={formData.isAdmin} onChange={handleChange} className="w-5 h-5 rounded text-violet-600 focus:ring-violet-500 border-gray-300" />
               <div>
-                <span className="block font-semibold text-slate-800">
-                  Permisos de Administrador
-                </span>
-                <span className="block text-sm text-slate-500">
-                  Otorga acceso total al panel de control.
-                </span>
+                <span className="block font-semibold text-slate-800">Permisos de Administrador</span>
+                <span className="block text-sm text-slate-500">Otorga acceso total al panel de control.</span>
               </div>
             </label>
           </div>
           <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={onClose}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              className="flex-1"
-              isLoading={isLoading}
-            >
-              Guardar Cambios
-            </Button>
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Cambios</Button>
           </div>
         </form>
       </div>
@@ -486,51 +205,33 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }) => {
 // VISTAS DE LA APLICACIÓN
 // ==========================================
 
-const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }) => {
+const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: any) => {
     e.preventDefault();
-    const user = users.find(
-      (u) => u.email === email.toLowerCase() && u.password === password
-    );
+    const user = users.find((u: any) => u.email === email.toLowerCase() && u.password === password);
 
     if (user) {
       localStorage.setItem(SESSION_KEY, user.id);
       setCurrentUser(user);
       setView(user.isValidated ? "dashboard" : "validation");
     } else {
-      showGlobalMessage(
-        "error",
-        "Error de Autenticación",
-        "Credenciales incorrectas. Por favor, verifica tu email y contraseña."
-      );
+      showGlobalMessage("error", "Error de Autenticación", "Credenciales incorrectas. Por favor, verifica tu email y contraseña.");
     }
   };
 
   const handleForgot = () => {
     if (!email) {
-      showGlobalMessage(
-        "info",
-        "Recuperar Contraseña",
-        "Por favor, ingresa tu correo electrónico primero para buscar tu cuenta."
-      );
+      showGlobalMessage("info", "Recuperar Contraseña", "Por favor, ingresa tu correo electrónico primero para buscar tu cuenta.");
       return;
     }
-    const user = users.find((u) => u.email === email.toLowerCase());
+    const user = users.find((u: any) => u.email === email.toLowerCase());
     if (user) {
-      showGlobalMessage(
-        "success",
-        "Correo Enviado",
-        `Como estamos en pruebas, tu contraseña es: ${user.password}`
-      );
+      showGlobalMessage("success", "Correo Enviado", `Como estamos en pruebas, tu contraseña es: ${user.password}`);
     } else {
-      showGlobalMessage(
-        "error",
-        "Usuario no encontrado",
-        "No existe ninguna cuenta registrada con este correo electrónico."
-      );
+      showGlobalMessage("error", "Usuario no encontrado", "No existe ninguna cuenta registrada con este correo electrónico.");
     }
   };
 
@@ -540,10 +241,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }) => {
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4 relative">
             <IconBuilding className="w-8 h-8 text-violet-600" />
-            <div
-              className="absolute -bottom-2 -right-2 bg-green-500 text-white p-1 rounded-full shadow border-2 border-white"
-              title="Conectado a la Nube"
-            >
+            <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-1 rounded-full shadow border-2 border-white" title="Conectado a la Nube">
               <IconCloud className="w-3 h-3" />
             </div>
           </div>
@@ -551,79 +249,32 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }) => {
           <p className="text-slate-500 mt-2">Acceso exclusivo Fiduciantes</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-5">
-          <InputField
-            icon={IconMail}
-            label="Correo Electrónico"
-            type="email"
-            placeholder="ejemplo@correo.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <InputField
-            icon={IconLock}
-            label="Contraseña"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
+          <InputField icon={IconLock} label="Contraseña" type="password" placeholder="••••••••" value={password} onChange={(e: any) => setPassword(e.target.value)} required />
           <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={handleForgot}
-              className="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors"
-            >
-              ¿Olvidaste tu contraseña?
-            </button>
+            <button type="button" onClick={handleForgot} className="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">¿Olvidaste tu contraseña?</button>
           </div>
-          <Button type="submit" className="w-full mt-4">
-            Ingresar a mi cuenta
-          </Button>
+          <Button type="submit" className="w-full mt-4">Ingresar a mi cuenta</Button>
         </form>
         <p className="mt-8 text-center text-slate-600 text-sm">
-          ¿No tienes cuenta?{" "}
-          <button
-            onClick={() => setView("register")}
-            className="font-bold text-violet-600 hover:underline"
-          >
-            Solicitar alta
-          </button>
+          ¿No tienes cuenta? <button onClick={() => setView("register")} className="font-bold text-violet-600 hover:underline">Solicitar alta</button>
         </p>
       </Card>
     </div>
   );
 };
 
-const RegisterView = ({
-  users,
-  onRegister,
-  setView,
-  setCurrentUser,
-  showGlobalMessage,
-}) => {
-  const [formData, setFormData] = useState({
-    nombres: "",
-    apellidos: "",
-    cuit: "",
-    telefono: "",
-    email: "",
-    password: "",
-  });
+const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMessage }: any) => {
+  const [formData, setFormData] = useState({ nombres: "", apellidos: "", cuit: "", telefono: "", email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
 
     const emailLower = formData.email.toLowerCase();
-    if (users.some((u) => u.email === emailLower)) {
-      showGlobalMessage(
-        "error",
-        "Email duplicado",
-        "Este correo ya se encuentra registrado en el sistema."
-      );
+    if (users.some((u: any) => u.email === emailLower)) {
+      showGlobalMessage("error", "Email duplicado", "Este correo ya se encuentra registrado en el sistema.");
       setIsLoading(false);
       return;
     }
@@ -642,109 +293,41 @@ const RegisterView = ({
     localStorage.setItem(SESSION_KEY, newUser.id);
     setCurrentUser(newUser);
 
-    showGlobalMessage(
-      "success",
-      "Registro Exitoso",
-      "Tu cuenta ha sido creada en la nube. A continuación, validaremos tus datos.",
-      () => {
-        setView("validation");
-      }
-    );
+    showGlobalMessage("success", "Registro Exitoso", "Tu cuenta ha sido creada en la nube. A continuación, validaremos tus datos.", () => {
+      setView("validation");
+    });
     setIsLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 py-12">
       <Card className="w-full max-w-xl">
-        <button
-          onClick={() => setView("login")}
-          className="flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors"
-        >
-          <IconChevronRight className="w-4 h-4 rotate-180 mr-1" /> Volver al
-          Login
+        <button onClick={() => setView("login")} className="flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors">
+          <IconChevronRight className="w-4 h-4 rotate-180 mr-1" /> Volver al Login
         </button>
-        <h2 className="text-3xl font-bold text-slate-800 mb-2">
-          Solicitud de Alta
-        </h2>
-        <p className="text-slate-500 mb-8">
-          Completa tus datos para ingresar al Mercado de CDP.
-        </p>
+        <h2 className="text-3xl font-bold text-slate-800 mb-2">Solicitud de Alta</h2>
+        <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
-              icon={IconUser}
-              label="Nombres"
-              value={formData.nombres}
-              onChange={(e) =>
-                setFormData({ ...formData, nombres: e.target.value })
-              }
-              required
-            />
-            <InputField
-              icon={IconUser}
-              label="Apellidos"
-              value={formData.apellidos}
-              onChange={(e) =>
-                setFormData({ ...formData, apellidos: e.target.value })
-              }
-              required
-            />
+            <InputField icon={IconUser} label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required />
+            <InputField icon={IconUser} label="Apellidos" value={formData.apellidos} onChange={(e: any) => setFormData({ ...formData, apellidos: e.target.value })} required />
           </div>
-          <InputField
-            icon={IconFileText}
-            label="CUIT / CUIL"
-            value={formData.cuit}
-            onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
-            required
-          />
-          <InputField
-            icon={IconPhone}
-            label="Teléfono (WhatsApp)"
-            value={formData.telefono}
-            onChange={(e) =>
-              setFormData({ ...formData, telefono: e.target.value })
-            }
-            required
-          />
-          <InputField
-            icon={IconMail}
-            label="Correo Electrónico"
-            type="email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            required
-          />
-          <InputField
-            icon={IconLock}
-            label="Contraseña"
-            type="password"
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-            required
-          />
-          <Button type="submit" className="w-full mt-6" isLoading={isLoading}>
-            Registrarme
-          </Button>
+          <InputField icon={IconFileText} label="CUIT / CUIL" value={formData.cuit} onChange={(e: any) => setFormData({ ...formData, cuit: e.target.value })} required />
+          <InputField icon={IconPhone} label="Teléfono (WhatsApp)" value={formData.telefono} onChange={(e: any) => setFormData({ ...formData, telefono: e.target.value })} required />
+          <InputField icon={IconMail} label="Correo Electrónico" type="email" value={formData.email} onChange={(e: any) => setFormData({ ...formData, email: e.target.value })} required />
+          <InputField icon={IconLock} label="Contraseña" type="password" value={formData.password} onChange={(e: any) => setFormData({ ...formData, password: e.target.value })} required />
+          <Button type="submit" className="w-full mt-6" isLoading={isLoading}>Registrarme</Button>
         </form>
       </Card>
     </div>
   );
 };
 
-const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
-  const [formData, setFormData] = useState({
-    nombres: user.nombres,
-    apellidos: user.apellidos,
-    cuit: user.cuit,
-    telefono: user.telefono,
-  });
+const ValidationView = ({ user, onUpdate, setView, setCurrentUser }: any) => {
+  const [formData, setFormData] = useState({ nombres: user.nombres, apellidos: user.apellidos, cuit: user.cuit, telefono: user.telefono });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
     const updatedUser = { ...user, ...formData, isValidated: true };
@@ -761,84 +344,33 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
           <IconAlertCircle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
           <div>
             <h4 className="font-bold text-amber-900">Validación Requerida</h4>
-            <p className="text-amber-800 text-sm mt-1">
-              Antes de operar, es obligatorio confirmar que tus datos
-              fiduciarios son correctos. Esto garantiza la validez legal de tus
-              transacciones en la nube.
-            </p>
+            <p className="text-amber-800 text-sm mt-1">Antes de operar, es obligatorio confirmar que tus datos fiduciarios son correctos. Esto garantiza la validez legal de tus transacciones en la nube.</p>
           </div>
         </div>
         <Card>
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-8 pb-8 border-b border-slate-100">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">
-                Perfil Fiduciario
-              </h2>
+              <h2 className="text-2xl font-bold text-slate-800">Perfil Fiduciario</h2>
               <p className="text-slate-500">Revisión de legajo digital</p>
             </div>
             <div className="text-center md:text-right">
-              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Rol Asignado
-              </span>
-              <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${
-                  user.isAdmin
-                    ? "bg-violet-100 text-violet-700"
-                    : "bg-slate-100 text-slate-700"
-                }`}
-              >
+              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Rol Asignado</span>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${user.isAdmin ? "bg-violet-100 text-violet-700" : "bg-slate-100 text-slate-700"}`}>
                 {user.isAdmin && <IconShield className="w-4 h-4" />}
                 {user.isAdmin ? "ADMINISTRADOR" : "FIDUCIANTE"}
               </span>
-              <div className="mt-2 text-xl font-black text-slate-800 tracking-tight">
-                Socio Nº {formatId(user.correlativeId)}
-              </div>
+              <div className="mt-2 text-xl font-black text-slate-800 tracking-tight">Socio Nº {formatId(user.correlativeId)}</div>
             </div>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField
-                label="Nombres"
-                value={formData.nombres}
-                onChange={(e) =>
-                  setFormData({ ...formData, nombres: e.target.value })
-                }
-                required
-              />
-              <InputField
-                label="Apellidos"
-                value={formData.apellidos}
-                onChange={(e) =>
-                  setFormData({ ...formData, apellidos: e.target.value })
-                }
-                required
-              />
+              <InputField label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required />
+              <InputField label="Apellidos" value={formData.apellidos} onChange={(e: any) => setFormData({ ...formData, apellidos: e.target.value })} required />
             </div>
-            <InputField
-              label="CUIT / CUIL"
-              value={formData.cuit}
-              onChange={(e) =>
-                setFormData({ ...formData, cuit: e.target.value })
-              }
-              required
-            />
-            <InputField
-              label="Teléfono de Contacto"
-              value={formData.telefono}
-              onChange={(e) =>
-                setFormData({ ...formData, telefono: e.target.value })
-              }
-              required
-            />
+            <InputField label="CUIT / CUIL" value={formData.cuit} onChange={(e: any) => setFormData({ ...formData, cuit: e.target.value })} required />
+            <InputField label="Teléfono de Contacto" value={formData.telefono} onChange={(e: any) => setFormData({ ...formData, telefono: e.target.value })} required />
             <div className="pt-6">
-              <Button
-                type="submit"
-                className="w-full"
-                isLoading={isLoading}
-                icon={IconCheckCircle}
-              >
-                Confirmo que mis datos son correctos
-              </Button>
+              <Button type="submit" className="w-full" isLoading={isLoading} icon={IconCheckCircle}>Confirmo que mis datos son correctos</Button>
             </div>
           </form>
         </Card>
@@ -847,7 +379,7 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }) => {
   );
 };
 
-const DashboardView = ({ user, setView, handleLogout }) => {
+const DashboardView = ({ user, setView, handleLogout }: any) => {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
@@ -856,27 +388,16 @@ const DashboardView = ({ user, setView, handleLogout }) => {
             <div className="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
               <IconBuilding className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-slate-800 hidden sm:block">
-              Mi Panel
-            </h1>
+            <h1 className="text-xl font-bold text-slate-800 hidden sm:block">Mi Panel</h1>
           </div>
           <div className="flex items-center gap-4">
             {user.isAdmin && (
-              <Button
-                variant="outline"
-                className="!py-2 !px-4 !rounded-xl text-sm"
-                icon={IconShield}
-                onClick={() => setView("admin")}
-              >
+              <Button variant="outline" className="!py-2 !px-4 !rounded-xl text-sm" icon={IconShield} onClick={() => setView("admin")}>
                 Panel Admin
               </Button>
             )}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-slate-500 hover:text-red-500 font-semibold transition-colors"
-            >
-              <IconLogOut className="w-5 h-5" />{" "}
-              <span className="hidden sm:inline">Salir</span>
+            <button onClick={handleLogout} className="flex items-center gap-2 text-slate-500 hover:text-red-500 font-semibold transition-colors">
+              <IconLogOut className="w-5 h-5" /> <span className="hidden sm:inline">Salir</span>
             </button>
           </div>
         </div>
@@ -884,13 +405,8 @@ const DashboardView = ({ user, setView, handleLogout }) => {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-800">
-            Bienvenido, {user.nombres}
-          </h2>
-          <p className="text-slate-500 mt-1">
-            Gestiona tu participación en el fideicomiso (Sincronizado en la
-            Nube).
-          </p>
+          <h2 className="text-3xl font-bold text-slate-800">Bienvenido, {user.nombres}</h2>
+          <p className="text-slate-500 mt-1">Gestiona tu participación en el fideicomiso (Sincronizado en la Nube).</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -902,21 +418,13 @@ const DashboardView = ({ user, setView, handleLogout }) => {
                 <div className="flex justify-between items-start mb-10">
                   <IconCreditCard className="w-8 h-8 text-violet-300" />
                   <div className="text-right">
-                    <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Socio Nº
-                    </span>
-                    <span className="text-2xl font-black text-white">
-                      {formatId(user.correlativeId)}
-                    </span>
+                    <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Socio Nº</span>
+                    <span className="text-2xl font-black text-white">{formatId(user.correlativeId)}</span>
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold mb-1">
-                    {user.nombres} {user.apellidos}
-                  </h3>
-                  <p className="text-slate-400 font-mono tracking-widest text-sm">
-                    CUIT: {user.cuit}
-                  </p>
+                  <h3 className="text-2xl font-bold mb-1">{user.nombres} {user.apellidos}</h3>
+                  <p className="text-slate-400 font-mono tracking-widest text-sm">CUIT: {user.cuit}</p>
                 </div>
               </div>
             </div>
@@ -928,61 +436,41 @@ const DashboardView = ({ user, setView, handleLogout }) => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-500 text-sm">Email</span>
-                  <span className="font-semibold text-slate-800 text-sm">
-                    {user.email}
-                  </span>
+                  <span className="font-semibold text-slate-800 text-sm">{user.email}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-500 text-sm">Teléfono</span>
-                  <span className="font-semibold text-slate-800 text-sm">
-                    {user.telefono}
-                  </span>
+                  <span className="font-semibold text-slate-800 text-sm">{user.telefono}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-slate-500 text-sm">Fecha Alta</span>
-                  <span className="font-semibold text-slate-800 text-sm">
-                    {new Date(user.fechaRegistro).toLocaleDateString()}
-                  </span>
+                  <span className="font-semibold text-slate-800 text-sm">{new Date(user.fechaRegistro).toLocaleDateString()}</span>
                 </div>
               </div>
             </Card>
           </div>
 
           <div className="lg:col-span-7">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">
-              Acciones Rápidas
-            </h3>
+            <h3 className="text-xl font-bold text-slate-800 mb-6">Acciones Rápidas</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
                 <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <IconFileText className="w-7 h-7" />
                 </div>
-                <h4 className="text-xl font-bold text-slate-800 mb-2">
-                  Mis Documentos
-                </h4>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                  Accede a tus Certificados de Participación, anexos y actas
-                  firmadas.
-                </p>
+                <h4 className="text-xl font-bold text-slate-800 mb-2">Mis Documentos</h4>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">Accede a tus Certificados de Participación, anexos y actas firmadas.</p>
                 <div className="flex items-center text-sm font-bold text-blue-600">
-                  Ingresar a bóveda{" "}
-                  <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  Ingresar a bóveda <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
               <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
                 <div className="w-14 h-14 bg-violet-50 text-violet-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <IconBuilding className="w-7 h-7" />
                 </div>
-                <h4 className="text-xl font-bold text-slate-800 mb-2">
-                  Mercado Activo
-                </h4>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                  Explora oportunidades, cede participaciones o adquiere nuevas
-                  unidades.
-                </p>
+                <h4 className="text-xl font-bold text-slate-800 mb-2">Mercado Activo</h4>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">Explora oportunidades, cede participaciones o adquiere nuevas unidades.</p>
                 <div className="flex items-center text-sm font-bold text-violet-600">
-                  Ver mercado{" "}
-                  <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  Ver mercado <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </div>
@@ -993,41 +481,22 @@ const DashboardView = ({ user, setView, handleLogout }) => {
   );
 };
 
-const AdminView = ({
-  users,
-  setView,
-  currentUser,
-  setCurrentUser,
-  onUpdate,
-  onDelete,
-  showGlobalMessage,
-}) => {
-  const [editingUser, setEditingUser] = useState(null);
+const AdminView = ({ users, setView, currentUser, setCurrentUser, onUpdate, onDelete, showGlobalMessage }: any) => {
+  const [editingUser, setEditingUser] = useState<any>(null);
 
-  const handleDeleteRequest = (userToDelete) => {
+  const handleDeleteRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) {
-      showGlobalMessage(
-        "error",
-        "Acción Denegada",
-        "No puedes eliminar tu propia cuenta de administrador."
-      );
+      showGlobalMessage("error", "Acción Denegada", "No puedes eliminar tu propia cuenta de administrador.");
       return;
     }
 
     showGlobalMessage(
-      "confirm",
-      "Eliminar Fiduciante",
-      `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`,
+      "confirm", "Eliminar Fiduciante", `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`,
       async () => {
         await onDelete(userToDelete.id);
-        showGlobalMessage(
-          "success",
-          "Usuario Eliminado",
-          "El registro fue borrado exitosamente de la nube."
-        );
+        showGlobalMessage("success", "Usuario Eliminado", "El registro fue borrado exitosamente de la nube.");
       },
-      null,
-      "Sí, Eliminar"
+      null, "Sí, Eliminar"
     );
   };
 
@@ -1038,32 +507,19 @@ const AdminView = ({
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center relative">
               <IconSettings className="w-5 h-5 text-violet-400" />
-              <div
-                className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-slate-900"
-                title="En vivo"
-              ></div>
+              <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-slate-900" title="En vivo"></div>
             </div>
             <h1 className="text-xl font-bold">Administración General</h1>
           </div>
-          <Button
-            variant="secondary"
-            className="!py-2 !px-4 !rounded-xl text-sm"
-            onClick={() => setView("dashboard")}
-          >
-            Volver al Dashboard
-          </Button>
+          <Button variant="secondary" className="!py-2 !px-4 !rounded-xl text-sm" onClick={() => setView("dashboard")}>Volver al Dashboard</Button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-6 flex justify-between items-end">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">
-              Fiduciantes Registrados
-            </h2>
-            <p className="text-slate-500 mt-1">
-              Sincronización en tiempo real desde Firebase.
-            </p>
+            <h2 className="text-2xl font-bold text-slate-800">Fiduciantes Registrados</h2>
+            <p className="text-slate-500 mt-1">Sincronización en tiempo real desde Firebase.</p>
           </div>
           <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-semibold text-slate-600">
             Total: {users.length}
@@ -1078,70 +534,33 @@ const AdminView = ({
                   <th className="p-4 font-semibold">ID</th>
                   <th className="p-4 font-semibold">Fiduciante</th>
                   <th className="p-4 font-semibold">Contacto</th>
-                  <th className="p-4 font-semibold text-center">
-                    Rol / Estado
-                  </th>
+                  <th className="p-4 font-semibold text-center">Rol / Estado</th>
                   <th className="p-4 font-semibold text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {users.map((u) => (
-                  <tr
-                    key={u.id}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
+                {users.map((u: any) => (
+                  <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="p-4 align-middle"><span className="font-mono font-bold text-slate-600">{formatId(u.correlativeId)}</span></td>
                     <td className="p-4 align-middle">
-                      <span className="font-mono font-bold text-slate-600">
-                        {formatId(u.correlativeId)}
-                      </span>
+                      <p className="font-bold text-slate-800">{u.nombres} {u.apellidos}</p>
+                      <p className="text-sm text-slate-500 font-mono mt-0.5">CUIT: {u.cuit}</p>
                     </td>
                     <td className="p-4 align-middle">
-                      <p className="font-bold text-slate-800">
-                        {u.nombres} {u.apellidos}
-                      </p>
-                      <p className="text-sm text-slate-500 font-mono mt-0.5">
-                        CUIT: {u.cuit}
-                      </p>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <p className="text-sm font-medium text-slate-700">
-                        {u.email}
-                      </p>
-                      <p className="text-sm text-slate-500 mt-0.5">
-                        {u.telefono}
-                      </p>
+                      <p className="text-sm font-medium text-slate-700">{u.email}</p>
+                      <p className="text-sm text-slate-500 mt-0.5">{u.telefono}</p>
                     </td>
                     <td className="p-4 align-middle text-center">
                       <div className="flex flex-col items-center gap-2">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${
-                            u.isAdmin
-                              ? "bg-violet-100 text-violet-700"
-                              : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${u.isAdmin ? "bg-violet-100 text-violet-700" : "bg-slate-100 text-slate-600"}`}>
                           {u.isAdmin ? "ADMIN" : "SOCIO"}
                         </span>
-                        {!u.isValidated && (
-                          <span className="text-[10px] uppercase font-bold text-amber-500 tracking-wider">
-                            Pendiente
-                          </span>
-                        )}
+                        {!u.isValidated && <span className="text-[10px] uppercase font-bold text-amber-500 tracking-wider">Pendiente</span>}
                       </div>
                     </td>
                     <td className="p-4 align-middle text-right space-x-2">
-                      <button
-                        onClick={() => setEditingUser(u)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      >
-                        <IconEdit className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteRequest(u)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <IconTrash2 className="w-5 h-5" />
-                      </button>
+                      <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
+                      <button onClick={() => handleDeleteRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
                     </td>
                   </tr>
                 ))}
@@ -1155,12 +574,12 @@ const AdminView = ({
         <AdminEditModal
           user={editingUser}
           onClose={() => setEditingUser(null)}
-          onUpdate={(id, data) => {
-            onUpdate(id, data);
-            if (id === currentUser.id) {
-              setCurrentUser(data);
-              if (!data.isAdmin) setView("dashboard");
-            }
+          onUpdate={(id: string, data: any) => {
+             onUpdate(id, data);
+             if (id === currentUser.id) {
+                setCurrentUser(data);
+                if (!data.isAdmin) setView("dashboard");
+             }
           }}
           showGlobalMessage={showGlobalMessage}
         />
@@ -1175,24 +594,18 @@ const AdminView = ({
 
 export default function App() {
   const [currentView, setCurrentView] = useState("login");
-  const [currentUser, setCurrentUser] = useState(null);
-
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  
   // Estados de Firebase
-  const [firebaseUser, setFirebaseUser] = useState(null);
-  const [users, setUsers] = useState([]);
+  const [firebaseUser, setFirebaseUser] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [dbError, setDbError] = useState(null); // NUEVO ESTADO PARA CAPTURAR ERRORES
+  const [dbError, setDbError] = useState<string | null>(null);
 
-  const [modalConfig, setModalConfig] = useState({
-    isOpen: false,
-    type: "info",
-    title: "",
-    message: "",
-    onConfirm: null,
-    onCancel: null,
-    confirmText: "Aceptar",
-    cancelText: "Cancelar",
+  const [modalConfig, setModalConfig] = useState<any>({
+    isOpen: false, type: "info", title: "", message: "",
+    onConfirm: null, onCancel: null, confirmText: "Aceptar", cancelText: "Cancelar",
   });
 
   // 1. Inicializar Autenticación de la Nube
@@ -1200,75 +613,53 @@ export default function App() {
     if (!firebaseConfig) return;
     const initAuth = async () => {
       try {
-        if (
-          typeof __initial_auth_token !== "undefined" &&
-          __initial_auth_token
-        ) {
-          await signInWithCustomToken(auth, __initial_auth_token);
+        if (typeof (window as any).__initial_auth_token !== 'undefined' && (window as any).__initial_auth_token) {
+          await signInWithCustomToken(auth, (window as any).__initial_auth_token);
         } else {
           await signInAnonymously(auth);
         }
       } catch (e) {
         console.error("Error de Auth Firebase:", e);
-        setDbError(
-          "Para que la base de datos funcione, debes ir a Firebase > Authentication > Sign-in method > y habilitar el proveedor 'Anónimo'."
-        );
+        setDbError("Para que la base de datos funcione, debes ir a Firebase > Authentication > Sign-in method > y habilitar el proveedor 'Anónimo'.");
         setIsInitializing(false);
       }
     };
     initAuth();
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    
+    const unsubscribe = onAuthStateChanged(auth, (user: any) => {
       setFirebaseUser(user);
-      // Si onAuthStateChanged devuelve null pero no hay un error previo, no hacemos nada extra aquí
     });
-
+    
     return () => unsubscribe();
   }, []);
 
   // 2. Escuchar la Base de Datos en Tiempo Real
   useEffect(() => {
     if (!firebaseConfig || !firebaseUser) return;
-
+    
     // Colección: fiduciantes
-    const usersRef = collection(
-      db,
-      "artifacts",
-      appId,
-      "public",
-      "data",
-      "fiduciantes"
-    );
-
-    const unsubscribe = onSnapshot(
-      usersRef,
-      (snapshot) => {
-        const usersData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setUsers(usersData);
-        setIsDbReady(true);
-        setDbError(null);
-      },
-      (error) => {
-        console.error("Error de lectura DB:", error);
-        setDbError(
-          "Error de permisos en la base de datos. Asegúrate de que las reglas de Firestore estén configuradas para permitir lectura/escritura (Modo de prueba)."
-        );
-        setIsInitializing(false);
-      }
-    );
+    const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'fiduciantes');
+    
+    const unsubscribe = onSnapshot(usersRef, (snapshot: any) => {
+      const usersData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      setUsers(usersData);
+      setIsDbReady(true);
+      setDbError(null);
+    }, (error: any) => {
+      console.error("Error de lectura DB:", error);
+      setDbError("Error de permisos en la base de datos. Asegúrate de que las reglas de Firestore estén configuradas para permitir lectura/escritura (Modo de prueba).");
+      setIsInitializing(false);
+    });
 
     return () => unsubscribe();
   }, [firebaseUser]);
 
-  // 3. Restaurar Sesión del Usuario (Si ya estaba logueado en esta compu)
+  // 3. Restaurar Sesión del Usuario
   useEffect(() => {
     if (isDbReady && isInitializing) {
       const sessionId = localStorage.getItem(SESSION_KEY);
       if (sessionId) {
-        const user = users.find((u) => u.id === sessionId);
+        const user = users.find((u: any) => u.id === sessionId);
         if (user) {
           setCurrentUser(user);
           setCurrentView(user.isValidated ? "dashboard" : "validation");
@@ -1281,131 +672,68 @@ export default function App() {
   }, [isDbReady, users, isInitializing]);
 
   // Funciones de Base de Datos
-  const handleRegisterUser = async (newUser) => {
+  const handleRegisterUser = async (newUser: any) => {
     try {
-      await setDoc(
-        doc(
-          db,
-          "artifacts",
-          appId,
-          "public",
-          "data",
-          "fiduciantes",
-          newUser.id
-        ),
-        newUser
-      );
-    } catch (e) {
-      console.error(e);
-    }
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', newUser.id), newUser);
+    } catch (e) { console.error(e); }
   };
 
-  const handleUpdateUser = async (id, data) => {
+  const handleUpdateUser = async (id: string, data: any) => {
     try {
-      await updateDoc(
-        doc(db, "artifacts", appId, "public", "data", "fiduciantes", id),
-        data
-      );
-    } catch (e) {
-      console.error(e);
-    }
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id), data);
+    } catch (e) { console.error(e); }
   };
 
-  const handleDeleteUser = async (id) => {
+  const handleDeleteUser = async (id: string) => {
     try {
-      await deleteDoc(
-        doc(db, "artifacts", appId, "public", "data", "fiduciantes", id)
-      );
-    } catch (e) {
-      console.error(e);
-    }
+      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id));
+    } catch (e) { console.error(e); }
   };
 
-  const showGlobalMessage = (
-    type,
-    title,
-    message,
-    onConfirmCallback = null,
-    onCancelCallback = null,
-    confirmText = "Aceptar"
-  ) => {
+  const showGlobalMessage = (type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
     setModalConfig({
-      isOpen: true,
-      type,
-      title,
-      message,
-      confirmText,
-      cancelText: "Cancelar",
+      isOpen: true, type, title, message, confirmText, cancelText: "Cancelar",
       onConfirm: () => {
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        setModalConfig((prev: any) => ({ ...prev, isOpen: false }));
         if (onConfirmCallback) onConfirmCallback();
       },
       onCancel: () => {
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        setModalConfig((prev: any) => ({ ...prev, isOpen: false }));
         if (onCancelCallback) onCancelCallback();
       },
     });
   };
 
   const handleLogout = () => {
-    showGlobalMessage(
-      "confirm",
-      "Cerrar Sesión",
-      "¿Estás seguro de que deseas salir de tu cuenta?",
-      () => {
-        localStorage.removeItem(SESSION_KEY);
-        setCurrentUser(null);
-        setCurrentView("login");
-      }
-    );
+    showGlobalMessage("confirm", "Cerrar Sesión", "¿Estás seguro de que deseas salir de tu cuenta?", () => {
+      localStorage.removeItem(SESSION_KEY);
+      setCurrentUser(null);
+      setCurrentView("login");
+    });
   };
 
-  // PANTALLAS DE ERROR O CARGA
+  // PANTALLAS DE CARGA O ERROR
   if (!firebaseConfig) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-        <Card className="max-w-lg text-center border-amber-200 bg-amber-50">
-          <IconAlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-amber-900 mb-2">
-            ¡Casi listo para la Nube!
-          </h2>
-          <p className="text-amber-800 mb-6">
-            Esta versión está lista para conectarse a una base de datos real.
-            Para que funcione en CodeSandbox o en tu página web, debes crear un
-            proyecto gratuito en Firebase y pegar tus "claves" en la línea 127
-            del código.
-          </p>
-          <div className="bg-white p-4 rounded-xl text-left border border-amber-200">
-            <p className="text-sm font-bold text-slate-700 mb-1">
-              Pasos a seguir:
-            </p>
-            <ol className="text-sm text-slate-600 list-decimal list-inside space-y-1">
-              <li>Ve a console.firebase.google.com</li>
-              <li>Crea un proyecto (ej: mercado-cdp)</li>
-              <li>Crea una base de datos "Firestore" (en modo prueba)</li>
-              <li>Añade una "App Web" (icono de código `{"</>"}`)</li>
-              <li>Copia el `firebaseConfig` y pégalo en el código.</li>
-            </ol>
-          </div>
-        </Card>
+         <Card className="max-w-lg text-center border-amber-200 bg-amber-50">
+           <IconAlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+           <h2 className="text-2xl font-bold text-amber-900 mb-2">¡Casi listo para la Nube!</h2>
+           <p className="text-amber-800 mb-6">Configura Firebase en la línea 127 del código.</p>
+         </Card>
       </div>
     );
   }
 
-  // SI HAY UN ERROR EN LA CONEXIÓN (Como la falta de autenticación anónima)
   if (dbError) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-        <Card className="max-w-lg text-center border-red-200 bg-red-50">
-          <IconAlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-red-900 mb-2">
-            Falta un permiso en Firebase
-          </h2>
-          <p className="text-red-800 mb-6 font-medium">{dbError}</p>
-          <Button onClick={() => window.location.reload()}>
-            Reintentar conexión
-          </Button>
-        </Card>
+         <Card className="max-w-lg text-center border-red-200 bg-red-50">
+           <IconAlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+           <h2 className="text-2xl font-bold text-red-900 mb-2">Error de conexión</h2>
+           <p className="text-red-800 mb-6 font-medium">{dbError}</p>
+           <Button onClick={() => window.location.reload()}>Reintentar conexión</Button>
+         </Card>
       </div>
     );
   }
@@ -1414,59 +742,18 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
         <Spinner className="w-12 h-12 text-violet-600" />
-        <p className="text-slate-500 font-medium">
-          Conectando con la base de datos segura...
-        </p>
+        <p className="text-slate-500 font-medium">Conectando con la base de datos segura...</p>
       </div>
     );
   }
 
   return (
     <>
-      {currentView === "login" && (
-        <LoginView
-          users={users}
-          setView={setCurrentView}
-          setCurrentUser={setCurrentUser}
-          showGlobalMessage={showGlobalMessage}
-        />
-      )}
-      {currentView === "register" && (
-        <RegisterView
-          users={users}
-          onRegister={handleRegisterUser}
-          setView={setCurrentView}
-          setCurrentUser={setCurrentUser}
-          showGlobalMessage={showGlobalMessage}
-        />
-      )}
-      {currentView === "validation" && (
-        <ValidationView
-          user={currentUser}
-          onUpdate={handleUpdateUser}
-          setView={setCurrentView}
-          setCurrentUser={setCurrentUser}
-          showGlobalMessage={showGlobalMessage}
-        />
-      )}
-      {currentView === "dashboard" && (
-        <DashboardView
-          user={currentUser}
-          setView={setCurrentView}
-          handleLogout={handleLogout}
-        />
-      )}
-      {currentView === "admin" && (
-        <AdminView
-          users={users}
-          setView={setCurrentView}
-          currentUser={currentUser}
-          setCurrentUser={setCurrentUser}
-          onUpdate={handleUpdateUser}
-          onDelete={handleDeleteUser}
-          showGlobalMessage={showGlobalMessage}
-        />
-      )}
+      {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "validation" && <ValidationView user={currentUser} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "dashboard" && <DashboardView user={currentUser} setView={setCurrentView} handleLogout={handleLogout} />}
+      {currentView === "admin" && <AdminView users={users} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdate={handleUpdateUser} onDelete={handleDeleteUser} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </>
   );
