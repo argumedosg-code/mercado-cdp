@@ -18,7 +18,7 @@ if (typeof window !== "undefined" && !document.getElementById("tailwind-cdn")) {
 // ==========================================
 const ROLES = {
   ADMIN: "Fiduciante Original (Administrador)",
-  FIDUCIANTE: "Fiduciante",
+  FIDUCIANTE: "Fiduciante Activo",
   NO_FIDUCIANTE: "No Fiduciante"
 };
 
@@ -206,7 +206,7 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
               <span className="text-sm font-semibold text-slate-600">Gestión de Categorías Automática</span>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              La categoría de este usuario ya no se edita manualmente. El sistema verifica si posee al menos 1 CDP asignado en el mapa para otorgarle el estatus de "Fiduciante".
+              La categoría de este usuario ya no se edita manualmente. El sistema verifica si posee al menos 1 CDP asignado en el mapa para otorgarle el estatus de "Fiduciante Activo".
             </p>
           </div>
 
@@ -284,7 +284,6 @@ const BulkAssignModal = ({ users, onClose, onConfirm, showGlobalMessage }: any) 
 // VISTAS DE LA APLICACIÓN
 // ==========================================
 
-// HOTFIX: Eliminada la variable 'cdps' que no se usaba y bloqueaba Vercel
 const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -325,9 +324,9 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
               <IconCloud className="w-3 h-3" />
             </div>
           </div>
-          <h1 className="font-bold text-slate-800 flex flex-col items-center">
-            <span className="text-5xl mb-2 tracking-tight">Mercado de CDP</span>
-            <span className="text-xl text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase">v27</span>
+          <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
+            <span className="text-4xl tracking-tight">Mercado de CDP</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v28</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">"Club de Campo Viñas en las Violetas"</p>
         </div>
