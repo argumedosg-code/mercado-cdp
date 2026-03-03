@@ -14,6 +14,18 @@ if (typeof window !== "undefined" && !document.getElementById("tailwind-cdn")) {
 }
 
 // ==========================================
+// CONSTANTES Y REGLAS DE NEGOCIO
+// ==========================================
+const ROLES = {
+  ADMIN: "Fiduciante Original (Administrador)",
+  FIDUCIANTE: "Fiduciante",
+  NO_FIDUCIANTE: "No Fiduciante"
+};
+
+const TOTAL_CDPS = 413;
+const SESSION_KEY = "cdp_session_v23"; // Mantenemos la llave base de sesión
+
+// ==========================================
 // ÍCONOS INTEGRADOS (Compatibles con TypeScript para Vercel)
 // ==========================================
 const SvgIcon = ({ children, ...props }: any) => (
@@ -40,13 +52,11 @@ const IconSettings = (props: any) => <SvgIcon {...props}><path d="M12.22 2h-.44a
 const IconX = (props: any) => <SvgIcon {...props}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></SvgIcon>;
 const IconInfo = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></SvgIcon>;
 const IconCloud = (props: any) => <SvgIcon {...props}><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></SvgIcon>;
+const IconGrid = (props: any) => <SvgIcon {...props}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
 // ==========================================
-const SESSION_KEY = "cdp_session_v23";
-
-// Tus llaves exactas del Club de Campo Viñas en las Violetas
 const codeSandboxFirebaseConfig = {
   apiKey: "AIzaSyAKURp61wvvL-YfYhfUQzVsl4sQX69TCHc",
   authDomain: "mercado-cdp-violetas.firebaseapp.com",
@@ -152,8 +162,17 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: any) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    const { name, value } = e.target;
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRoleChange = (e: any) => {
+    const newRole = e.target.value;
+    setFormData((prev: any) => ({ 
+      ...prev, 
+      role: newRole, 
+      isAdmin: newRole === ROLES.ADMIN 
+    }));
   };
 
   const handleSubmit = async (e: any) => {
@@ -161,7 +180,7 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
     setIsLoading(true);
     await onUpdate(user.id, formData);
     setIsLoading(false);
-    showGlobalMessage("success", "Usuario Actualizado", "Los datos se guardaron correctamente en la nube.");
+    showGlobalMessage("success", "Usuario Actualizado", "Los datos y categoría se guardaron correctamente.");
     onClose();
   };
 
@@ -182,15 +201,21 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
             <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required />
             <InputField label="Contraseña" name="password" value={formData.password} onChange={handleChange} required />
           </div>
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 mt-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" name="isAdmin" checked={formData.isAdmin} onChange={handleChange} className="w-5 h-5 rounded text-violet-600 focus:ring-violet-500 border-gray-300" />
-              <div>
-                <span className="block font-semibold text-slate-800">Permisos de Administrador</span>
-                <span className="block text-sm text-slate-500">Otorga acceso total al panel de control.</span>
-              </div>
-            </label>
+          
+          <div className="flex flex-col gap-1 w-full mt-4">
+            <label className="text-sm font-semibold text-slate-600 ml-1">Categoría de Socio</label>
+            <select 
+              name="role" 
+              value={formData.role || ROLES.FIDUCIANTE} 
+              onChange={handleRoleChange}
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl py-3 px-4 outline-none focus:ring-2 focus:ring-violet-500 transition-all"
+            >
+              <option value={ROLES.ADMIN}>{ROLES.ADMIN}</option>
+              <option value={ROLES.FIDUCIANTE}>{ROLES.FIDUCIANTE}</option>
+              <option value={ROLES.NO_FIDUCIANTE}>{ROLES.NO_FIDUCIANTE}</option>
+            </select>
           </div>
+
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
             <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Cambios</Button>
@@ -214,7 +239,6 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
     const user = users.find((u: any) => u.email === email.toLowerCase() && u.password === password);
 
     if (user) {
-      // ACTUALIZADO V23: Ahora usa sessionStorage para que la sesión se cierre al cerrar la pestaña
       sessionStorage.setItem(SESSION_KEY, user.id);
       setCurrentUser(user);
       setView(user.isValidated ? "dashboard" : "validation");
@@ -280,18 +304,20 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
       return;
     }
 
+    const isFirstUser = users.length === 0;
+
     const newUser = {
       ...formData,
       id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       email: emailLower,
       correlativeId: users.length + 1,
-      isAdmin: users.length === 0, // Primer usuario en la base de datos es Admin
+      role: isFirstUser ? ROLES.ADMIN : ROLES.FIDUCIANTE,
+      isAdmin: isFirstUser,
       isValidated: false,
       fechaRegistro: new Date().toISOString(),
     };
 
     await onRegister(newUser);
-    // ACTUALIZADO V23: Usa sessionStorage
     sessionStorage.setItem(SESSION_KEY, newUser.id);
     setCurrentUser(newUser);
 
@@ -356,10 +382,10 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }: any) => {
               <p className="text-slate-500">Revisión de legajo digital</p>
             </div>
             <div className="text-center md:text-right">
-              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Rol Asignado</span>
+              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Categoría</span>
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${user.isAdmin ? "bg-violet-100 text-violet-700" : "bg-slate-100 text-slate-700"}`}>
                 {user.isAdmin && <IconShield className="w-4 h-4" />}
-                {user.isAdmin ? "ADMINISTRADOR" : "FIDUCIANTE"}
+                {user.role || ROLES.FIDUCIANTE}
               </span>
               <div className="mt-2 text-xl font-black text-slate-800 tracking-tight">Socio Nº {formatId(user.correlativeId)}</div>
             </div>
@@ -381,7 +407,10 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }: any) => {
   );
 };
 
-const DashboardView = ({ user, setView, handleLogout }: any) => {
+const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
+  // Filtramos los CDPs que pertenecen a este usuario
+  const misCdps = cdps.filter((c: any) => c.ownerId === user.id);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
@@ -408,11 +437,11 @@ const DashboardView = ({ user, setView, handleLogout }: any) => {
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-slate-800">Bienvenido, {user.nombres}</h2>
-          <p className="text-slate-500 mt-1">Gestiona tu participación en el fideicomiso (Sincronizado en la Nube).</p>
+          <p className="text-slate-500 mt-1">Categoría: <span className="font-bold text-violet-600">{user.role || ROLES.FIDUCIANTE}</span></p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-4 space-y-6">
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-violet-900 p-8 text-white shadow-2xl shadow-violet-900/20 border border-white/10">
               <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-violet-500/20 rounded-full blur-3xl"></div>
@@ -452,15 +481,45 @@ const DashboardView = ({ user, setView, handleLogout }: any) => {
             </Card>
           </div>
 
-          <div className="lg:col-span-7">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">Acciones Rápidas</h3>
+          <div className="lg:col-span-8 space-y-8">
+            <Card className="p-6 border-t-4 border-t-violet-500">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <IconFileText className="w-6 h-6 text-violet-500" /> Mis CDPs Asignados
+                  </h3>
+                  <p className="text-slate-500 text-sm mt-1">Derechos de Participación a tu nombre.</p>
+                </div>
+                <span className="bg-violet-100 text-violet-700 px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
+                  Total: {misCdps.length}
+                </span>
+              </div>
+
+              {misCdps.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {misCdps.map((cdp: any) => (
+                    <div key={cdp.id} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center group hover:border-violet-400 hover:shadow-md transition-all">
+                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Activo</p>
+                      <p className="font-bold text-slate-800 text-lg">CDP Número {cdp.number}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                  <IconFileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 font-medium">No tienes CDPs asignados actualmente.</p>
+                </div>
+              )}
+            </Card>
+
+            <h3 className="text-xl font-bold text-slate-800 mb-4">Acciones Rápidas</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
                 <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <IconFileText className="w-7 h-7" />
                 </div>
                 <h4 className="text-xl font-bold text-slate-800 mb-2">Mis Documentos</h4>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">Accede a tus Certificados de Participación, anexos y actas firmadas.</p>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">Accede a tus Certificados de Participación y anexos.</p>
                 <div className="flex items-center text-sm font-bold text-blue-600">
                   Ingresar a bóveda <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -470,7 +529,7 @@ const DashboardView = ({ user, setView, handleLogout }: any) => {
                   <IconBuilding className="w-7 h-7" />
                 </div>
                 <h4 className="text-xl font-bold text-slate-800 mb-2">Mercado Activo</h4>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">Explora oportunidades, cede participaciones o adquiere nuevas unidades.</p>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">Explora oportunidades y cede participaciones.</p>
                 <div className="flex items-center text-sm font-bold text-violet-600">
                   Ver mercado <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -483,7 +542,8 @@ const DashboardView = ({ user, setView, handleLogout }: any) => {
   );
 };
 
-const AdminView = ({ users, setView, currentUser, setCurrentUser, onUpdate, onDelete, showGlobalMessage }: any) => {
+const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdateUser, onUpdateCDP, onDelete, showGlobalMessage }: any) => {
+  const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes" o "cdps"
   const [editingUser, setEditingUser] = useState<any>(null);
 
   const handleDeleteRequest = (userToDelete: any) => {
@@ -491,7 +551,6 @@ const AdminView = ({ users, setView, currentUser, setCurrentUser, onUpdate, onDe
       showGlobalMessage("error", "Acción Denegada", "No puedes eliminar tu propia cuenta de administrador.");
       return;
     }
-
     showGlobalMessage(
       "confirm", "Eliminar Fiduciante", `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`,
       async () => {
@@ -511,65 +570,121 @@ const AdminView = ({ users, setView, currentUser, setCurrentUser, onUpdate, onDe
               <IconSettings className="w-5 h-5 text-violet-400" />
               <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-slate-900" title="En vivo"></div>
             </div>
-            <h1 className="text-xl font-bold">Administración General</h1>
+            <h1 className="text-xl font-bold hidden sm:block">Administración General</h1>
           </div>
-          <Button variant="secondary" className="!py-2 !px-4 !rounded-xl text-sm" onClick={() => setView("dashboard")}>Volver al Dashboard</Button>
+          <Button variant="secondary" className="!py-2 !px-4 !rounded-xl text-sm border border-slate-700" onClick={() => setView("dashboard")}>Volver al Dashboard</Button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-6 flex justify-between items-end">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">Fiduciantes Registrados</h2>
-            <p className="text-slate-500 mt-1">Sincronización en tiempo real desde Firebase.</p>
-          </div>
-          <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-semibold text-slate-600">
-            Total: {users.length}
-          </div>
+        <div className="flex flex-wrap gap-4 mb-8 border-b border-slate-200 pb-4">
+          <button 
+            onClick={() => setActiveTab("fiduciantes")} 
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${activeTab === "fiduciantes" ? "bg-violet-600 text-white shadow-md shadow-violet-500/30" : "bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
+          >
+            <IconUser className="w-5 h-5" /> Fiduciantes
+          </button>
+          <button 
+            onClick={() => setActiveTab("cdps")} 
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${activeTab === "cdps" ? "bg-violet-600 text-white shadow-md shadow-violet-500/30" : "bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
+          >
+            <IconGrid className="w-5 h-5" /> Mapa de CDPs (1 al 413)
+          </button>
         </div>
 
-        <Card className="!p-0 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-sm uppercase tracking-wider">
-                  <th className="p-4 font-semibold">ID</th>
-                  <th className="p-4 font-semibold">Fiduciante</th>
-                  <th className="p-4 font-semibold">Contacto</th>
-                  <th className="p-4 font-semibold text-center">Rol / Estado</th>
-                  <th className="p-4 font-semibold text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {users.map((u: any) => (
-                  <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-4 align-middle"><span className="font-mono font-bold text-slate-600">{formatId(u.correlativeId)}</span></td>
-                    <td className="p-4 align-middle">
-                      <p className="font-bold text-slate-800">{u.nombres} {u.apellidos}</p>
-                      <p className="text-sm text-slate-500 font-mono mt-0.5">CUIT: {u.cuit}</p>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <p className="text-sm font-medium text-slate-700">{u.email}</p>
-                      <p className="text-sm text-slate-500 mt-0.5">{u.telefono}</p>
-                    </td>
-                    <td className="p-4 align-middle text-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${u.isAdmin ? "bg-violet-100 text-violet-700" : "bg-slate-100 text-slate-600"}`}>
-                          {u.isAdmin ? "ADMIN" : "SOCIO"}
-                        </span>
-                        {!u.isValidated && <span className="text-[10px] uppercase font-bold text-amber-500 tracking-wider">Pendiente</span>}
-                      </div>
-                    </td>
-                    <td className="p-4 align-middle text-right space-x-2">
-                      <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
-                      <button onClick={() => handleDeleteRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {activeTab === "fiduciantes" && (
+          <div className="animate-in fade-in duration-300">
+            <div className="mb-4 flex justify-between items-end">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">Directorio de Socios</h2>
+                <p className="text-slate-500 mt-1">Sincronización en tiempo real desde Firebase.</p>
+              </div>
+              <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-semibold text-slate-600">
+                Total: {users.length}
+              </div>
+            </div>
+
+            <Card className="!p-0 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
+                      <th className="p-4 font-semibold">ID</th>
+                      <th className="p-4 font-semibold">Fiduciante</th>
+                      <th className="p-4 font-semibold">Categoría Oficial</th>
+                      <th className="p-4 font-semibold">Contacto</th>
+                      <th className="p-4 font-semibold text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {users.map((u: any) => (
+                      <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 align-middle"><span className="font-mono font-bold text-slate-600">{formatId(u.correlativeId)}</span></td>
+                        <td className="p-4 align-middle">
+                          <p className="font-bold text-slate-800">{u.nombres} {u.apellidos}</p>
+                          <p className="text-sm text-slate-500 font-mono mt-0.5">CUIT: {u.cuit}</p>
+                        </td>
+                        <td className="p-4 align-middle">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${u.role === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : u.role === ROLES.NO_FIDUCIANTE ? "bg-slate-100 text-slate-500" : "bg-blue-100 text-blue-700"}`}>
+                            {u.role || ROLES.FIDUCIANTE}
+                          </span>
+                        </td>
+                        <td className="p-4 align-middle">
+                          <p className="text-sm font-medium text-slate-700">{u.email}</p>
+                          <p className="text-sm text-slate-500 mt-0.5">{u.telefono}</p>
+                        </td>
+                        <td className="p-4 align-middle text-right space-x-2">
+                          <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar Rol y Datos"><IconEdit className="w-5 h-5" /></button>
+                          <button onClick={() => handleDeleteRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           </div>
-        </Card>
+        )}
+
+        {activeTab === "cdps" && (
+          <div className="animate-in fade-in duration-300">
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-slate-800">Mapa Global de Activos</h2>
+              <p className="text-slate-500 mt-1">Asigna a qué fiduciante pertenece cada uno de los 413 CDPs disponibles.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {Array.from({ length: TOTAL_CDPS }, (_, i) => i + 1).map(num => {
+                const cdpInfo = cdps.find((c: any) => c.number === num);
+                const currentOwnerId = cdpInfo ? cdpInfo.ownerId : "";
+                const hasOwner = currentOwnerId !== "";
+                
+                return (
+                  <div key={num} className={`bg-white p-4 rounded-2xl border transition-all shadow-sm flex flex-col gap-3 ${hasOwner ? "border-violet-300" : "border-slate-200"}`}>
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                      <span className="font-black text-slate-800 text-sm">CDP Número {num}</span>
+                      <IconFileText className={`w-4 h-4 ${hasOwner ? "text-violet-500" : "text-slate-300"}`} />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Propietario:</label>
+                      <select 
+                        className="w-full text-sm p-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700"
+                        value={currentOwnerId}
+                        onChange={(e) => onUpdateCDP(num, e.target.value)}
+                      >
+                        <option value="">-- Sin Asignar --</option>
+                        {users.map((u: any) => (
+                          <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
       </main>
 
       {editingUser && (
@@ -577,7 +692,7 @@ const AdminView = ({ users, setView, currentUser, setCurrentUser, onUpdate, onDe
           user={editingUser}
           onClose={() => setEditingUser(null)}
           onUpdate={(id: string, data: any) => {
-             onUpdate(id, data);
+             onUpdateUser(id, data);
              if (id === currentUser.id) {
                 setCurrentUser(data);
                 if (!data.isAdmin) setView("dashboard");
@@ -601,6 +716,7 @@ export default function App() {
   // Estados de Firebase
   const [firebaseUser, setFirebaseUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
+  const [cdps, setCdps] = useState<any[]>([]); // Nuevo estado para los activos
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
@@ -610,7 +726,7 @@ export default function App() {
     onConfirm: null, onCancel: null, confirmText: "Aceptar", cancelText: "Cancelar",
   });
 
-  // 1. Inicializar Autenticación de la Nube
+  // 1. Inicializar Autenticación
   useEffect(() => {
     if (!firebaseConfig) return;
     const initAuth = async () => {
@@ -622,7 +738,7 @@ export default function App() {
         }
       } catch (e) {
         console.error("Error de Auth Firebase:", e);
-        setDbError("Para que la base de datos funcione, debes ir a Firebase > Authentication > Sign-in method > y habilitar el proveedor 'Anónimo'.");
+        setDbError("Error de Autenticación con Firebase.");
         setIsInitializing(false);
       }
     };
@@ -635,28 +751,35 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // 2. Escuchar la Base de Datos en Tiempo Real
+  // 2. Escuchar la Base de Datos (Usuarios y CDPs)
   useEffect(() => {
     if (!firebaseConfig || !firebaseUser) return;
     
-    // Colección: fiduciantes
     const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'fiduciantes');
-    
-    const unsubscribe = onSnapshot(usersRef, (snapshot: any) => {
+    const uUnsubscribe = onSnapshot(usersRef, (snapshot: any) => {
       const usersData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       setUsers(usersData);
       setIsDbReady(true);
       setDbError(null);
     }, (error: any) => {
       console.error("Error de lectura DB:", error);
-      setDbError("Error de permisos en la base de datos. Asegúrate de que las reglas de Firestore estén configuradas para permitir lectura/escritura (Modo de prueba).");
+      setDbError("Error de permisos en la base de datos.");
       setIsInitializing(false);
     });
 
-    return () => unsubscribe();
+    const cdpsRef = collection(db, 'artifacts', appId, 'public', 'data', 'cdps');
+    const cUnsubscribe = onSnapshot(cdpsRef, (snapshot: any) => {
+      const cdpsData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      setCdps(cdpsData);
+    });
+
+    return () => {
+      uUnsubscribe();
+      cUnsubscribe();
+    };
   }, [firebaseUser]);
 
-  // 3. Restaurar Sesión del Usuario (ACTUALIZADO V23)
+  // 3. Restaurar Sesión
   useEffect(() => {
     if (isDbReady && isInitializing) {
       const sessionId = sessionStorage.getItem(SESSION_KEY);
@@ -692,6 +815,25 @@ export default function App() {
     } catch (e) { console.error(e); }
   };
 
+  // Función para asignar o desasignar un CDP
+  const handleUpdateCDP = async (num: number, ownerId: string) => {
+    try {
+      const cdpId = `cdp_${num}`;
+      if (!ownerId) {
+        // Si seleccionan "Sin asignar", borramos el documento para mantener limpia la DB
+        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId));
+      } else {
+        // Si asignan a alguien, creamos o actualizamos
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId), {
+          id: cdpId,
+          number: num,
+          ownerId: ownerId,
+          updatedAt: new Date().toISOString()
+        });
+      }
+    } catch (e) { console.error("Error al asignar CDP", e); }
+  };
+
   const showGlobalMessage = (type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
     setModalConfig({
       isOpen: true, type, title, message, confirmText, cancelText: "Cancelar",
@@ -708,7 +850,6 @@ export default function App() {
 
   const handleLogout = () => {
     showGlobalMessage("confirm", "Cerrar Sesión", "¿Estás seguro de que deseas salir de tu cuenta?", () => {
-      // ACTUALIZADO V23
       sessionStorage.removeItem(SESSION_KEY);
       setCurrentUser(null);
       setCurrentView("login");
@@ -755,8 +896,8 @@ export default function App() {
       {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
-      {currentView === "dashboard" && <DashboardView user={currentUser} setView={setCurrentView} handleLogout={handleLogout} />}
-      {currentView === "admin" && <AdminView users={users} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdate={handleUpdateUser} onDelete={handleDeleteUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={cdps} setView={setCurrentView} handleLogout={handleLogout} />}
+      {currentView === "admin" && <AdminView users={users} cdps={cdps} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onUpdateCDP={handleUpdateCDP} onDelete={handleDeleteUser} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </>
   );
