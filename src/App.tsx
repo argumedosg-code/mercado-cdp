@@ -23,7 +23,7 @@ const ROLES = {
 };
 
 const TOTAL_CDPS = 413;
-const SESSION_KEY = "cdp_session_v23"; // Mantenemos la llave base de sesión
+const SESSION_KEY = "cdp_session_v23"; // Mantenemos la llave base de sesión segura
 
 // ==========================================
 // ÍCONOS INTEGRADOS (Compatibles con TypeScript para Vercel)
@@ -78,6 +78,13 @@ if (firebaseConfig) {
 }
 
 const formatId = (num: number) => `#${String(num).padStart(4, "0")}`;
+
+// LÓGICA DE NEGOCIO: Determinación de Categoría (Automática)
+const getUserRole = (user: any, cdps: any[]) => {
+  if (user.isAdmin || user.correlativeId === 1) return ROLES.ADMIN;
+  const ownsCdp = cdps.some((c: any) => c.ownerId === user.id);
+  return ownsCdp ? ROLES.FIDUCIANTE : ROLES.NO_FIDUCIANTE;
+};
 
 // ==========================================
 // COMPONENTES UI REUTILIZABLES
@@ -166,21 +173,12 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
     setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  const handleRoleChange = (e: any) => {
-    const newRole = e.target.value;
-    setFormData((prev: any) => ({ 
-      ...prev, 
-      role: newRole, 
-      isAdmin: newRole === ROLES.ADMIN 
-    }));
-  };
-
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
     await onUpdate(user.id, formData);
     setIsLoading(false);
-    showGlobalMessage("success", "Usuario Actualizado", "Los datos y categoría se guardaron correctamente.");
+    showGlobalMessage("success", "Usuario Actualizado", "Los datos personales se guardaron correctamente.");
     onClose();
   };
 
@@ -202,18 +200,14 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
             <InputField label="Contraseña" name="password" value={formData.password} onChange={handleChange} required />
           </div>
           
-          <div className="flex flex-col gap-1 w-full mt-4">
-            <label className="text-sm font-semibold text-slate-600 ml-1">Categoría de Socio</label>
-            <select 
-              name="role" 
-              value={formData.role || ROLES.FIDUCIANTE} 
-              onChange={handleRoleChange}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl py-3 px-4 outline-none focus:ring-2 focus:ring-violet-500 transition-all"
-            >
-              <option value={ROLES.ADMIN}>{ROLES.ADMIN}</option>
-              <option value={ROLES.FIDUCIANTE}>{ROLES.FIDUCIANTE}</option>
-              <option value={ROLES.NO_FIDUCIANTE}>{ROLES.NO_FIDUCIANTE}</option>
-            </select>
+          <div className="flex flex-col gap-1 w-full mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <div className="flex items-center gap-2">
+              <IconInfo className="w-5 h-5 text-violet-500" />
+              <span className="text-sm font-semibold text-slate-600">Gestión de Categorías Automática</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">
+              La categoría de este usuario ya no se edita manualmente. El sistema verifica si posee al menos 1 CDP asignado en el mapa para otorgarle el estatus de "Fiduciante".
+            </p>
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -230,7 +224,7 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
 // VISTAS DE LA APLICACIÓN
 // ==========================================
 
-const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) => {
+const LoginView = ({ users, cdps, setView, setCurrentUser, showGlobalMessage }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -270,8 +264,8 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
               <IconCloud className="w-3 h-3" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-slate-800">Mercado de CDP</h1>
-          <p className="text-slate-500 mt-2">Acceso exclusivo Fiduciantes</p>
+          <h1 className="text-3xl font-bold text-slate-800">Mercado de CDP v26</h1>
+          <p className="text-slate-500 mt-2 font-medium">Club de Campo Viñas en las Violetas</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-5">
           <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
@@ -311,8 +305,7 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
       id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       email: emailLower,
       correlativeId: users.length + 1,
-      role: isFirstUser ? ROLES.ADMIN : ROLES.FIDUCIANTE,
-      isAdmin: isFirstUser,
+      isAdmin: isFirstUser, // El usuario 1 es el administrador base
       isValidated: false,
       fechaRegistro: new Date().toISOString(),
     };
@@ -334,7 +327,7 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
           <IconChevronRight className="w-4 h-4 rotate-180 mr-1" /> Volver al Login
         </button>
         <h2 className="text-3xl font-bold text-slate-800 mb-2">Solicitud de Alta</h2>
-        <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP.</p>
+        <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP v26.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField icon={IconUser} label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required />
@@ -351,9 +344,10 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
   );
 };
 
-const ValidationView = ({ user, onUpdate, setView, setCurrentUser }: any) => {
+const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) => {
   const [formData, setFormData] = useState({ nombres: user.nombres, apellidos: user.apellidos, cuit: user.cuit, telefono: user.telefono });
   const [isLoading, setIsLoading] = useState(false);
+  const currentRole = getUserRole(user, cdps);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -382,10 +376,10 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }: any) => {
               <p className="text-slate-500">Revisión de legajo digital</p>
             </div>
             <div className="text-center md:text-right">
-              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Categoría</span>
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${user.isAdmin ? "bg-violet-100 text-violet-700" : "bg-slate-100 text-slate-700"}`}>
-                {user.isAdmin && <IconShield className="w-4 h-4" />}
-                {user.role || ROLES.FIDUCIANTE}
+              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Categoría Oficial</span>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${currentRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : currentRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>
+                {currentRole === ROLES.ADMIN && <IconShield className="w-4 h-4" />}
+                {currentRole}
               </span>
               <div className="mt-2 text-xl font-black text-slate-800 tracking-tight">Socio Nº {formatId(user.correlativeId)}</div>
             </div>
@@ -408,8 +402,8 @@ const ValidationView = ({ user, onUpdate, setView, setCurrentUser }: any) => {
 };
 
 const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
-  // Filtramos los CDPs que pertenecen a este usuario
   const misCdps = cdps.filter((c: any) => c.ownerId === user.id);
+  const currentRole = getUserRole(user, cdps);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -422,11 +416,11 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
             <h1 className="text-xl font-bold text-slate-800 hidden sm:block">Mi Panel</h1>
           </div>
           <div className="flex items-center gap-4">
-            {user.isAdmin && (
+            {user.isAdmin || user.correlativeId === 1 ? (
               <Button variant="outline" className="!py-2 !px-4 !rounded-xl text-sm" icon={IconShield} onClick={() => setView("admin")}>
                 Panel Admin
               </Button>
-            )}
+            ) : null}
             <button onClick={handleLogout} className="flex items-center gap-2 text-slate-500 hover:text-red-500 font-semibold transition-colors">
               <IconLogOut className="w-5 h-5" /> <span className="hidden sm:inline">Salir</span>
             </button>
@@ -437,7 +431,7 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-slate-800">Bienvenido, {user.nombres}</h2>
-          <p className="text-slate-500 mt-1">Categoría: <span className="font-bold text-violet-600">{user.role || ROLES.FIDUCIANTE}</span></p>
+          <p className="text-slate-500 mt-1">Categoría: <span className="font-bold text-violet-600">{currentRole}</span></p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -580,13 +574,13 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
         <div className="flex flex-wrap gap-4 mb-8 border-b border-slate-200 pb-4">
           <button 
             onClick={() => setActiveTab("fiduciantes")} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${activeTab === "fiduciantes" ? "bg-violet-600 text-white shadow-md shadow-violet-500/30" : "bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all border-2 ${activeTab === "fiduciantes" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}
           >
             <IconUser className="w-5 h-5" /> Fiduciantes
           </button>
           <button 
             onClick={() => setActiveTab("cdps")} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${activeTab === "cdps" ? "bg-violet-600 text-white shadow-md shadow-violet-500/30" : "bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all border-2 ${activeTab === "cdps" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}
           >
             <IconGrid className="w-5 h-5" /> Mapa de CDPs (1 al 413)
           </button>
@@ -617,28 +611,31 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {users.map((u: any) => (
-                      <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="p-4 align-middle"><span className="font-mono font-bold text-slate-600">{formatId(u.correlativeId)}</span></td>
-                        <td className="p-4 align-middle">
-                          <p className="font-bold text-slate-800">{u.nombres} {u.apellidos}</p>
-                          <p className="text-sm text-slate-500 font-mono mt-0.5">CUIT: {u.cuit}</p>
-                        </td>
-                        <td className="p-4 align-middle">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${u.role === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : u.role === ROLES.NO_FIDUCIANTE ? "bg-slate-100 text-slate-500" : "bg-blue-100 text-blue-700"}`}>
-                            {u.role || ROLES.FIDUCIANTE}
-                          </span>
-                        </td>
-                        <td className="p-4 align-middle">
-                          <p className="text-sm font-medium text-slate-700">{u.email}</p>
-                          <p className="text-sm text-slate-500 mt-0.5">{u.telefono}</p>
-                        </td>
-                        <td className="p-4 align-middle text-right space-x-2">
-                          <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar Rol y Datos"><IconEdit className="w-5 h-5" /></button>
-                          <button onClick={() => handleDeleteRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
-                        </td>
-                      </tr>
-                    ))}
+                    {users.map((u: any) => {
+                      const uRole = getUserRole(u, cdps);
+                      return (
+                        <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 align-middle"><span className="font-mono font-bold text-slate-600">{formatId(u.correlativeId)}</span></td>
+                          <td className="p-4 align-middle">
+                            <p className="font-bold text-slate-800">{u.nombres} {u.apellidos}</p>
+                            <p className="text-sm text-slate-500 font-mono mt-0.5">CUIT: {u.cuit}</p>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${uRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : uRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>
+                              {uRole}
+                            </span>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <p className="text-sm font-medium text-slate-700">{u.email}</p>
+                            <p className="text-sm text-slate-500 mt-0.5">{u.telefono}</p>
+                          </td>
+                          <td className="p-4 align-middle text-right space-x-2">
+                            <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar Datos Personales"><IconEdit className="w-5 h-5" /></button>
+                            <button onClick={() => handleDeleteRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -716,7 +713,7 @@ export default function App() {
   // Estados de Firebase
   const [firebaseUser, setFirebaseUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
-  const [cdps, setCdps] = useState<any[]>([]); // Nuevo estado para los activos
+  const [cdps, setCdps] = useState<any[]>([]); // Estado para los activos (CDPs)
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
@@ -820,7 +817,7 @@ export default function App() {
     try {
       const cdpId = `cdp_${num}`;
       if (!ownerId) {
-        // Si seleccionan "Sin asignar", borramos el documento para mantener limpia la DB
+        // Si seleccionan "Sin asignar", borramos el documento
         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId));
       } else {
         // Si asignan a alguien, creamos o actualizamos
@@ -893,9 +890,9 @@ export default function App() {
 
   return (
     <>
-      {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "login" && <LoginView users={users} cdps={cdps} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
-      {currentView === "validation" && <ValidationView user={currentUser} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "validation" && <ValidationView user={currentUser} cdps={cdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={cdps} setView={setCurrentView} handleLogout={handleLogout} />}
       {currentView === "admin" && <AdminView users={users} cdps={cdps} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onUpdateCDP={handleUpdateCDP} onDelete={handleDeleteUser} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
