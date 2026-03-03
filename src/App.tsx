@@ -53,6 +53,8 @@ const IconX = (props: any) => <SvgIcon {...props}><path d="M18 6 6 18" /><path d
 const IconInfo = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></SvgIcon>;
 const IconCloud = (props: any) => <SvgIcon {...props}><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></SvgIcon>;
 const IconGrid = (props: any) => <SvgIcon {...props}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></SvgIcon>;
+const IconList = (props: any) => <SvgIcon {...props}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></SvgIcon>;
+const IconDollarSign = (props: any) => <SvgIcon {...props}><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
@@ -280,6 +282,74 @@ const BulkAssignModal = ({ users, onClose, onConfirm, showGlobalMessage }: any) 
   );
 };
 
+const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }: any) => {
+  const [formData, setFormData] = useState(operacion || {
+    numero: "",
+    vendedorId: "",
+    compradorId: "",
+    monto: "",
+    fecha: new Date().toISOString().split('T')[0]
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    if (formData.vendedorId === formData.compradorId && formData.vendedorId !== "") {
+      showGlobalMessage("error", "Error", "El vendedor y comprador no pueden ser el mismo fiduciante.");
+      return;
+    }
+    setIsLoading(true);
+    await onSave(formData);
+    setIsLoading(false);
+    showGlobalMessage("success", "Operación Registrada", "El registro se guardó correctamente.");
+    onClose();
+  };
+
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-800">{operacion ? "Editar Operación" : "Nueva Operación"}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <InputField label="Nº Operación" name="numero" value={formData.numero} onChange={handleChange} required />
+            <InputField label="Fecha" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required />
+          </div>
+          <div className="flex flex-col gap-1 w-full mt-2">
+            <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label>
+            <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="vendedorId" value={formData.vendedorId} onChange={handleChange} required>
+              <option value="">-- Seleccionar Vendedor --</option>
+              {users.map((u: any) => (
+                <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1 w-full mt-2">
+            <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Comprador</label>
+            <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="compradorId" value={formData.compradorId} onChange={handleChange} required>
+              <option value="">-- Seleccionar Comprador --</option>
+              {users.map((u: any) => (
+                <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
+              ))}
+            </select>
+          </div>
+          <InputField icon={IconDollarSign} label="Monto (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required />
+          <p className="text-xs text-slate-500 mt-2 italic">* Los valores de las operaciones de CDPs siempre deben registrarse y cotizarse estrictamente en Dólares Estadounidenses (USD).</p>
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // ==========================================
 // VISTAS DE LA APLICACIÓN
 // ==========================================
@@ -326,7 +396,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v28</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v29</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -539,6 +609,32 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
           </div>
 
           <div className="lg:col-span-8 space-y-8">
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-4">Acciones Rápidas</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
+                  <div className="w-14 h-14 bg-violet-50 text-violet-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <IconBuilding className="w-7 h-7" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-800 mb-2">Mercado Activo</h4>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Explora oportunidades y cede participaciones (Valores en USD).</p>
+                  <div className="flex items-center text-sm font-bold text-violet-600">
+                    Ver mercado <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+                <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
+                  <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <IconFileText className="w-7 h-7" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-800 mb-2">Mis Documentos</h4>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Accede a tus Certificados de Participación y anexos.</p>
+                  <div className="flex items-center text-sm font-bold text-blue-600">
+                    Ingresar a bóveda <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Card className="p-6 border-t-4 border-t-violet-500">
               <div className="flex justify-between items-center mb-6">
                 <div>
@@ -568,30 +664,6 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
                 </div>
               )}
             </Card>
-
-            <h3 className="text-xl font-bold text-slate-800 mb-4">Acciones Rápidas</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
-                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <IconFileText className="w-7 h-7" />
-                </div>
-                <h4 className="text-xl font-bold text-slate-800 mb-2">Mis Documentos</h4>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">Accede a tus Certificados de Participación y anexos.</p>
-                <div className="flex items-center text-sm font-bold text-blue-600">
-                  Ingresar a bóveda <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-              <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
-                <div className="w-14 h-14 bg-violet-50 text-violet-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <IconBuilding className="w-7 h-7" />
-                </div>
-                <h4 className="text-xl font-bold text-slate-800 mb-2">Mercado Activo</h4>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">Explora oportunidades y cede participaciones.</p>
-                <div className="flex items-center text-sm font-bold text-violet-600">
-                  Ver mercado <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </main>
@@ -599,12 +671,13 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
   );
 };
 
-const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdateUser, onUpdateCDP, onBulkUpdateCDP, onDelete, showGlobalMessage }: any) => {
-  const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes" o "cdps"
+const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentUser, onUpdateUser, onUpdateCDP, onBulkUpdateCDP, onDeleteUser, onSaveOperacion, onDeleteOperacion, showGlobalMessage }: any) => {
+  const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes", "cdps" o "operaciones"
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [editingOperacion, setEditingOperacion] = useState<any>(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
-  const handleDeleteRequest = (userToDelete: any) => {
+  const handleDeleteUserRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) {
       showGlobalMessage("error", "Acción Denegada", "No puedes eliminar tu propia cuenta de administrador.");
       return;
@@ -612,11 +685,27 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
     showGlobalMessage(
       "confirm", "Eliminar Fiduciante", `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`,
       async () => {
-        await onDelete(userToDelete.id);
+        await onDeleteUser(userToDelete.id);
         showGlobalMessage("success", "Usuario Eliminado", "El registro fue borrado exitosamente de la nube.");
       },
       null, "Sí, Eliminar"
     );
+  };
+
+  const handleDeleteOperacionRequest = (operacion: any) => {
+    showGlobalMessage(
+      "confirm", "Eliminar Operación", `¿Estás seguro de que deseas eliminar la operación #${operacion.numero}?`,
+      async () => {
+        await onDeleteOperacion(operacion.id);
+        showGlobalMessage("success", "Operación Eliminada", "El registro fue borrado exitosamente de la base de datos.");
+      },
+      null, "Sí, Eliminar"
+    );
+  };
+
+  const getUserName = (id: string) => {
+    const user = users.find((u: any) => u.id === id);
+    return user ? `${user.nombres} ${user.apellidos}` : "Usuario Desconocido";
   };
 
   return (
@@ -646,7 +735,13 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
             onClick={() => setActiveTab("cdps")} 
             className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all border-2 ${activeTab === "cdps" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}
           >
-            <IconGrid className="w-5 h-5" /> Mapa de CDPs (1 al 413)
+            <IconGrid className="w-5 h-5" /> Mapa de CDPs
+          </button>
+          <button 
+            onClick={() => setActiveTab("operaciones")} 
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all border-2 ${activeTab === "operaciones" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}
+          >
+            <IconList className="w-5 h-5" /> Registro de Operaciones
           </button>
         </div>
 
@@ -695,7 +790,7 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
                           </td>
                           <td className="p-4 align-middle text-right space-x-2">
                             <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar Datos Personales"><IconEdit className="w-5 h-5" /></button>
-                            <button onClick={() => handleDeleteRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
+                            <button onClick={() => handleDeleteUserRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
                           </td>
                         </tr>
                       );
@@ -751,6 +846,58 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
           </div>
         )}
 
+        {activeTab === "operaciones" && (
+          <div className="animate-in fade-in duration-300">
+            <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">Historial de Transacciones</h2>
+                <p className="text-slate-500 mt-1">Llevá el registro de las cesiones y compra-ventas en USD.</p>
+              </div>
+              <Button onClick={() => setEditingOperacion(null)} icon={IconList} className="whitespace-nowrap">
+                + Nueva Operación
+              </Button>
+            </div>
+
+            <Card className="!p-0 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
+                      <th className="p-4 font-semibold">Nº Oper.</th>
+                      <th className="p-4 font-semibold">Fecha</th>
+                      <th className="p-4 font-semibold">Vendedor</th>
+                      <th className="p-4 font-semibold">Comprador</th>
+                      <th className="p-4 font-semibold text-right">Monto (USD)</th>
+                      <th className="p-4 font-semibold text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {operaciones.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td>
+                      </tr>
+                    ) : (
+                      operaciones.map((op: any) => (
+                        <tr key={op.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{op.numero}</span></td>
+                          <td className="p-4 align-middle text-sm text-slate-600">{new Date(op.fecha).toLocaleDateString()}</td>
+                          <td className="p-4 align-middle text-sm font-semibold text-red-600">{getUserName(op.vendedorId)}</td>
+                          <td className="p-4 align-middle text-sm font-semibold text-green-600">{getUserName(op.compradorId)}</td>
+                          <td className="p-4 align-middle text-right font-bold text-slate-800">USD {Number(op.monto).toLocaleString()}</td>
+                          <td className="p-4 align-middle text-right space-x-2">
+                            <button onClick={() => setEditingOperacion(op)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
+                            <button onClick={() => handleDeleteOperacionRequest(op)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+
       </main>
 
       {editingUser && (
@@ -776,6 +923,16 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
           showGlobalMessage={showGlobalMessage}
         />
       )}
+
+      {(activeTab === "operaciones" && editingOperacion !== undefined) && (
+        <OperacionModal
+          operacion={editingOperacion}
+          users={users}
+          onClose={() => setEditingOperacion(undefined)}
+          onSave={onSaveOperacion}
+          showGlobalMessage={showGlobalMessage}
+        />
+      )}
     </div>
   );
 };
@@ -792,6 +949,7 @@ export default function App() {
   const [firebaseUser, setFirebaseUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [cdps, setCdps] = useState<any[]>([]); // Estado para los activos (CDPs)
+  const [operaciones, setOperaciones] = useState<any[]>([]); // Estado de operaciones
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
@@ -826,7 +984,7 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // 2. Escuchar la Base de Datos (Usuarios y CDPs)
+  // 2. Escuchar la Base de Datos (Usuarios, CDPs y Operaciones)
   useEffect(() => {
     if (!firebaseConfig || !firebaseUser) return;
     
@@ -848,9 +1006,18 @@ export default function App() {
       setCdps(cdpsData);
     });
 
+    const operacionesRef = collection(db, 'artifacts', appId, 'public', 'data', 'operaciones');
+    const oUnsubscribe = onSnapshot(operacionesRef, (snapshot: any) => {
+      const operacionesData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      // Ordenar por fecha descendente
+      operacionesData.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+      setOperaciones(operacionesData);
+    });
+
     return () => {
       uUnsubscribe();
       cUnsubscribe();
+      oUnsubscribe();
     };
   }, [firebaseUser]);
 
@@ -871,7 +1038,7 @@ export default function App() {
     }
   }, [isDbReady, users, isInitializing]);
 
-  // Funciones de Base de Datos
+  // Funciones de Base de Datos para Usuarios
   const handleRegisterUser = async (newUser: any) => {
     try {
       await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', newUser.id), newUser);
@@ -888,6 +1055,24 @@ export default function App() {
     try {
       await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id));
     } catch (e) { console.error(e); }
+  };
+
+  // Funciones para Operaciones
+  const handleSaveOperacion = async (data: any) => {
+    try {
+      const opId = data.id || `op_${Date.now()}`;
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', opId), {
+        ...data,
+        id: opId,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (e) { console.error("Error al guardar operación", e); }
+  };
+
+  const handleDeleteOperacion = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', id));
+    } catch (e) { console.error("Error al eliminar operación", e); }
   };
 
   // Función para asignar o desasignar un CDP individual
@@ -957,34 +1142,31 @@ export default function App() {
   // PANTALLAS DE CARGA O ERROR
   if (!firebaseConfig) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-         <Card className="max-w-lg text-center border-amber-200 bg-amber-50">
-           <IconAlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-           <h2 className="text-2xl font-bold text-amber-900 mb-2">¡Casi listo para la Nube!</h2>
-           <p className="text-amber-800 mb-6">Configura Firebase en la línea 127 del código.</p>
-         </Card>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', fontFamily: 'sans-serif' }}>
+        <h2 style={{ color: '#d97706', fontSize: '1.5rem', fontWeight: 'bold' }}>¡Casi listo para la Nube!</h2>
+        <p style={{ color: '#92400e' }}>Configura Firebase en el código.</p>
       </div>
     );
   }
 
   if (dbError) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-         <Card className="max-w-lg text-center border-red-200 bg-red-50">
-           <IconAlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-           <h2 className="text-2xl font-bold text-red-900 mb-2">Error de conexión</h2>
-           <p className="text-red-800 mb-6 font-medium">{dbError}</p>
-           <Button onClick={() => window.location.reload()}>Reintentar conexión</Button>
-         </Card>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', fontFamily: 'sans-serif' }}>
+        <h2 style={{ color: '#dc2626', fontSize: '1.5rem', fontWeight: 'bold' }}>Error de conexión</h2>
+        <p style={{ color: '#991b1b', marginBottom: '1rem' }}>{dbError}</p>
+        <button onClick={() => window.location.reload()} style={{ padding: '0.75rem 1.5rem', backgroundColor: '#dc2626', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>Reintentar conexión</button>
       </div>
     );
   }
 
+  // SOLUCIÓN AL "CÍRCULO NEGRO": Estilos nativos de CSS sin depender de Tailwind durante el primer segundo de carga.
   if (isInitializing || !isDbReady) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-        <Spinner className="w-12 h-12 text-violet-600" />
-        <p className="text-slate-500 font-medium">Conectando con la base de datos segura...</p>
+      <div style={{ display: 'flex', height: '100vh', width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', color: '#64748b', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: 600, fontSize: '1.125rem', marginBottom: '0.5rem', color: '#7c3aed' }}>Mercado de CDP</div>
+          <p style={{ fontSize: '0.875rem' }}>Conectando de forma segura con la Nube...</p>
+        </div>
       </div>
     );
   }
@@ -995,7 +1177,7 @@ export default function App() {
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={cdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={cdps} setView={setCurrentView} handleLogout={handleLogout} />}
-      {currentView === "admin" && <AdminView users={users} cdps={cdps} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onUpdateCDP={handleUpdateCDP} onBulkUpdateCDP={handleBulkUpdateCDP} onDelete={handleDeleteUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "admin" && <AdminView users={users} cdps={cdps} operaciones={operaciones} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onUpdateCDP={handleUpdateCDP} onBulkUpdateCDP={handleBulkUpdateCDP} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </>
   );
