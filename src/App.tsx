@@ -284,7 +284,8 @@ const BulkAssignModal = ({ users, onClose, onConfirm, showGlobalMessage }: any) 
 // VISTAS DE LA APLICACIÓN
 // ==========================================
 
-const LoginView = ({ users, cdps, setView, setCurrentUser, showGlobalMessage }: any) => {
+// HOTFIX: Eliminada la variable 'cdps' que no se usaba y bloqueaba Vercel
+const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -991,7 +992,7 @@ export default function App() {
 
   return (
     <>
-      {currentView === "login" && <LoginView users={users} cdps={cdps} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={cdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={cdps} setView={setCurrentView} handleLogout={handleLogout} />}
