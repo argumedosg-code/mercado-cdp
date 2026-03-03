@@ -220,6 +220,66 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
   );
 };
 
+const BulkAssignModal = ({ users, onClose, onConfirm, showGlobalMessage }: any) => {
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [owner, setOwner] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const s = parseInt(start);
+    const eNum = parseInt(end);
+
+    if (isNaN(s) || isNaN(eNum) || s < 1 || eNum > TOTAL_CDPS || s > eNum) {
+      showGlobalMessage("error", "Rango Inválido", `Por favor ingresa un rango válido (Desde menor o igual a Hasta, máximo ${TOTAL_CDPS}).`);
+      return;
+    }
+
+    setIsLoading(true);
+    await onConfirm(s, eNum, owner);
+    setIsLoading(false);
+    showGlobalMessage("success", "Asignación Exitosa", `Se actualizaron correctamente los CDPs del ${s} al ${eNum}.`);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="bg-white rounded-3xl p-8 max-w-md w-full relative z-10 shadow-2xl scale-100 animate-in zoom-in-95">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-800">Asignación Múltiple</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
+        </div>
+        <p className="text-slate-500 mb-6 text-sm">Transfiere la titularidad de un rango completo de CDPs en una sola acción.</p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <InputField label="Desde CDP Nº" type="number" min="1" max={TOTAL_CDPS} value={start} onChange={(e: any) => setStart(e.target.value)} required />
+            <InputField label="Hasta CDP Nº" type="number" min="1" max={TOTAL_CDPS} value={end} onChange={(e: any) => setEnd(e.target.value)} required />
+          </div>
+          <div className="flex flex-col gap-1 w-full mt-2">
+            <label className="text-sm font-semibold text-slate-600 ml-1">Nuevo Propietario</label>
+            <select
+              className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700"
+              value={owner}
+              onChange={(e) => setOwner(e.target.value)}
+            >
+              <option value="">-- Sin Asignar (Liberar) --</option>
+              {users.map((u: any) => (
+                <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex gap-3 pt-6">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Aplicar</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // ==========================================
 // VISTAS DE LA APLICACIÓN
 // ==========================================
@@ -264,8 +324,11 @@ const LoginView = ({ users, cdps, setView, setCurrentUser, showGlobalMessage }: 
               <IconCloud className="w-3 h-3" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-slate-800">Mercado de CDP v26</h1>
-          <p className="text-slate-500 mt-2 font-medium">Club de Campo Viñas en las Violetas</p>
+          <h1 className="font-bold text-slate-800 flex flex-col items-center">
+            <span className="text-5xl mb-2 tracking-tight">Mercado de CDP</span>
+            <span className="text-xl text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase">v27</span>
+          </h1>
+          <p className="text-slate-500 mt-4 font-medium italic">"Club de Campo Viñas en las Violetas"</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-5">
           <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
@@ -327,7 +390,7 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
           <IconChevronRight className="w-4 h-4 rotate-180 mr-1" /> Volver al Login
         </button>
         <h2 className="text-3xl font-bold text-slate-800 mb-2">Solicitud de Alta</h2>
-        <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP v26.</p>
+        <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField icon={IconUser} label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required />
@@ -536,9 +599,10 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
   );
 };
 
-const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdateUser, onUpdateCDP, onDelete, showGlobalMessage }: any) => {
+const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdateUser, onUpdateCDP, onBulkUpdateCDP, onDelete, showGlobalMessage }: any) => {
   const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes" o "cdps"
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const handleDeleteRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) {
@@ -645,9 +709,14 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
 
         {activeTab === "cdps" && (
           <div className="animate-in fade-in duration-300">
-            <div className="mb-4">
-              <h2 className="text-2xl font-bold text-slate-800">Mapa Global de Activos</h2>
-              <p className="text-slate-500 mt-1">Asigna a qué fiduciante pertenece cada uno de los 413 CDPs disponibles.</p>
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">Mapa Global de Activos</h2>
+                <p className="text-slate-500 mt-1">Asigna a qué fiduciante pertenece cada uno de los 413 CDPs disponibles.</p>
+              </div>
+              <Button onClick={() => setIsBulkModalOpen(true)} icon={IconGrid} className="whitespace-nowrap">
+                Asignación Múltiple
+              </Button>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -695,6 +764,15 @@ const AdminView = ({ users, cdps, setView, currentUser, setCurrentUser, onUpdate
                 if (!data.isAdmin) setView("dashboard");
              }
           }}
+          showGlobalMessage={showGlobalMessage}
+        />
+      )}
+
+      {isBulkModalOpen && (
+        <BulkAssignModal 
+          users={users}
+          onClose={() => setIsBulkModalOpen(false)}
+          onConfirm={onBulkUpdateCDP}
           showGlobalMessage={showGlobalMessage}
         />
       )}
@@ -812,7 +890,7 @@ export default function App() {
     } catch (e) { console.error(e); }
   };
 
-  // Función para asignar o desasignar un CDP
+  // Función para asignar o desasignar un CDP individual
   const handleUpdateCDP = async (num: number, ownerId: string) => {
     try {
       const cdpId = `cdp_${num}`;
@@ -829,6 +907,29 @@ export default function App() {
         });
       }
     } catch (e) { console.error("Error al asignar CDP", e); }
+  };
+
+  // Función para asignación múltiple (Bulk Assign)
+  const handleBulkUpdateCDP = async (start: number, end: number, ownerId: string) => {
+    try {
+      const promises = [];
+      for (let i = start; i <= end; i++) {
+        const cdpId = `cdp_${i}`;
+        if (!ownerId) {
+          promises.push(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId)));
+        } else {
+          promises.push(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId), {
+            id: cdpId,
+            number: i,
+            ownerId: ownerId,
+            updatedAt: new Date().toISOString()
+          }));
+        }
+      }
+      await Promise.all(promises);
+    } catch (e) { 
+      console.error("Error en asignación múltiple", e); 
+    }
   };
 
   const showGlobalMessage = (type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
@@ -894,7 +995,7 @@ export default function App() {
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={cdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={cdps} setView={setCurrentView} handleLogout={handleLogout} />}
-      {currentView === "admin" && <AdminView users={users} cdps={cdps} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onUpdateCDP={handleUpdateCDP} onDelete={handleDeleteUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "admin" && <AdminView users={users} cdps={cdps} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onUpdateCDP={handleUpdateCDP} onBulkUpdateCDP={handleBulkUpdateCDP} onDelete={handleDeleteUser} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </>
   );
