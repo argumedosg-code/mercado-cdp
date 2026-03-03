@@ -206,7 +206,7 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
               <span className="text-sm font-semibold text-slate-600">Gestión de Categorías Automática</span>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              La categoría de este usuario ya no se edita manualmente. El sistema verifica si posee al menos 1 CDP asignado en el mapa para otorgarle el estatus de "Fiduciante Activo".
+              La categoría de este usuario ya no se edita manualmente. El sistema verifica si posee al menos 1 CDP asignado en el mapa para otorgarle el estatus de &quot;Fiduciante Activo&quot;.
             </p>
           </div>
 
@@ -328,7 +328,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
             <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v28</span>
           </h1>
-          <p className="text-slate-500 mt-4 font-medium italic">"Club de Campo Viñas en las Violetas"</p>
+          <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-5">
           <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
