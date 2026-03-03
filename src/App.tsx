@@ -44,7 +44,7 @@ const IconCloud = (props: any) => <SvgIcon {...props}><path d="M17.5 19H9a7 7 0 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
 // ==========================================
-const SESSION_KEY = "cdp_session_v22";
+const SESSION_KEY = "cdp_session_v23";
 
 // Tus llaves exactas del Club de Campo Viñas en las Violetas
 const codeSandboxFirebaseConfig = {
@@ -214,7 +214,8 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
     const user = users.find((u: any) => u.email === email.toLowerCase() && u.password === password);
 
     if (user) {
-      localStorage.setItem(SESSION_KEY, user.id);
+      // ACTUALIZADO V23: Ahora usa sessionStorage para que la sesión se cierre al cerrar la pestaña
+      sessionStorage.setItem(SESSION_KEY, user.id);
       setCurrentUser(user);
       setView(user.isValidated ? "dashboard" : "validation");
     } else {
@@ -290,7 +291,8 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
     };
 
     await onRegister(newUser);
-    localStorage.setItem(SESSION_KEY, newUser.id);
+    // ACTUALIZADO V23: Usa sessionStorage
+    sessionStorage.setItem(SESSION_KEY, newUser.id);
     setCurrentUser(newUser);
 
     showGlobalMessage("success", "Registro Exitoso", "Tu cuenta ha sido creada en la nube. A continuación, validaremos tus datos.", () => {
@@ -654,17 +656,17 @@ export default function App() {
     return () => unsubscribe();
   }, [firebaseUser]);
 
-  // 3. Restaurar Sesión del Usuario
+  // 3. Restaurar Sesión del Usuario (ACTUALIZADO V23)
   useEffect(() => {
     if (isDbReady && isInitializing) {
-      const sessionId = localStorage.getItem(SESSION_KEY);
+      const sessionId = sessionStorage.getItem(SESSION_KEY);
       if (sessionId) {
         const user = users.find((u: any) => u.id === sessionId);
         if (user) {
           setCurrentUser(user);
           setCurrentView(user.isValidated ? "dashboard" : "validation");
         } else {
-          localStorage.removeItem(SESSION_KEY);
+          sessionStorage.removeItem(SESSION_KEY);
         }
       }
       setIsInitializing(false);
@@ -706,7 +708,8 @@ export default function App() {
 
   const handleLogout = () => {
     showGlobalMessage("confirm", "Cerrar Sesión", "¿Estás seguro de que deseas salir de tu cuenta?", () => {
-      localStorage.removeItem(SESSION_KEY);
+      // ACTUALIZADO V23
+      sessionStorage.removeItem(SESSION_KEY);
       setCurrentUser(null);
       setCurrentView("login");
     });
