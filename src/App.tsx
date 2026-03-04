@@ -225,7 +225,7 @@ const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) =>
 };
 
 // ==========================================
-// COMPONENTE: GRÁFICO DE MERCADO (+20% Textos)
+// COMPONENTE: GRÁFICO DE MERCADO
 // ==========================================
 const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSaveConfig = null, showGlobalMessage = null }: any) => {
   const [hoveredPoint, setHoveredPoint] = useState<any>(null);
@@ -263,7 +263,6 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
 
   const width = 800;
   const height = 400;
-  // Aumentamos ligerísimamente el padding horizontal para que los textos más grandes (eje Y) entren bien
   const paddingX = simplified ? 55 : 70;
   const paddingY = simplified ? 25 : 50;
 
@@ -346,12 +345,10 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
       <div className="flex-1 flex items-center justify-center overflow-hidden w-full h-full relative p-2">
          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto max-h-full min-w-[500px]">
            
-           {/* Título dentro del gráfico (+20% respecto a v40) */}
            <text x={width / 2} y={simplified ? 18 : 25} textAnchor="middle" className={`font-bold fill-slate-300 ${simplified ? 'text-[22px]' : 'text-[28px]'}`}>
               Precio de los CDP y fecha de operación
            </text>
 
-           {/* Eje Y (+20% respecto a v40) */}
            {yLines.map((val, idx) => {
                const y = getY(val);
                if(y < 0 || y > height) return null;
@@ -363,7 +360,6 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                )
            })}
 
-           {/* Eje X (+20% respecto a v40) */}
            {xLines.map((val, idx) => {
                const x = getX(val);
                if(x < paddingX || x > width - paddingX) return null;
@@ -385,10 +381,8 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                )
            })}
 
-           {/* Curva */}
            <polyline points={pointsStr} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md" />
 
-           {/* Puntos Interactivos */}
            {data.map((d:any, i:number) => {
                const cx = getX(d.dateMs);
                const cy = getY(d.monto);
@@ -418,7 +412,6 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                )
            })}
 
-           {/* Tooltip Dinámico (Textos agrandados un +20% y caja ensanchada) */}
            {hoveredPoint && (
                <g transform={`translate(${hoveredPoint.x}, ${Math.max(65, hoveredPoint.y - 65)})`} className="pointer-events-none transition-all duration-100 ease-out">
                    <rect x="-95" y="-55" width="190" height="65" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
@@ -464,7 +457,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v41</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v42</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -656,32 +649,28 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                       {ofertasOrdenadas.length > 0 ? (
                         ofertasOrdenadas.map((of: any) => (
-                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col gap-3 group relative overflow-hidden">
+                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col justify-between group relative overflow-hidden min-h-[85px] gap-3">
                              
-                             {/* Fila Superior: Flexbox para empujar elementos a los bordes */}
-                             <div className="flex justify-between items-start gap-2">
-                               {/* Etiqueta Oferta (w-fit y sin margen extra) */}
-                               <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap">
+                             {/* Fila Superior: Oferta de Venta (Izquierda) - CDP Número (Derecha) */}
+                             <div className="flex justify-between items-start gap-2 w-full">
+                               <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">
                                  Oferta de Venta
                                </span>
                                
-                               {/* Fecha de Vencimiento (Alineada a la derecha) */}
-                               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mt-0.5">
-                                  <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
+                               <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">
+                                 CDP {of.cdpNumber}
                                </span>
                              </div>
 
-                             {/* Fila Inferior: Flexbox para alinear Precio y CDP */}
-                             <div className="flex justify-between items-end gap-2">
-                               {/* Precio en un solo renglón, U$S al 50% de tamaño */}
+                             {/* Fila Inferior: Precio (Izquierda) - Fecha Vencimiento (Derecha) */}
+                             <div className="flex justify-between items-end gap-2 w-full">
                                <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
                                  <span className="text-[11px] font-black">U$S</span>
                                  <span className="text-[22px] font-black leading-none">{Number(of.monto).toLocaleString()}</span>
                                </div>
                                
-                               {/* Recuadro Azul para CDP */}
-                               <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">
-                                 CDP {of.cdpNumber}
+                               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mb-0.5">
+                                  <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
                                </span>
                              </div>
 
