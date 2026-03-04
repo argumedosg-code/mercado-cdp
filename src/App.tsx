@@ -285,6 +285,7 @@ const BulkAssignModal = ({ users, onClose, onConfirm, showGlobalMessage }: any) 
 const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState(operacion || {
     numero: "",
+    cdpNumber: "",
     vendedorId: "",
     compradorId: "",
     monto: "",
@@ -316,8 +317,9 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <InputField label="Nº Operación" name="numero" value={formData.numero} onChange={handleChange} required />
+            <InputField label="Nº CDP" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required />
             <InputField label="Fecha" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required />
           </div>
           <div className="flex flex-col gap-1 w-full mt-2">
@@ -396,7 +398,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v29</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v30</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -865,6 +867,7 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
                     <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
                       <th className="p-4 font-semibold">Nº Oper.</th>
                       <th className="p-4 font-semibold">Fecha</th>
+                      <th className="p-4 font-semibold">Nº CDP</th>
                       <th className="p-4 font-semibold">Vendedor</th>
                       <th className="p-4 font-semibold">Comprador</th>
                       <th className="p-4 font-semibold text-right">Monto (USD)</th>
@@ -874,13 +877,14 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
                   <tbody className="divide-y divide-slate-100">
                     {operaciones.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td>
+                        <td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td>
                       </tr>
                     ) : (
                       operaciones.map((op: any) => (
                         <tr key={op.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{op.numero}</span></td>
                           <td className="p-4 align-middle text-sm text-slate-600">{new Date(op.fecha).toLocaleDateString()}</td>
+                          <td className="p-4 align-middle"><span className="inline-flex items-center px-2 py-1 bg-violet-100 text-violet-700 rounded-lg text-xs font-bold">CDP {op.cdpNumber}</span></td>
                           <td className="p-4 align-middle text-sm font-semibold text-red-600">{getUserName(op.vendedorId)}</td>
                           <td className="p-4 align-middle text-sm font-semibold text-green-600">{getUserName(op.compradorId)}</td>
                           <td className="p-4 align-middle text-right font-bold text-slate-800">USD {Number(op.monto).toLocaleString()}</td>
