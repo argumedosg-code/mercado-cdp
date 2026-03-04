@@ -55,6 +55,8 @@ const IconCloud = (props: any) => <SvgIcon {...props}><path d="M17.5 19H9a7 7 0 
 const IconGrid = (props: any) => <SvgIcon {...props}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></SvgIcon>;
 const IconList = (props: any) => <SvgIcon {...props}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></SvgIcon>;
 const IconDollarSign = (props: any) => <SvgIcon {...props}><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></SvgIcon>;
+const IconTag = (props: any) => <SvgIcon {...props}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></SvgIcon>;
+const IconFolder = (props: any) => <SvgIcon {...props}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
@@ -80,6 +82,19 @@ if (firebaseConfig) {
 }
 
 const formatId = (num: number) => `#${String(num).padStart(4, "0")}`;
+
+// Helpers de Fecha (Solución al Bug de Zona Horaria)
+const getLocalDateString = () => {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
+
+const formatDateForDisplay = (dateStr: string) => {
+  if (!dateStr) return "";
+  const parts = dateStr.split('-');
+  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return dateStr;
+};
 
 // LÓGICA DE NEGOCIO: Determinación de Categoría (Automática)
 const getUserRole = (user: any, cdps: any[]) => {
@@ -229,7 +244,7 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
     vendedorId: "",
     compradorId: "",
     monto: "",
-    fecha: new Date().toISOString().split('T')[0]
+    fecha: getLocalDateString() // Usa la función corregida local
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -294,6 +309,115 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
   );
 };
 
+const OfertaModal = ({ oferta, users, onClose, onSave, showGlobalMessage }: any) => {
+  const [formData, setFormData] = useState(oferta || {
+    numero: "",
+    cdpNumber: "",
+    vendedorId: "",
+    monto: "",
+    fecha: getLocalDateString(),
+    vencimiento: getLocalDateString()
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsLoading(true);
+    await onSave(formData);
+    setIsLoading(false);
+    showGlobalMessage("success", "Oferta Registrada", "La oferta de venta ha sido publicada en la base de datos.");
+    onClose();
+  };
+
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-800">{oferta ? "Editar Oferta" : "Nueva Oferta de Venta"}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <InputField label="Nº de Oferta" type="number" name="numero" value={formData.numero} onChange={handleChange} required />
+            <InputField label="Nº CDP a la venta" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required />
+          </div>
+          <div className="flex flex-col gap-1 w-full mt-2">
+            <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label>
+            <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="vendedorId" value={formData.vendedorId} onChange={handleChange} required>
+              <option value="">-- Seleccionar Vendedor --</option>
+              <option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello (Base)</option>
+              {users.map((u: any) => (
+                <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
+              ))}
+            </select>
+          </div>
+          <InputField icon={IconDollarSign} label="Monto Solicitado (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <InputField label="Fecha Publicación" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required />
+            <InputField label="Fecha Vencimiento" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required />
+          </div>
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Oferta</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) => {
+  const [formData, setFormData] = useState(bovedaItem || {
+    cdpNumber: "",
+    titulo: "",
+    url: ""
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsLoading(true);
+    await onSave(formData);
+    setIsLoading(false);
+    showGlobalMessage("success", "Documento Guardado", "El enlace al documento ha sido vinculado al CDP exitosamente.");
+    onClose();
+  };
+
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-800">{bovedaItem ? "Editar Documento" : "Vincular Documento"}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl mb-6 flex items-start gap-4 shadow-sm">
+           <IconInfo className="w-6 h-6 shrink-0 mt-0.5" />
+           <div>
+              <p className="text-xs leading-relaxed">
+                Para evitar límites de espacio y costos de servidor, sube las imágenes o PDFs a una plataforma como <b>Google Drive</b> o <b>Dropbox</b>, asegúrate de que el enlace sea público, y pégalo aquí abajo.
+              </p>
+           </div>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <InputField label="Nº CDP Asociado" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required />
+          <InputField icon={IconFileText} label="Título del Archivo (Ej: DNI, Acta de Cesión, PDF Contrato)" name="titulo" value={formData.titulo} onChange={handleChange} required />
+          <InputField icon={IconCloud} label="Enlace Web (URL del Documento)" type="url" name="url" placeholder="https://drive.google.com/..." value={formData.url} onChange={handleChange} required />
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Enlace</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // ==========================================
 // VISTAS DE LA APLICACIÓN
 // ==========================================
@@ -340,7 +464,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v31</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v32</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -615,34 +739,38 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
   );
 };
 
-const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, showGlobalMessage }: any) => {
-  const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes", "cdps" o "operaciones"
+const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, showGlobalMessage }: any) => {
+  const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes", "cdps", "operaciones", "ofertas", "boveda"
   const [editingUser, setEditingUser] = useState<any>(null);
   const [editingOperacion, setEditingOperacion] = useState<any>(null);
+  const [editingOferta, setEditingOferta] = useState<any>(null);
+  const [editingBoveda, setEditingBoveda] = useState<any>(null);
 
   const handleDeleteUserRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) {
       showGlobalMessage("error", "Acción Denegada", "No puedes eliminar tu propia cuenta de administrador.");
       return;
     }
-    showGlobalMessage(
-      "confirm", "Eliminar Fiduciante", `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`,
-      async () => {
-        await onDeleteUser(userToDelete.id);
-        showGlobalMessage("success", "Usuario Eliminado", "El registro fue borrado exitosamente de la nube.");
-      },
-      null, "Sí, Eliminar"
+    showGlobalMessage("confirm", "Eliminar Fiduciante", `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`,
+      async () => { await onDeleteUser(userToDelete.id); showGlobalMessage("success", "Usuario Eliminado", "El registro fue borrado exitosamente."); }, null, "Sí, Eliminar"
     );
   };
 
   const handleDeleteOperacionRequest = (operacion: any) => {
-    showGlobalMessage(
-      "confirm", "Eliminar Operación", `¿Estás seguro de que deseas eliminar la operación #${operacion.numero}?`,
-      async () => {
-        await onDeleteOperacion(operacion.id);
-        showGlobalMessage("success", "Operación Eliminada", "El registro fue borrado exitosamente y el mapa recalculará la titularidad.");
-      },
-      null, "Sí, Eliminar"
+    showGlobalMessage("confirm", "Eliminar Operación", `¿Estás seguro de que deseas eliminar la operación #${operacion.numero}?`,
+      async () => { await onDeleteOperacion(operacion.id); showGlobalMessage("success", "Operación Eliminada", "El registro fue borrado exitosamente."); }, null, "Sí, Eliminar"
+    );
+  };
+
+  const handleDeleteOfertaRequest = (oferta: any) => {
+    showGlobalMessage("confirm", "Eliminar Oferta", `¿Estás seguro de que deseas eliminar la oferta #${oferta.numero}?`,
+      async () => { await onDeleteOferta(oferta.id); showGlobalMessage("success", "Oferta Eliminada", "La oferta fue removida del mercado."); }, null, "Sí, Eliminar"
+    );
+  };
+
+  const handleDeleteBovedaRequest = (docInfo: any) => {
+    showGlobalMessage("confirm", "Desvincular Documento", `¿Estás seguro de que deseas borrar este documento del CDP #${docInfo.cdpNumber}?`,
+      async () => { await onDeleteBoveda(docInfo.id); showGlobalMessage("success", "Documento Borrado", "El enlace se desvinculó de la bóveda."); }, null, "Sí, Borrar"
     );
   };
 
@@ -668,27 +796,25 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-wrap gap-4 mb-8 border-b border-slate-200 pb-4">
-          <button 
-            onClick={() => setActiveTab("fiduciantes")} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all border-2 ${activeTab === "fiduciantes" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}
-          >
-            <IconUser className="w-5 h-5" /> Fiduciantes
+        <div className="flex flex-wrap gap-3 mb-8 border-b border-slate-200 pb-4">
+          <button onClick={() => setActiveTab("fiduciantes")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "fiduciantes" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
+            <IconUser className="w-4 h-4" /> Fiduciantes
           </button>
-          <button 
-            onClick={() => setActiveTab("cdps")} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all border-2 ${activeTab === "cdps" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}
-          >
-            <IconGrid className="w-5 h-5" /> Mapa de CDPs
+          <button onClick={() => setActiveTab("cdps")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "cdps" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
+            <IconGrid className="w-4 h-4" /> Mapa de CDPs
           </button>
-          <button 
-            onClick={() => setActiveTab("operaciones")} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all border-2 ${activeTab === "operaciones" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}
-          >
-            <IconList className="w-5 h-5" /> Registro de Operaciones
+          <button onClick={() => setActiveTab("operaciones")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "operaciones" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
+            <IconList className="w-4 h-4" /> Operaciones
+          </button>
+          <button onClick={() => setActiveTab("ofertas")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "ofertas" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
+            <IconTag className="w-4 h-4" /> Ofertas de Venta
+          </button>
+          <button onClick={() => setActiveTab("boveda")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "boveda" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
+            <IconFolder className="w-4 h-4" /> Bóveda Documentos
           </button>
         </div>
 
+        {/* CONTENIDO FIDUCIANTES */}
         {activeTab === "fiduciantes" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex justify-between items-end">
@@ -696,11 +822,8 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
                 <h2 className="text-2xl font-bold text-slate-800">Directorio de Socios</h2>
                 <p className="text-slate-500 mt-1">Sincronización en tiempo real desde Firebase.</p>
               </div>
-              <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-semibold text-slate-600">
-                Total: {users.length}
-              </div>
+              <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-semibold text-slate-600">Total: {users.length}</div>
             </div>
-
             <Card className="!p-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -719,21 +842,11 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
                       return (
                         <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="font-mono font-bold text-slate-600">{formatId(u.correlativeId)}</span></td>
-                          <td className="p-4 align-middle">
-                            <p className="font-bold text-slate-800">{u.nombres} {u.apellidos}</p>
-                            <p className="text-sm text-slate-500 font-mono mt-0.5">CUIT: {u.cuit}</p>
-                          </td>
-                          <td className="p-4 align-middle">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${uRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : uRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>
-                              {uRole}
-                            </span>
-                          </td>
-                          <td className="p-4 align-middle">
-                            <p className="text-sm font-medium text-slate-700">{u.email}</p>
-                            <p className="text-sm text-slate-500 mt-0.5">{u.telefono}</p>
-                          </td>
+                          <td className="p-4 align-middle"><p className="font-bold text-slate-800">{u.nombres} {u.apellidos}</p><p className="text-sm text-slate-500 font-mono mt-0.5">CUIT: {u.cuit}</p></td>
+                          <td className="p-4 align-middle"><span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${uRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : uRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>{uRole}</span></td>
+                          <td className="p-4 align-middle"><p className="text-sm font-medium text-slate-700">{u.email}</p><p className="text-sm text-slate-500 mt-0.5">{u.telefono}</p></td>
                           <td className="p-4 align-middle text-right space-x-2">
-                            <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar Datos Personales"><IconEdit className="w-5 h-5" /></button>
+                            <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar"><IconEdit className="w-5 h-5" /></button>
                             <button onClick={() => handleDeleteUserRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
                           </td>
                         </tr>
@@ -746,13 +859,13 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
           </div>
         )}
 
+        {/* CONTENIDO CDPs */}
         {activeTab === "cdps" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Mapa Global de Activos</h2>
               <p className="text-slate-500 mt-1">El registro de titularidad está automatizado por Event Sourcing.</p>
             </div>
-
             <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl mb-6 flex items-start gap-4 shadow-sm">
                <IconInfo className="w-6 h-6 shrink-0 mt-0.5" />
                <div>
@@ -763,7 +876,6 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
                   </p>
                </div>
             </div>
-            
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {Array.from({ length: TOTAL_CDPS }, (_, i) => i + 1).map(num => {
                 const cdpInfo = cdps.find((c: any) => c.number === num);
@@ -779,9 +891,7 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Propietario Actual:</label>
-                      <div className="text-sm font-bold text-slate-700 truncate" title={ownerName}>
-                        {ownerName}
-                      </div>
+                      <div className="text-sm font-bold text-slate-700 truncate" title={ownerName}>{ownerName}</div>
                     </div>
                   </div>
                 );
@@ -790,6 +900,7 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
           </div>
         )}
 
+        {/* CONTENIDO OPERACIONES */}
         {activeTab === "operaciones" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -797,11 +908,8 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
                 <h2 className="text-2xl font-bold text-slate-800">Historial de Transacciones</h2>
                 <p className="text-slate-500 mt-1">Llevá el registro de las cesiones y compra-ventas en USD.</p>
               </div>
-              <Button onClick={() => setEditingOperacion(null)} icon={IconList} className="whitespace-nowrap">
-                + Nueva Operación
-              </Button>
+              <Button onClick={() => setEditingOperacion(null)} icon={IconList} className="whitespace-nowrap">+ Nueva Operación</Button>
             </div>
-
             <Card className="!p-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -818,14 +926,12 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {operaciones.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td>
-                      </tr>
+                      <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td></tr>
                     ) : (
                       operaciones.map((op: any) => (
                         <tr key={op.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{op.numero}</span></td>
-                          <td className="p-4 align-middle text-sm text-slate-600">{new Date(op.fecha).toLocaleDateString()}</td>
+                          <td className="p-4 align-middle text-sm text-slate-600 font-medium">{formatDateForDisplay(op.fecha)}</td>
                           <td className="p-4 align-middle"><span className="inline-flex items-center px-2 py-1 bg-violet-100 text-violet-700 rounded-lg text-xs font-bold">CDP {op.cdpNumber}</span></td>
                           <td className="p-4 align-middle text-sm font-semibold text-red-600">{getUserName(op.vendedorId)}</td>
                           <td className="p-4 align-middle text-sm font-semibold text-green-600">{getUserName(op.compradorId)}</td>
@@ -844,32 +950,111 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
           </div>
         )}
 
+        {/* CONTENIDO OFERTAS */}
+        {activeTab === "ofertas" && (
+          <div className="animate-in fade-in duration-300">
+            <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">Mercado: Ofertas de Venta</h2>
+                <p className="text-slate-500 mt-1">CDPs puestos a la venta por sus fiduciantes.</p>
+              </div>
+              <Button onClick={() => setEditingOferta(null)} icon={IconTag} className="whitespace-nowrap">+ Nueva Oferta</Button>
+            </div>
+            <Card className="!p-0 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
+                      <th className="p-4 font-semibold">Nº Oferta</th>
+                      <th className="p-4 font-semibold">Publicada</th>
+                      <th className="p-4 font-semibold">Nº CDP</th>
+                      <th className="p-4 font-semibold">Vendedor</th>
+                      <th className="p-4 font-semibold">Vencimiento</th>
+                      <th className="p-4 font-semibold text-right">Monto (USD)</th>
+                      <th className="p-4 font-semibold text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {ofertas.length === 0 ? (
+                      <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay ofertas de venta activas.</td></tr>
+                    ) : (
+                      ofertas.map((of: any) => (
+                        <tr key={of.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{of.numero}</span></td>
+                          <td className="p-4 align-middle text-sm text-slate-600">{formatDateForDisplay(of.fecha)}</td>
+                          <td className="p-4 align-middle"><span className="inline-flex items-center px-2 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs font-bold">CDP {of.cdpNumber}</span></td>
+                          <td className="p-4 align-middle text-sm font-semibold text-slate-700">{getUserName(of.vendedorId)}</td>
+                          <td className="p-4 align-middle text-sm text-red-500 font-medium">{formatDateForDisplay(of.vencimiento)}</td>
+                          <td className="p-4 align-middle text-right font-bold text-slate-800">USD {Number(of.monto).toLocaleString()}</td>
+                          <td className="p-4 align-middle text-right space-x-2">
+                            <button onClick={() => setEditingOferta(of)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
+                            <button onClick={() => handleDeleteOfertaRequest(of)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* CONTENIDO BÓVEDA */}
+        {activeTab === "boveda" && (
+          <div className="animate-in fade-in duration-300">
+            <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">Bóveda de Documentos (PDF/Imágenes)</h2>
+                <p className="text-slate-500 mt-1">Repositorio de enlaces a los contratos y certificados escaneados.</p>
+              </div>
+              <Button onClick={() => setEditingBoveda(null)} icon={IconFolder} className="whitespace-nowrap">+ Cargar Documento</Button>
+            </div>
+            <Card className="!p-0 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
+                      <th className="p-4 font-semibold">Nº CDP</th>
+                      <th className="p-4 font-semibold">Título del Documento</th>
+                      <th className="p-4 font-semibold">Enlace (URL)</th>
+                      <th className="p-4 font-semibold text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {boveda.length === 0 ? (
+                      <tr><td colSpan={4} className="p-8 text-center text-slate-500 font-medium">La bóveda de documentos está vacía.</td></tr>
+                    ) : (
+                      boveda.map((doc: any) => (
+                        <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 align-middle"><span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">CDP {doc.cdpNumber}</span></td>
+                          <td className="p-4 align-middle text-sm font-bold text-slate-800">{doc.titulo}</td>
+                          <td className="p-4 align-middle">
+                            <a href={doc.url} target="_blank" rel="noreferrer" className="text-sm font-medium text-blue-500 hover:underline flex items-center gap-1">
+                              Abrir Archivo <IconChevronRight className="w-3 h-3" />
+                            </a>
+                          </td>
+                          <td className="p-4 align-middle text-right space-x-2">
+                            <button onClick={() => setEditingBoveda(doc)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
+                            <button onClick={() => handleDeleteBovedaRequest(doc)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+
       </main>
 
-      {editingUser && (
-        <AdminEditModal
-          user={editingUser}
-          onClose={() => setEditingUser(null)}
-          onUpdate={(id: string, data: any) => {
-             onUpdateUser(id, data);
-             if (id === currentUser.id) {
-                setCurrentUser(data);
-                if (!data.isAdmin) setView("dashboard");
-             }
-          }}
-          showGlobalMessage={showGlobalMessage}
-        />
-      )}
-
-      {(activeTab === "operaciones" && editingOperacion !== undefined) && (
-        <OperacionModal
-          operacion={editingOperacion}
-          users={users}
-          onClose={() => setEditingOperacion(undefined)}
-          onSave={onSaveOperacion}
-          showGlobalMessage={showGlobalMessage}
-        />
-      )}
+      {/* RENDERIZADO DE MODALES */}
+      {editingUser && <AdminEditModal user={editingUser} onClose={() => setEditingUser(null)} onUpdate={(id: string, data: any) => { onUpdateUser(id, data); if (id === currentUser.id) { setCurrentUser(data); if (!data.isAdmin) setView("dashboard"); } }} showGlobalMessage={showGlobalMessage} />}
+      {editingOperacion !== null && <OperacionModal operacion={editingOperacion} users={users} onClose={() => setEditingOperacion(null)} onSave={onSaveOperacion} showGlobalMessage={showGlobalMessage} />}
+      {editingOferta !== null && <OfertaModal oferta={editingOferta} users={users} onClose={() => setEditingOferta(null)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
+      {editingBoveda !== null && <BovedaModal bovedaItem={editingBoveda} onClose={() => setEditingBoveda(null)} onSave={onSaveBoveda} showGlobalMessage={showGlobalMessage} />}
     </div>
   );
 };
@@ -885,18 +1070,17 @@ export default function App() {
   // Estados de Firebase y Derivados
   const [firebaseUser, setFirebaseUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
-  const [computedCdps, setComputedCdps] = useState<any[]>([]); // Estado derivado
+  const [computedCdps, setComputedCdps] = useState<any[]>([]);
   const [operaciones, setOperaciones] = useState<any[]>([]);
+  const [ofertas, setOfertas] = useState<any[]>([]);
+  const [boveda, setBoveda] = useState<any[]>([]);
+  
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
 
-  const [modalConfig, setModalConfig] = useState<any>({
-    isOpen: false, type: "info", title: "", message: "",
-    onConfirm: null, onCancel: null, confirmText: "Aceptar", cancelText: "Cancelar",
-  });
+  const [modalConfig, setModalConfig] = useState<any>({ isOpen: false, type: "info", title: "", message: "", onConfirm: null, onCancel: null, confirmText: "Aceptar", cancelText: "Cancelar" });
 
-  // 1. Inicializar Autenticación
   useEffect(() => {
     if (!firebaseConfig) return;
     const initAuth = async () => {
@@ -907,100 +1091,78 @@ export default function App() {
           await signInAnonymously(auth);
         }
       } catch (e) {
-        console.error("Error de Auth Firebase:", e);
         setDbError("Error de Autenticación con Firebase.");
         setIsInitializing(false);
       }
     };
     initAuth();
-    
-    const unsubscribe = onAuthStateChanged(auth, (user: any) => {
-      setFirebaseUser(user);
-    });
-    
+    const unsubscribe = onAuthStateChanged(auth, (user: any) => setFirebaseUser(user));
     return () => unsubscribe();
   }, []);
 
-  // 2. Escuchar la Base de Datos (Usuarios y Operaciones)
   useEffect(() => {
     if (!firebaseConfig || !firebaseUser) return;
     
+    // Fiduciantes
     const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'fiduciantes');
     const uUnsubscribe = onSnapshot(usersRef, (snapshot: any) => {
-      const usersData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      setUsers(usersData);
+      setUsers(snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })));
       setIsDbReady(true);
       setDbError(null);
-    }, (error: any) => {
-      console.error("Error de lectura DB:", error);
-      setDbError("Error de permisos en la base de datos.");
-      setIsInitializing(false);
-    });
+    }, () => { setDbError("Error de permisos."); setIsInitializing(false); });
 
+    // Operaciones
     const operacionesRef = collection(db, 'artifacts', appId, 'public', 'data', 'operaciones');
     const oUnsubscribe = onSnapshot(operacionesRef, (snapshot: any) => {
-      const operacionesData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      
-      // Ordenar: Más NUEVAS (fecha reciente) arriba. En caso de misma fecha, mayor N° de operación arriba.
-      operacionesData.sort((a: any, b: any) => {
+      const ops = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      ops.sort((a: any, b: any) => {
           const dateDiff = new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
-          if (dateDiff === 0) {
-              return Number(b.numero) - Number(a.numero);
-          }
-          return dateDiff;
+          return dateDiff === 0 ? Number(b.numero) - Number(a.numero) : dateDiff;
       });
-      setOperaciones(operacionesData);
+      setOperaciones(ops);
     });
 
-    return () => {
-      uUnsubscribe();
-      oUnsubscribe();
-    };
+    // Ofertas
+    const ofertasRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas');
+    const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot: any) => {
+      const ofs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      ofs.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+      setOfertas(ofs);
+    });
+
+    // Bóveda
+    const bovedaRef = collection(db, 'artifacts', appId, 'public', 'data', 'boveda');
+    const bovUnsubscribe = onSnapshot(bovedaRef, (snapshot: any) => {
+      const docs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      docs.sort((a: any, b: any) => Number(a.cdpNumber) - Number(b.cdpNumber));
+      setBoveda(docs);
+    });
+
+    return () => { uUnsubscribe(); oUnsubscribe(); ofUnsubscribe(); bovUnsubscribe(); };
   }, [firebaseUser]);
 
-  // 3. EVENT SOURCING: Calcular titularidad de CDPs al vuelo basándose en Operaciones
   useEffect(() => {
     if (users.length === 0) return;
-
-    // A. Encontrar al dueño base (Sergio Gabriel Argumedo Rosello) o usar ID de fallback
-    let baseOwnerId = "base_owner_sergio"; // ID Virtual
+    let baseOwnerId = "base_owner_sergio";
     const sergio = users.find(u => u.nombres?.toLowerCase().includes("sergio") && u.apellidos?.toLowerCase().includes("argumedo"));
-    if (sergio) {
-      baseOwnerId = sergio.id;
-    }
+    if (sergio) baseOwnerId = sergio.id;
 
-    // B. Crear mapa base: Los 413 CDPs son de Sergio
     let ownershipMap: Record<number, string> = {};
-    for (let i = 1; i <= TOTAL_CDPS; i++) {
-        ownershipMap[i] = baseOwnerId;
-    }
+    for (let i = 1; i <= TOTAL_CDPS; i++) ownershipMap[i] = baseOwnerId;
 
-    // C. Replicar la historia: Ordenar operaciones de más VIEJAS a más NUEVAS para aplicar el traspaso
     const chronologicalOps = [...operaciones].sort((a, b) => {
         const dateDiff = new Date(a.fecha).getTime() - new Date(b.fecha).getTime();
-        if (dateDiff === 0) return Number(a.numero) - Number(b.numero);
-        return dateDiff;
+        return dateDiff === 0 ? Number(a.numero) - Number(b.numero) : dateDiff;
     });
 
-    // D. Traspasar titularidad a medida que avanzan las operaciones
     chronologicalOps.forEach(op => {
         const cdpNum = Number(op.cdpNumber);
-        if (cdpNum >= 1 && cdpNum <= TOTAL_CDPS && op.compradorId) {
-            ownershipMap[cdpNum] = op.compradorId;
-        }
+        if (cdpNum >= 1 && cdpNum <= TOTAL_CDPS && op.compradorId) ownershipMap[cdpNum] = op.compradorId;
     });
 
-    // E. Convertir a Array para que la app lo consuma
-    const newComputedCdps = Object.keys(ownershipMap).map(numStr => ({
-        id: `cdp_${numStr}`,
-        number: Number(numStr),
-        ownerId: ownershipMap[Number(numStr)]
-    }));
-
-    setComputedCdps(newComputedCdps);
+    setComputedCdps(Object.keys(ownershipMap).map(numStr => ({ id: `cdp_${numStr}`, number: Number(numStr), ownerId: ownershipMap[Number(numStr)] })));
   }, [users, operaciones]);
 
-  // 4. Restaurar Sesión
   useEffect(() => {
     if (isDbReady && isInitializing) {
       const sessionId = sessionStorage.getItem(SESSION_KEY);
@@ -1017,96 +1179,28 @@ export default function App() {
     }
   }, [isDbReady, users, isInitializing]);
 
-  // Funciones de Base de Datos para Usuarios
-  const handleRegisterUser = async (newUser: any) => {
-    try {
-      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', newUser.id), newUser);
-    } catch (e) { console.error(e); }
-  };
+  const handleRegisterUser = async (newUser: any) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', newUser.id), newUser); } catch (e) {} };
+  const handleUpdateUser = async (id: string, data: any) => { try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id), data); } catch (e) {} };
+  const handleDeleteUser = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id)); } catch (e) {} };
 
-  const handleUpdateUser = async (id: string, data: any) => {
-    try {
-      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id), data);
-    } catch (e) { console.error(e); }
-  };
+  const handleSaveOperacion = async (data: any) => { try { const id = data.id || `op_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
+  const handleDeleteOperacion = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', id)); } catch (e) {} };
 
-  const handleDeleteUser = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id));
-    } catch (e) { console.error(e); }
-  };
+  const handleSaveOferta = async (data: any) => { try { const id = data.id || `of_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
+  const handleDeleteOferta = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas', id)); } catch (e) {} };
 
-  // Funciones para Operaciones
-  const handleSaveOperacion = async (data: any) => {
-    try {
-      const opId = data.id || `op_${Date.now()}`;
-      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', opId), {
-        ...data,
-        id: opId,
-        updatedAt: new Date().toISOString()
-      });
-    } catch (e) { console.error("Error al guardar operación", e); }
-  };
-
-  const handleDeleteOperacion = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', id));
-    } catch (e) { console.error("Error al eliminar operación", e); }
-  };
+  const handleSaveBoveda = async (data: any) => { try { const id = data.id || `doc_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
+  const handleDeleteBoveda = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id)); } catch (e) {} };
 
   const showGlobalMessage = (type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
-    setModalConfig({
-      isOpen: true, type, title, message, confirmText, cancelText: "Cancelar",
-      onConfirm: () => {
-        setModalConfig((prev: any) => ({ ...prev, isOpen: false }));
-        if (onConfirmCallback) onConfirmCallback();
-      },
-      onCancel: () => {
-        setModalConfig((prev: any) => ({ ...prev, isOpen: false }));
-        if (onCancelCallback) onCancelCallback();
-      },
-    });
+    setModalConfig({ isOpen: true, type, title, message, confirmText, cancelText: "Cancelar", onConfirm: () => { setModalConfig((prev: any) => ({ ...prev, isOpen: false })); if (onConfirmCallback) onConfirmCallback(); }, onCancel: () => { setModalConfig((prev: any) => ({ ...prev, isOpen: false })); if (onCancelCallback) onCancelCallback(); } });
   };
 
-  const handleLogout = () => {
-    showGlobalMessage("confirm", "Cerrar Sesión", "¿Estás seguro de que deseas salir de tu cuenta?", () => {
-      sessionStorage.removeItem(SESSION_KEY);
-      setCurrentUser(null);
-      setCurrentView("login");
-    });
-  };
+  const handleLogout = () => { showGlobalMessage("confirm", "Cerrar Sesión", "¿Estás seguro de que deseas salir de tu cuenta?", () => { sessionStorage.removeItem(SESSION_KEY); setCurrentUser(null); setCurrentView("login"); }); };
 
-  // PANTALLAS DE CARGA O ERROR
-  if (!firebaseConfig) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', fontFamily: 'sans-serif' }}>
-        <h2 style={{ color: '#d97706', fontSize: '1.5rem', fontWeight: 'bold' }}>¡Casi listo para la Nube!</h2>
-        <p style={{ color: '#92400e' }}>Configura Firebase en el código.</p>
-      </div>
-    );
-  }
-
-  if (dbError) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', fontFamily: 'sans-serif' }}>
-        <h2 style={{ color: '#dc2626', fontSize: '1.5rem', fontWeight: 'bold' }}>Error de conexión</h2>
-        <p style={{ color: '#991b1b', marginBottom: '1rem' }}>{dbError}</p>
-        <button onClick={() => window.location.reload()} style={{ padding: '0.75rem 1.5rem', backgroundColor: '#dc2626', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>Reintentar conexión</button>
-      </div>
-    );
-  }
-
-  // SOLUCIÓN AL "CÍRCULO NEGRO": Estilos nativos de CSS
-  if (isInitializing || !isDbReady) {
-    return (
-      <div style={{ display: 'flex', height: '100vh', width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', color: '#64748b', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontWeight: 600, fontSize: '1.125rem', marginBottom: '0.5rem', color: '#7c3aed' }}>Mercado de CDP</div>
-          <p style={{ fontSize: '0.875rem' }}>Conectando de forma segura con la Nube...</p>
-        </div>
-      </div>
-    );
-  }
+  if (!firebaseConfig) return <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}><h2 style={{ color: '#d97706', fontSize: '1.5rem', fontWeight: 'bold' }}>¡Casi listo!</h2></div>;
+  if (dbError) return <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}><h2 style={{ color: '#dc2626', fontSize: '1.5rem', fontWeight: 'bold' }}>Error de conexión</h2><button onClick={() => window.location.reload()}>Reintentar</button></div>;
+  if (isInitializing || !isDbReady) return <div style={{ display: 'flex', height: '100vh', width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', color: '#64748b' }}><div><div style={{ fontWeight: 600, fontSize: '1.125rem', marginBottom: '0.5rem', color: '#7c3aed' }}>Mercado de CDP</div><p style={{ fontSize: '0.875rem' }}>Conectando de forma segura con la Nube...</p></div></div>;
 
   return (
     <>
@@ -1114,7 +1208,7 @@ export default function App() {
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={computedCdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} setView={setCurrentView} handleLogout={handleLogout} />}
-      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </>
   );
