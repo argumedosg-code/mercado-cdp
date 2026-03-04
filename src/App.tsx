@@ -263,8 +263,8 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
 
   const width = 800;
   const height = 400;
-  const paddingX = simplified ? 40 : 60;
-  const paddingY = simplified ? 40 : 80;
+  const paddingX = simplified ? 45 : 60;
+  const paddingY = simplified ? 45 : 80;
 
   const dataMinY = Math.min(...data.map((d:any) => d.monto));
   const dataMaxY = Math.max(...data.map((d:any) => d.monto));
@@ -289,7 +289,7 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
   if (usedYStep > 0) { for(let y = usedYMin; y <= usedYMax; y += usedYStep) yLines.push(y); }
 
   const xLines = [];
-  if (usedXStepMs > 0 && !simplified) { for(let x = usedXMin; x <= usedXMax; x += usedXStepMs) xLines.push(x); }
+  if (usedXStepMs > 0) { for(let x = usedXMin; x <= usedXMax; x += usedXStepMs) xLines.push(x); }
 
   const pointsStr = data.map((d:any) => `${getX(d.dateMs)},${getY(d.monto)}`).join(" ");
 
@@ -345,6 +345,11 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
       <div className="flex-1 flex items-center justify-center overflow-hidden w-full h-full relative p-2">
          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto max-h-full min-w-[500px]">
            
+           {/* Título dentro del gráfico */}
+           <text x={width / 2} y={simplified ? 25 : 30} textAnchor="middle" className={`font-bold fill-slate-300 ${simplified ? 'text-sm' : 'text-lg'}`}>
+              Precio de los CDP y fecha de operación
+           </text>
+
            {/* Eje Y */}
            {yLines.map((val, idx) => {
                const y = getY(val);
@@ -352,20 +357,30 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                return (
                    <g key={`y-${idx}`}>
                      <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#334155" strokeDasharray="4 4" />
-                     <text x={paddingX - 10} y={y + 4} textAnchor="end" className="text-xs fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
+                     <text x={paddingX - 10} y={y + 4} textAnchor="end" className="text-[10px] fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
                    </g>
                )
            })}
 
-           {/* Eje X */}
-           {!simplified && xLines.map((val, idx) => {
+           {/* Eje X (Modificado para mostrarse en simplificado también) */}
+           {xLines.map((val, idx) => {
                const x = getX(val);
                if(x < paddingX || x > width - paddingX) return null;
-               const dateStr = formatDateForDisplay(new Date(val).toISOString().split('T')[0]);
+               const dateObj = new Date(val);
+               // Si es simplificado solo muestra el año, sino la fecha completa
+               const dateStr = simplified ? dateObj.getFullYear().toString() : formatDateForDisplay(dateObj.toISOString().split('T')[0]);
                return (
                    <g key={`x-${idx}`}>
                       <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke="#1e293b" />
-                      <text x={x} y={height - 20} textAnchor="end" className="text-[10px] fill-slate-500 font-mono font-bold" transform={`rotate(-45 ${x} ${height - 20})`}>{dateStr}</text>
+                      <text 
+                        x={x} 
+                        y={height - (simplified ? 15 : 20)} 
+                        textAnchor={simplified ? "middle" : "end"} 
+                        className={`fill-slate-500 font-mono font-bold ${simplified ? 'text-xs' : 'text-[10px]'}`} 
+                        transform={simplified ? "" : `rotate(-45 ${x} ${height - 20})`}
+                      >
+                        {dateStr}
+                      </text>
                    </g>
                )
            })}
@@ -449,7 +464,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v37</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v38</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -617,7 +632,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
           {/* COLUMNA DERECHA (Mercado, Bóveda, CDPs) */}
           <div className="lg:col-span-8 space-y-6">
             
-            {/* SECCIÓN 1: MERCADO ACTIVO (GRILLA 3x3 ESTRICTA BLOQUEADA) */}
+            {/* SECCIÓN 1: MERCADO ACTIVO (GRILLA 3x3 ESTRICTA BLOQUEADA CON BOTONES ALTOS) */}
             <Card className="p-6 bg-slate-100/50">
               <div className="mb-6 border-b border-slate-200 pb-4">
                   <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
@@ -626,41 +641,38 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                   <p className="text-slate-600 mt-1 font-medium">Precios, Tendencias, Ofertas de Compra y Venta (Valores USD)</p>
               </div>
               
-              {/* Contenedor principal con altura máxima estricta para forzar la grilla y el scroll */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_120px] gap-4 lg:h-[600px]">
+              {/* Contenedor principal: 180px para la fila de los botones inferiores hace que el gráfico sea más bajo */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_180px] gap-4 lg:h-[600px]">
                 
-                {/* Cuadrante: Gráfico (2 columnas x 2 filas, h-full lo restringe a las 2 filas sin expandirse) */}
+                {/* Cuadrante: Gráfico (2 columnas x 2 filas) */}
                 <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 overflow-hidden shadow-sm h-full bg-white flex flex-col">
                    <MarketChart operaciones={operaciones} simplified={true} savedConfig={chartConfigData} />
                 </div>
 
                 {/* Cuadrante: Ofertas (1 columna x 3 filas, funciona como ventana scrolleable) */}
                 <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
-                   <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Compra</h4>
+                   <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Venta</h4>
                    
-                   {/* Scroll Window para las tarjetas de Ofertas */}
-                   <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+                   {/* Scroll Window para las tarjetas de Ofertas (Ajustado para que entren 5) */}
+                   <div className="overflow-y-auto space-y-2.5 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                       {ofertasOrdenadas.length > 0 ? (
                         ofertasOrdenadas.map((of: any) => (
-                          <div key={of.id} className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-5 shadow-sm hover:shadow-md hover:border-violet-300 transition-all flex flex-col items-center relative overflow-hidden group">
+                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col gap-1.5 group relative overflow-hidden">
                              
-                             <div className="absolute top-0 w-full bg-violet-100 text-center py-1 group-hover:bg-violet-600 transition-colors">
-                               <span className="text-[10px] font-black text-violet-800 group-hover:text-white uppercase tracking-widest">Oferta de Venta</span>
+                             <div className="flex justify-between items-center">
+                               <div className="flex items-center gap-2">
+                                 <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200">Oferta de Venta</span>
+                                 <span className="text-xs font-bold text-slate-600">CDP {of.cdpNumber}</span>
+                               </div>
+                               <span className="flex items-center gap-1 text-[9px] font-bold text-red-500 uppercase">
+                                  <IconClock className="w-3 h-3" /> Vence {formatDateForDisplay(of.vencimiento)}
+                               </span>
                              </div>
 
-                             <div className="mt-6 text-center">
-                               <span className="block font-black text-slate-800 text-lg">CDP {of.cdpNumber}</span>
+                             <div className="flex justify-between items-end mt-1">
+                               <span className="text-xl font-black text-slate-800">USD {Number(of.monto).toLocaleString()}</span>
                              </div>
 
-                             <div className="mt-1 text-center">
-                                <span className="text-2xl font-black text-slate-800 block">USD {Number(of.monto).toLocaleString()}</span>
-                             </div>
-
-                             <div className="mt-3 w-full flex justify-center">
-                                <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded-md uppercase border border-red-100">
-                                   <IconClock className="w-3 h-3" /> Vence {formatDateForDisplay(of.vencimiento)}
-                                </span>
-                             </div>
                           </div>
                         ))
                       ) : (
@@ -674,18 +686,17 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
 
                 {/* Cuadrante: Botón Compra (1 columna x 1 fila) */}
                 <div className="lg:col-span-1 lg:row-span-1 h-full">
-                   {/* Usamos botón personalizado para asegurar el Flex Column vertical y el tamaño exacto */}
-                   <button className="w-full h-full min-h-[100px] flex flex-col items-center justify-center gap-2 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl">
-                     <IconShoppingCart className="w-8 h-8 text-violet-600" />
-                     <span className="text-sm font-bold text-center leading-tight">Hacer oferta de<br/>compra de CDP</span>
+                   <button className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl group">
+                     <IconShoppingCart className="w-10 h-10 text-violet-600 group-hover:scale-110 transition-transform" />
+                     <span className="text-base font-bold text-center leading-tight">Hacer oferta de<br/>compra de CDP</span>
                    </button>
                 </div>
 
                 {/* Cuadrante: Botón Venta (1 columna x 1 fila) */}
                 <div className="lg:col-span-1 lg:row-span-1 h-full">
-                   <button className="w-full h-full min-h-[100px] flex flex-col items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white transition-colors shadow-md shadow-violet-500/30 rounded-2xl">
-                     <IconTag className="w-8 h-8 text-white" />
-                     <span className="text-sm font-bold text-center leading-tight">Hacer oferta de<br/>Venta de CDP</span>
+                   <button className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-violet-600 hover:bg-violet-700 text-white transition-colors shadow-md shadow-violet-500/30 rounded-2xl group">
+                     <IconTag className="w-10 h-10 text-white group-hover:scale-110 transition-transform" />
+                     <span className="text-base font-bold text-center leading-tight">Hacer oferta de<br/>Venta de CDP</span>
                    </button>
                 </div>
 
