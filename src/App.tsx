@@ -225,7 +225,7 @@ const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) =>
 };
 
 // ==========================================
-// COMPONENTE: GRÁFICO DE MERCADO 
+// COMPONENTE: GRÁFICO DE MERCADO (+20% Textos)
 // ==========================================
 const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSaveConfig = null, showGlobalMessage = null }: any) => {
   const [hoveredPoint, setHoveredPoint] = useState<any>(null);
@@ -263,8 +263,8 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
 
   const width = 800;
   const height = 400;
-  const paddingX = simplified ? 45 : 60;
-  // REDUCIDO: Recortamos los márgenes verticales vacíos para que la curva use más espacio del gráfico.
+  // Aumentamos ligerísimamente el padding horizontal para que los textos más grandes (eje Y) entren bien
+  const paddingX = simplified ? 55 : 70;
   const paddingY = simplified ? 25 : 50;
 
   const dataMinY = Math.min(...data.map((d:any) => d.monto));
@@ -342,28 +342,28 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
         </div>
       )}
 
-      {/* SVG Container: Expande 100% de la altura restante */}
+      {/* SVG Container */}
       <div className="flex-1 flex items-center justify-center overflow-hidden w-full h-full relative p-2">
          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto max-h-full min-w-[500px]">
            
-           {/* Título dentro del gráfico (+30% fuente) */}
-           <text x={width / 2} y={simplified ? 18 : 25} textAnchor="middle" className={`font-bold fill-slate-300 ${simplified ? 'text-lg' : 'text-2xl'}`}>
+           {/* Título dentro del gráfico (+20% respecto a v40) */}
+           <text x={width / 2} y={simplified ? 18 : 25} textAnchor="middle" className={`font-bold fill-slate-300 ${simplified ? 'text-[22px]' : 'text-[28px]'}`}>
               Precio de los CDP y fecha de operación
            </text>
 
-           {/* Eje Y (+30% fuente) */}
+           {/* Eje Y (+20% respecto a v40) */}
            {yLines.map((val, idx) => {
                const y = getY(val);
                if(y < 0 || y > height) return null;
                return (
                    <g key={`y-${idx}`}>
                      <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#334155" strokeDasharray="4 4" />
-                     <text x={paddingX - 10} y={y + 5} textAnchor="end" className="text-[13px] fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
+                     <text x={paddingX - 10} y={y + 5} textAnchor="end" className="text-[16px] fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
                    </g>
                )
            })}
 
-           {/* Eje X (+30% fuente) */}
+           {/* Eje X (+20% respecto a v40) */}
            {xLines.map((val, idx) => {
                const x = getX(val);
                if(x < paddingX || x > width - paddingX) return null;
@@ -374,9 +374,9 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                       <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke="#1e293b" />
                       <text 
                         x={x} 
-                        y={height - (simplified ? 8 : 12)} 
+                        y={height - (simplified ? 5 : 10)} 
                         textAnchor={simplified ? "middle" : "end"} 
-                        className={`fill-slate-500 font-mono font-bold ${simplified ? 'text-[13px]' : 'text-sm'}`} 
+                        className={`fill-slate-500 font-mono font-bold ${simplified ? 'text-[16px]' : 'text-[17px]'}`} 
                         transform={simplified ? "" : `rotate(-45 ${x} ${height - 15})`}
                       >
                         {dateStr}
@@ -418,13 +418,13 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                )
            })}
 
-           {/* Tooltip Dinámico (Textos agrandados un +30% y caja ajustada) */}
+           {/* Tooltip Dinámico (Textos agrandados un +20% y caja ensanchada) */}
            {hoveredPoint && (
-               <g transform={`translate(${hoveredPoint.x}, ${Math.max(50, hoveredPoint.y - 55)})`} className="pointer-events-none transition-all duration-100 ease-out">
-                   <rect x="-80" y="-45" width="160" height="55" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
+               <g transform={`translate(${hoveredPoint.x}, ${Math.max(65, hoveredPoint.y - 65)})`} className="pointer-events-none transition-all duration-100 ease-out">
+                   <rect x="-95" y="-55" width="190" height="65" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
                    <polygon points="-8,10 8,10 0,18" fill="#ffffff" />
-                   <text x="0" y="-22" textAnchor="middle" fill="#0f172a" className="text-[16px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
-                   <text x="0" y="0" textAnchor="middle" fill="#64748b" className="text-[13px] font-mono font-bold">{hoveredPoint.fechaStr}</text>
+                   <text x="0" y="-25" textAnchor="middle" fill="#0f172a" className="text-[20px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
+                   <text x="0" y="2" textAnchor="middle" fill="#64748b" className="text-[16px] font-mono font-bold">{hoveredPoint.fechaStr}</text>
                </g>
            )}
          </svg>
@@ -464,7 +464,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v40</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v41</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -641,48 +641,46 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                   <p className="text-slate-600 mt-1 font-medium">Precios, Tendencias, Ofertas de Compra y Venta (Valores USD)</p>
               </div>
               
-              {/* Contenedor principal: Altura reducida lg:h-[520px] */}
               <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_180px] gap-4 lg:h-[520px]">
                 
-                {/* Cuadrante: Gráfico (2 columnas x 2 filas) */}
+                {/* Cuadrante: Gráfico */}
                 <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 overflow-hidden shadow-sm h-full bg-white flex flex-col">
                    <MarketChart operaciones={operaciones} simplified={true} savedConfig={chartConfigData} />
                 </div>
 
-                {/* Cuadrante: Ofertas (1 columna x 3 filas, funciona como ventana scrolleable) */}
+                {/* Cuadrante: Ofertas */}
                 <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
                    <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Venta</h4>
                    
                    {/* Scroll Window para las tarjetas de Ofertas */}
-                   <div className="overflow-y-auto space-y-2.5 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+                   <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                       {ofertasOrdenadas.length > 0 ? (
                         ofertasOrdenadas.map((of: any) => (
-                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all grid grid-cols-2 gap-y-3 group relative overflow-hidden items-center">
+                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col gap-3 group relative overflow-hidden">
                              
-                             {/* Cuadrante Superior Izquierdo */}
-                             <div className="flex justify-start">
-                               <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200">
+                             {/* Fila Superior: Flexbox para empujar elementos a los bordes */}
+                             <div className="flex justify-between items-start gap-2">
+                               {/* Etiqueta Oferta (w-fit y sin margen extra) */}
+                               <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap">
                                  Oferta de Venta
                                </span>
-                             </div>
-
-                             {/* Cuadrante Superior Derecho: Centrado en la columna */}
-                             <div className="flex justify-center">
-                               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase">
-                                  <IconClock className="w-3 h-3" /> Vence {formatDateForDisplay(of.vencimiento)}
+                               
+                               {/* Fecha de Vencimiento (Alineada a la derecha) */}
+                               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mt-0.5">
+                                  <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
                                </span>
                              </div>
 
-                             {/* Cuadrante Inferior Izquierdo: Precio (+10% tamaño) */}
-                             <div className="flex justify-start">
-                               <span className="text-[22px] font-black text-slate-800 leading-none">
-                                 USD {Number(of.monto).toLocaleString()}
-                               </span>
-                             </div>
-
-                             {/* Cuadrante Inferior Derecho: CDP en cajita azul centrado en la columna */}
-                             <div className="flex justify-center">
-                               <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest">
+                             {/* Fila Inferior: Flexbox para alinear Precio y CDP */}
+                             <div className="flex justify-between items-end gap-2">
+                               {/* Precio en un solo renglón, U$S al 50% de tamaño */}
+                               <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
+                                 <span className="text-[11px] font-black">U$S</span>
+                                 <span className="text-[22px] font-black leading-none">{Number(of.monto).toLocaleString()}</span>
+                               </div>
+                               
+                               {/* Recuadro Azul para CDP */}
+                               <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">
                                  CDP {of.cdpNumber}
                                </span>
                              </div>
@@ -698,7 +696,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    </div>
                 </div>
 
-                {/* Cuadrante: Botón Compra (1 columna x 1 fila) */}
+                {/* Cuadrante: Botón Compra */}
                 <div className="lg:col-span-1 lg:row-span-1 h-full">
                    <button className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl group">
                      <IconShoppingCart className="w-10 h-10 text-violet-600 group-hover:scale-110 transition-transform" />
@@ -706,7 +704,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    </button>
                 </div>
 
-                {/* Cuadrante: Botón Venta (1 columna x 1 fila) */}
+                {/* Cuadrante: Botón Venta */}
                 <div className="lg:col-span-1 lg:row-span-1 h-full">
                    <button className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-violet-600 hover:bg-violet-700 text-white transition-colors shadow-md shadow-violet-500/30 rounded-2xl group">
                      <IconTag className="w-10 h-10 text-white group-hover:scale-110 transition-transform" />
