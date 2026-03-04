@@ -60,6 +60,7 @@ const IconFolder = (props: any) => <SvgIcon {...props}><path d="M22 19a2 2 0 0 1
 const IconTrendingUp = (props: any) => <SvgIcon {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></SvgIcon>;
 const IconExternalLink = (props: any) => <SvgIcon {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></SvgIcon>;
 const IconClock = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></SvgIcon>;
+const IconSave = (props: any) => <SvgIcon {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
@@ -158,14 +159,12 @@ const Card = ({ children, className = "" }: any) => (
 
 const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confirmText = "Aceptar", cancelText = "Cancelar" }: any) => {
   if (!isOpen) return null;
-
   const icons: any = {
     success: <IconCheckCircle className="w-12 h-12 text-green-500" />,
     error: <IconAlertCircle className="w-12 h-12 text-red-500" />,
     info: <IconInfo className="w-12 h-12 text-violet-500" />,
     confirm: <IconAlertCircle className="w-12 h-12 text-amber-500" />,
   };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={type === "confirm" ? onCancel : onConfirm}></div>
@@ -182,7 +181,6 @@ const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confir
   );
 };
 
-// Modales de Administración omitidos visualmente en este bloque por brevedad (se mantienen funcionales abajo)
 const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ ...user });
   const [isLoading, setIsLoading] = useState(false);
@@ -226,51 +224,49 @@ const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) =>
 };
 
 // ==========================================
-// COMPONENTE: GRÁFICO DE MERCADO (Mejorado v35)
+// COMPONENTE: GRÁFICO DE MERCADO 
 // ==========================================
-const MarketChart = ({ operaciones, simplified = false }: any) => {
+const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSaveConfig = null, showGlobalMessage = null }: any) => {
   const [hoveredPoint, setHoveredPoint] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
-  // Configuraciones manuales de los ejes
-  const [config, setConfig] = useState({
-     filterYear: "Todos",
-     yMin: "", yMax: "", yStep: "",
-     xMin: "", xMax: "", xStep: "30" // 30 días por defecto de salto
-  });
+  const defaultConfig = { filterYear: "Todos", yMin: "", yMax: "", yStep: "", xMin: "", xMax: "", xStep: "30" };
+  const [localConfig, setLocalConfig] = useState(savedConfig || defaultConfig);
+
+  // Sincronizar si entran props nuevas desde la nube (útil para el Admin cuando carga)
+  useEffect(() => {
+    if (savedConfig) setLocalConfig(savedConfig);
+  }, [savedConfig]);
+
+  // Si estamos en vista simplificada (Dashboard Fiduciante), usamos estrictamente lo guardado en la nube.
+  const activeConfig = simplified ? (savedConfig || defaultConfig) : localConfig;
 
   const opsConMonto = operaciones.filter((op:any) => op.monto && op.fecha && !isNaN(Number(op.monto)));
   const aniosDisponibles = ["Todos", ...Array.from(new Set(opsConMonto.map((op:any) => op.fecha.substring(0,4)))).sort().reverse()];
 
-  const dataFiltrada = config.filterYear === "Todos"
+  const dataFiltrada = activeConfig.filterYear === "Todos"
       ? opsConMonto
-      : opsConMonto.filter((op:any) => op.fecha.startsWith(config.filterYear));
+      : opsConMonto.filter((op:any) => op.fecha.startsWith(activeConfig.filterYear));
 
   const data = dataFiltrada
-      .map((op:any) => ({
-          dateMs: new Date(op.fecha + "T00:00:00").getTime(),
-          monto: Number(op.monto),
-          fechaStr: formatDateForDisplay(op.fecha),
-          id: op.id
-      }))
+      .map((op:any) => ({ dateMs: new Date(op.fecha + "T00:00:00").getTime(), monto: Number(op.monto), fechaStr: formatDateForDisplay(op.fecha), id: op.id }))
       .sort((a:any, b:any) => a.dateMs - b.dateMs);
 
   if (data.length < 2) {
       return (
-        <Card className="text-center py-16 bg-slate-50 border-2 border-dashed border-slate-200">
-           <IconTrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl min-h-[300px]">
+           <IconTrendingUp className="w-12 h-12 text-slate-300 mb-4" />
            <h3 className="text-lg font-bold text-slate-600">Datos Insuficientes</h3>
-           <p className="text-slate-500 mt-2">Se requieren al menos 2 operaciones registradas para trazar la curva.</p>
-        </Card>
+           <p className="text-slate-500 mt-2 text-center text-sm">Se requieren al menos 2 operaciones para trazar la curva.</p>
+        </div>
       );
   }
 
-  // Dimensiones SVG
   const width = 800;
   const height = 400;
   const paddingX = simplified ? 40 : 60;
-  const paddingY = simplified ? 40 : 80; // Extra padding for rotated text
+  const paddingY = simplified ? 40 : 80;
 
-  // Límites auto-calculados (Fallback)
   const dataMinY = Math.min(...data.map((d:any) => d.monto));
   const dataMaxY = Math.max(...data.map((d:any) => d.monto));
   const rangeYData = dataMaxY - dataMinY || 100;
@@ -279,146 +275,146 @@ const MarketChart = ({ operaciones, simplified = false }: any) => {
   const dataMaxX = data[data.length - 1].dateMs;
   const rangeXData = dataMaxX - dataMinX || 86400000;
 
-  // Aplicar Configuración o Fallbacks
-  const usedYMin = config.yMin !== "" ? Number(config.yMin) : Math.max(0, dataMinY - rangeYData * 0.1);
-  const usedYMax = config.yMax !== "" ? Number(config.yMax) : dataMaxY + rangeYData * 0.1;
-  const usedYStep = config.yStep !== "" ? Number(config.yStep) : (usedYMax - usedYMin) / 4;
+  const usedYMin = activeConfig.yMin !== "" ? Number(activeConfig.yMin) : Math.max(0, dataMinY - rangeYData * 0.1);
+  const usedYMax = activeConfig.yMax !== "" ? Number(activeConfig.yMax) : dataMaxY + rangeYData * 0.1;
+  const usedYStep = activeConfig.yStep !== "" ? Number(activeConfig.yStep) : (usedYMax - usedYMin) / 4;
 
-  const usedXMin = config.xMin !== "" ? new Date(config.xMin + "T00:00:00").getTime() : dataMinX;
-  const usedXMax = config.xMax !== "" ? new Date(config.xMax + "T00:00:00").getTime() : dataMaxX;
-  const usedXStepMs = config.xStep !== "" ? Math.max(1, Number(config.xStep)) * 86400000 : rangeXData / 4;
+  const usedXMin = activeConfig.xMin !== "" ? new Date(activeConfig.xMin + "T00:00:00").getTime() : dataMinX;
+  const usedXMax = activeConfig.xMax !== "" ? new Date(activeConfig.xMax + "T00:00:00").getTime() : dataMaxX;
+  const usedXStepMs = activeConfig.xStep !== "" ? Math.max(1, Number(activeConfig.xStep)) * 86400000 : rangeXData / 4;
 
   const getX = (dateMs: number) => paddingX + ((dateMs - usedXMin) / (usedXMax - usedXMin || 1)) * (width - paddingX * 2);
   const getY = (monto: number) => height - paddingY - ((monto - usedYMin) / (usedYMax - usedYMin || 1)) * (height - paddingY * 2);
 
-  // Líneas Guía Y
   const yLines = [];
-  if (usedYStep > 0) {
-      for(let y = usedYMin; y <= usedYMax; y += usedYStep) yLines.push(y);
-  }
+  if (usedYStep > 0) { for(let y = usedYMin; y <= usedYMax; y += usedYStep) yLines.push(y); }
 
-  // Líneas Guía X
   const xLines = [];
-  if (usedXStepMs > 0 && !simplified) {
-      for(let x = usedXMin; x <= usedXMax; x += usedXStepMs) xLines.push(x);
-  }
+  if (usedXStepMs > 0 && !simplified) { for(let x = usedXMin; x <= usedXMax; x += usedXStepMs) xLines.push(x); }
 
   const pointsStr = data.map((d:any) => `${getX(d.dateMs)},${getY(d.monto)}`).join(" ");
 
-  const handleChangeConfig = (e: any) => setConfig({ ...config, [e.target.name]: e.target.value });
+  const handleChangeConfig = (e: any) => setLocalConfig({ ...localConfig, [e.target.name]: e.target.value });
+
+  const handleSave = async () => {
+    if (onSaveConfig) {
+      setIsSaving(true);
+      await onSaveConfig(localConfig);
+      setIsSaving(false);
+      if (showGlobalMessage) showGlobalMessage("success", "Configuración Guardada", "El gráfico se ha calibrado y ya es visible para todos los fiduciantes.");
+    }
+  };
 
   return (
-    <div className="animate-in fade-in duration-300">
-      
-      {/* Controles del Gráfico (Ocultos en vista simplificada) */}
+    <div className="animate-in fade-in duration-300 h-full flex flex-col w-full relative">
       {!simplified && (
-        <>
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-slate-800">Evolución de Precios (USD)</h2>
-            <p className="text-slate-500 mt-1">Análisis visual del mercado secundario de CDPs.</p>
+        <div className="p-4">
+          <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800">Evolución de Precios (USD)</h2>
+              <p className="text-slate-500 mt-1">Análisis visual del mercado secundario de CDPs.</p>
+            </div>
+            <Button onClick={handleSave} isLoading={isSaving} icon={IconSave} className="!py-2 !px-4 text-sm whitespace-nowrap shadow-sm">Guardar Cambios</Button>
           </div>
           
-          <div className="flex flex-wrap items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-sm">
+          <div className="flex flex-wrap items-center gap-4 mb-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-sm">
             <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
                <IconTrendingUp className="w-5 h-5 text-slate-400" />
-               <select name="filterYear" value={config.filterYear} onChange={handleChangeConfig} className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 font-bold outline-none focus:ring-2 focus:ring-violet-500">
+               <select name="filterYear" value={localConfig.filterYear} onChange={handleChangeConfig} className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 font-bold outline-none focus:ring-2 focus:ring-violet-500">
                   {aniosDisponibles.map((a:any) => <option key={a} value={a}>{a}</option>)}
                </select>
             </div>
             
             <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
                <span className="font-bold text-slate-700">Eje Y (USD):</span>
-               <input type="number" name="yMin" placeholder="Mín" value={config.yMin} onChange={handleChangeConfig} className="w-16 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Valor Mínimo (USD)" />
-               <input type="number" name="yMax" placeholder="Máx" value={config.yMax} onChange={handleChangeConfig} className="w-16 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Valor Máximo (USD)" />
-               <input type="number" name="yStep" placeholder="Intervalo" value={config.yStep} onChange={handleChangeConfig} className="w-20 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Salto entre líneas (USD)" />
+               <input type="number" name="yMin" placeholder="Mín" value={localConfig.yMin} onChange={handleChangeConfig} className="w-16 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Valor Mínimo (USD)" />
+               <input type="number" name="yMax" placeholder="Máx" value={localConfig.yMax} onChange={handleChangeConfig} className="w-16 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Valor Máximo (USD)" />
+               <input type="number" name="yStep" placeholder="Salto" value={localConfig.yStep} onChange={handleChangeConfig} className="w-16 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Salto entre líneas (USD)" />
             </div>
 
             <div className="flex items-center gap-2">
                <span className="font-bold text-slate-700">Eje X (Fechas):</span>
-               <input type="date" name="xMin" value={config.xMin} onChange={handleChangeConfig} className="w-[120px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Fecha Mínima" />
-               <input type="date" name="xMax" value={config.xMax} onChange={handleChangeConfig} className="w-[120px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Fecha Máxima" />
-               <input type="number" name="xStep" placeholder="Días salto" value={config.xStep} onChange={handleChangeConfig} className="w-24 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Intervalo de días en Eje X" />
+               <input type="date" name="xMin" value={localConfig.xMin} onChange={handleChangeConfig} className="w-[115px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Fecha Mínima" />
+               <input type="date" name="xMax" value={localConfig.xMax} onChange={handleChangeConfig} className="w-[115px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Fecha Máxima" />
+               <input type="number" name="xStep" placeholder="Días" value={localConfig.xStep} onChange={handleChangeConfig} className="w-16 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Intervalo de días en Eje X" />
             </div>
           </div>
-        </>
+        </div>
       )}
 
-      {/* SVG Container */}
-      <Card className={`${simplified ? "!p-2" : "!p-4"} overflow-hidden relative group`}>
-        <div className="w-full overflow-x-auto overflow-y-hidden no-scrollbar">
-           <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-[700px] bg-slate-900 rounded-2xl overflow-hidden">
-             
-             {/* Eje Y: Líneas y Texto */}
-             {yLines.map((val, idx) => {
-                 const y = getY(val);
-                 if(y < 0 || y > height) return null;
-                 return (
-                     <g key={`y-${idx}`}>
-                       <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#334155" strokeDasharray="4 4" />
-                       <text x={paddingX - 10} y={y + 4} textAnchor="end" className="text-xs fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
-                     </g>
-                 )
-             })}
+      {/* SVG Container: Se expande para llenar el contenedor padre */}
+      <div className={`w-full h-full flex items-center justify-center overflow-x-auto overflow-y-hidden no-scrollbar bg-slate-900 ${simplified ? "rounded-2xl" : "rounded-2xl border-4 border-slate-900"}`}>
+         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-[500px] max-h-full">
+           
+           {/* Eje Y */}
+           {yLines.map((val, idx) => {
+               const y = getY(val);
+               if(y < 0 || y > height) return null;
+               return (
+                   <g key={`y-${idx}`}>
+                     <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#334155" strokeDasharray="4 4" />
+                     <text x={paddingX - 10} y={y + 4} textAnchor="end" className="text-xs fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
+                   </g>
+               )
+           })}
 
-             {/* Eje X: Líneas y Texto (Oculto en simplificado) */}
-             {!simplified && xLines.map((val, idx) => {
-                 const x = getX(val);
-                 if(x < paddingX || x > width - paddingX) return null;
-                 const dateStr = formatDateForDisplay(new Date(val).toISOString().split('T')[0]);
-                 return (
-                     <g key={`x-${idx}`}>
-                        <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke="#1e293b" />
-                        <text x={x} y={height - 20} textAnchor="end" className="text-[10px] fill-slate-500 font-mono font-bold" transform={`rotate(-45 ${x} ${height - 20})`}>{dateStr}</text>
-                     </g>
-                 )
-             })}
+           {/* Eje X */}
+           {!simplified && xLines.map((val, idx) => {
+               const x = getX(val);
+               if(x < paddingX || x > width - paddingX) return null;
+               const dateStr = formatDateForDisplay(new Date(val).toISOString().split('T')[0]);
+               return (
+                   <g key={`x-${idx}`}>
+                      <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke="#1e293b" />
+                      <text x={x} y={height - 20} textAnchor="end" className="text-[10px] fill-slate-500 font-mono font-bold" transform={`rotate(-45 ${x} ${height - 20})`}>{dateStr}</text>
+                   </g>
+               )
+           })}
 
-             {/* Línea Principal del Gráfico */}
-             <polyline points={pointsStr} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md" />
+           {/* Curva */}
+           <polyline points={pointsStr} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md" />
 
-             {/* Puntos Interactivos */}
-             {data.map((d:any, i:number) => {
-                 const cx = getX(d.dateMs);
-                 const cy = getY(d.monto);
-                 // Solo renderizar si el punto cae más o menos dentro de la vista
-                 if (cx < 0 || cx > width || cy < 0 || cy > height) return null;
-                 return (
-                 <circle
-                     key={i}
-                     cx={cx}
-                     cy={cy}
-                     r={simplified ? "4" : "6"}
-                     fill="#1e293b"
-                     stroke="#a78bfa"
-                     strokeWidth="3"
-                     className="cursor-pointer transition-all duration-300 origin-center"
-                     style={{ transformOrigin: `${cx}px ${cy}px` }}
-                     onMouseEnter={(e) => {
-                       e.currentTarget.setAttribute('r', '8');
-                       e.currentTarget.setAttribute('fill', '#8b5cf6');
-                       setHoveredPoint({ x: cx, y: cy, ...d });
-                     }}
-                     onMouseLeave={(e) => {
-                       e.currentTarget.setAttribute('r', simplified ? '4' : '6');
-                       e.currentTarget.setAttribute('fill', '#1e293b');
-                       setHoveredPoint(null);
-                     }}
-                 />
-                 )
-             })}
+           {/* Puntos Interactivos */}
+           {data.map((d:any, i:number) => {
+               const cx = getX(d.dateMs);
+               const cy = getY(d.monto);
+               if (cx < 0 || cx > width || cy < 0 || cy > height) return null;
+               return (
+               <circle
+                   key={i}
+                   cx={cx}
+                   cy={cy}
+                   r={simplified ? "4" : "6"}
+                   fill="#1e293b"
+                   stroke="#a78bfa"
+                   strokeWidth="3"
+                   className="cursor-pointer transition-all duration-300 origin-center"
+                   style={{ transformOrigin: `${cx}px ${cy}px` }}
+                   onMouseEnter={(e) => {
+                     e.currentTarget.setAttribute('r', '8');
+                     e.currentTarget.setAttribute('fill', '#8b5cf6');
+                     setHoveredPoint({ x: cx, y: cy, ...d });
+                   }}
+                   onMouseLeave={(e) => {
+                     e.currentTarget.setAttribute('r', simplified ? '4' : '6');
+                     e.currentTarget.setAttribute('fill', '#1e293b');
+                     setHoveredPoint(null);
+                   }}
+               />
+               )
+           })}
 
-             {/* Tooltip Dinámico en SVG */}
-             {hoveredPoint && (
-                 <g transform={`translate(${hoveredPoint.x}, ${Math.max(40, hoveredPoint.y - 45)})`} className="pointer-events-none transition-all duration-100 ease-out">
-                     <rect x="-65" y="-35" width="130" height="45" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
-                     <polygon points="-8,10 8,10 0,18" fill="#ffffff" />
-                     <text x="0" y="-15" textAnchor="middle" fill="#0f172a" className="text-[12px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
-                     <text x="0" y="2" textAnchor="middle" fill="#64748b" className="text-[10px] font-mono font-bold">{hoveredPoint.fechaStr}</text>
-                 </g>
-             )}
-           </svg>
-        </div>
-      </Card>
+           {/* Tooltip Dinámico */}
+           {hoveredPoint && (
+               <g transform={`translate(${hoveredPoint.x}, ${Math.max(40, hoveredPoint.y - 45)})`} className="pointer-events-none transition-all duration-100 ease-out">
+                   <rect x="-65" y="-35" width="130" height="45" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
+                   <polygon points="-8,10 8,10 0,18" fill="#ffffff" />
+                   <text x="0" y="-15" textAnchor="middle" fill="#0f172a" className="text-[12px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
+                   <text x="0" y="2" textAnchor="middle" fill="#64748b" className="text-[10px] font-mono font-bold">{hoveredPoint.fechaStr}</text>
+               </g>
+           )}
+         </svg>
+      </div>
     </div>
   );
 }
@@ -454,7 +450,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v35</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v36</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -538,11 +534,9 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
   );
 };
 
-const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, setView, handleLogout }: any) => {
+const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigData, setView, handleLogout }: any) => {
   const misCdps = cdps.filter((c: any) => c.ownerId === user.id);
   const currentRole = getUserRole(user, cdps);
-  
-  // Estado para la bóveda inteligente
   const [selectedBovedaCdp, setSelectedBovedaCdp] = useState("");
   const bovedaDocsFiltered = selectedBovedaCdp ? boveda.filter((d:any) => String(d.cdpNumber) === String(selectedBovedaCdp)) : [];
 
@@ -621,45 +615,66 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, setView, hand
           {/* COLUMNA DERECHA (Mercado, Bóveda, CDPs) */}
           <div className="lg:col-span-8 space-y-6">
             
-            {/* SECCIÓN 1: MERCADO ACTIVO */}
-            <Card className="p-6">
-              <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <IconTrendingUp className="w-6 h-6 text-violet-600" /> Mercado Activo
+            {/* SECCIÓN 1: MERCADO ACTIVO (GRILLA 3x3 ESTRICTA) */}
+            <Card className="p-6 bg-slate-100/50">
+              <div className="mb-6 border-b border-slate-200 pb-4">
+                  <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+                    <IconTrendingUp className="w-7 h-7 text-violet-600" /> Mercado Activo
                   </h3>
-                  <p className="text-sm text-slate-500 mt-1">Tendencia de precios e instrumentos en venta (Valores USD).</p>
-                </div>
+                  <p className="text-slate-600 mt-1 font-medium">Precios, Tendencias, Ofertas de Compra y Venta (Valores USD)</p>
               </div>
               
-              <div className="bg-slate-50 rounded-2xl border border-slate-200 mb-6">
-                 <MarketChart operaciones={operaciones} simplified={true} />
-              </div>
-
-              <h4 className="text-lg font-bold text-slate-800 mb-4">CDPs Disponibles para Compra</h4>
-              {ofertas.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {ofertas.map((of: any) => (
-                    <div key={of.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-violet-300 transition-all flex flex-col gap-3">
-                       <div className="flex justify-between items-center">
-                          <span className="bg-violet-100 text-violet-700 font-black text-xs px-2.5 py-1 rounded-lg">CDP {of.cdpNumber}</span>
-                          <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded-lg uppercase">
-                             <IconClock className="w-3 h-3" /> Vence: {formatDateForDisplay(of.vencimiento)}
-                          </span>
-                       </div>
-                       <div className="text-center py-2">
-                          <span className="text-xs text-slate-400 font-bold uppercase tracking-widest block mb-1">Valor Solicitado</span>
-                          <span className="text-2xl font-black text-slate-800">USD {Number(of.monto).toLocaleString()}</span>
-                       </div>
-                    </div>
-                  ))}
+              {/* Estructura CSS Grid: 3 Columnas, 3 Filas */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_auto] gap-4">
+                
+                {/* Cuadrante: Gráfico (2 columnas x 2 filas, arriba a la izquierda) */}
+                <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 min-h-[300px] overflow-hidden shadow-sm">
+                   <MarketChart operaciones={operaciones} simplified={true} savedConfig={chartConfigData} />
                 </div>
-              ) : (
-                 <div className="text-center py-8 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                    <IconTag className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-slate-500 text-sm font-medium">No hay ofertas de venta publicadas en este momento.</p>
-                 </div>
-              )}
+
+                {/* Cuadrante: Ofertas (1 columna x 3 filas, derecha) */}
+                <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-auto">
+                   <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Compra</h4>
+                   
+                   <div className="overflow-y-auto space-y-3 flex-1 no-scrollbar pr-1">
+                      {ofertas.length > 0 ? (
+                        ofertas.map((of: any) => (
+                          <div key={of.id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 shadow-sm hover:shadow hover:border-violet-300 transition-all">
+                             <div className="flex justify-between items-center mb-2">
+                                <span className="bg-violet-100 text-violet-700 font-black text-[10px] px-2 py-0.5 rounded-md">CDP {of.cdpNumber}</span>
+                                <span className="flex items-center gap-1 text-[9px] font-bold text-red-500 uppercase">
+                                   <IconClock className="w-2.5 h-2.5" /> Vence {formatDateForDisplay(of.vencimiento)}
+                                </span>
+                             </div>
+                             <div className="text-center">
+                                <span className="text-xl font-black text-slate-800 block">USD {Number(of.monto).toLocaleString()}</span>
+                             </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                           <IconTag className="w-8 h-8 text-slate-300 mb-2" />
+                           <p className="text-slate-400 text-sm font-medium">No hay ofertas publicadas.</p>
+                        </div>
+                      )}
+                   </div>
+                </div>
+
+                {/* Cuadrante: Botón Compra (1 columna x 1 fila, abajo a la izquierda) */}
+                <div className="lg:col-span-1 lg:row-span-1">
+                   <Button variant="outline" className="w-full h-full min-h-[60px] text-sm !border-2 !border-violet-600 !text-violet-700 hover:!bg-violet-50 transition-colors shadow-sm bg-white">
+                     Hacer oferta de compra de CDP
+                   </Button>
+                </div>
+
+                {/* Cuadrante: Botón Venta (1 columna x 1 fila, abajo al medio) */}
+                <div className="lg:col-span-1 lg:row-span-1">
+                   <Button variant="primary" className="w-full h-full min-h-[60px] text-sm shadow-sm">
+                     Hacer oferta de Venta de CDP
+                   </Button>
+                </div>
+
+              </div>
             </Card>
 
             {/* SECCIÓN 2: BÓVEDA DOCUMENTOS */}
@@ -722,7 +737,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, setView, hand
                   <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                     <IconGrid className="w-6 h-6 text-violet-500" /> Mis CDPs Asignados
                   </h3>
-                  <p className="text-slate-500 text-sm mt-1">Derechos de Participación a tu nombre.</p>
+                  <p className="text-slate-500 text-sm mt-1">Certificados de Participacion a tu nombre.</p>
                 </div>
                 <span className="bg-violet-100 text-violet-700 px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
                   Total: {misCdps.length}
@@ -753,7 +768,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, setView, hand
   );
 };
 
-const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, showGlobalMessage }: any) => {
+const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, onSaveChartConfig, showGlobalMessage }: any) => {
   const [activeTab, setActiveTab] = useState("fiduciantes"); 
   const [editingUser, setEditingUser] = useState<any>(undefined);
   const [editingOperacion, setEditingOperacion] = useState<any>(undefined);
@@ -763,31 +778,20 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
   const nextOfertaNum = ofertas.length > 0 ? Math.max(...ofertas.map((o:any) => Number(o.numero) || 0)) + 1 : 1;
 
   const handleDeleteUserRequest = (userToDelete: any) => {
-    if (userToDelete.id === currentUser.id) {
-      showGlobalMessage("error", "Acción Denegada", "No puedes eliminar tu propia cuenta de administrador.");
-      return;
-    }
-    showGlobalMessage("confirm", "Eliminar Fiduciante", `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`,
-      async () => { await onDeleteUser(userToDelete.id); showGlobalMessage("success", "Usuario Eliminado", "El registro fue borrado exitosamente."); }, null, "Sí, Eliminar"
-    );
+    if (userToDelete.id === currentUser.id) { showGlobalMessage("error", "Acción Denegada", "No puedes eliminar tu propia cuenta de administrador."); return; }
+    showGlobalMessage("confirm", "Eliminar Fiduciante", `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`, async () => { await onDeleteUser(userToDelete.id); showGlobalMessage("success", "Usuario Eliminado", "El registro fue borrado exitosamente."); }, null, "Sí, Eliminar");
   };
 
   const handleDeleteOperacionRequest = (operacion: any) => {
-    showGlobalMessage("confirm", "Eliminar Operación", `¿Estás seguro de que deseas eliminar la operación #${operacion.numero}?`,
-      async () => { await onDeleteOperacion(operacion.id); showGlobalMessage("success", "Operación Eliminada", "El registro fue borrado exitosamente."); }, null, "Sí, Eliminar"
-    );
+    showGlobalMessage("confirm", "Eliminar Operación", `¿Estás seguro de que deseas eliminar la operación #${operacion.numero}?`, async () => { await onDeleteOperacion(operacion.id); showGlobalMessage("success", "Operación Eliminada", "El registro fue borrado exitosamente."); }, null, "Sí, Eliminar");
   };
 
   const handleDeleteOfertaRequest = (oferta: any) => {
-    showGlobalMessage("confirm", "Eliminar Oferta", `¿Estás seguro de que deseas eliminar la oferta #${oferta.numero}?`,
-      async () => { await onDeleteOferta(oferta.id); showGlobalMessage("success", "Oferta Eliminada", "La oferta fue removida del mercado."); }, null, "Sí, Eliminar"
-    );
+    showGlobalMessage("confirm", "Eliminar Oferta", `¿Estás seguro de que deseas eliminar la oferta #${oferta.numero}?`, async () => { await onDeleteOferta(oferta.id); showGlobalMessage("success", "Oferta Eliminada", "La oferta fue removida del mercado."); }, null, "Sí, Eliminar");
   };
 
   const handleDeleteBovedaRequest = (docInfo: any) => {
-    showGlobalMessage("confirm", "Desvincular Documento", `¿Estás seguro de que deseas borrar este documento del CDP #${docInfo.cdpNumber}?`,
-      async () => { await onDeleteBoveda(docInfo.id); showGlobalMessage("success", "Documento Borrado", "El enlace se desvinculó de la bóveda."); }, null, "Sí, Borrar"
-    );
+    showGlobalMessage("confirm", "Desvincular Documento", `¿Estás seguro de que deseas borrar este documento del CDP #${docInfo.cdpNumber}?`, async () => { await onDeleteBoveda(docInfo.id); showGlobalMessage("success", "Documento Borrado", "El enlace se desvinculó de la bóveda."); }, null, "Sí, Borrar");
   };
 
   const getUserName = (id: string) => {
@@ -801,10 +805,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30">
         <div className="max-w-[1400px] mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center relative">
-              <IconSettings className="w-5 h-5 text-violet-400" />
-              <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-slate-900" title="En vivo"></div>
-            </div>
+            <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center relative"><IconSettings className="w-5 h-5 text-violet-400" /><div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-slate-900" title="En vivo"></div></div>
             <h1 className="text-xl font-bold hidden sm:block">Administración General</h1>
           </div>
           <Button variant="secondary" className="!py-2 !px-4 !rounded-xl text-sm border border-slate-700" onClick={() => setView("dashboard")}>Volver al Dashboard</Button>
@@ -813,24 +814,12 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
 
       <main className="max-w-[1400px] mx-auto px-4 py-8">
         <div className="flex flex-wrap gap-3 mb-8 border-b border-slate-200 pb-4">
-          <button onClick={() => setActiveTab("fiduciantes")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "fiduciantes" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
-            <IconUser className="w-4 h-4" /> Fiduciantes
-          </button>
-          <button onClick={() => setActiveTab("cdps")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "cdps" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
-            <IconGrid className="w-4 h-4" /> Mapa de CDPs
-          </button>
-          <button onClick={() => setActiveTab("operaciones")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "operaciones" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
-            <IconList className="w-4 h-4" /> Registro de Operaciones
-          </button>
-          <button onClick={() => setActiveTab("ofertas")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "ofertas" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
-            <IconTag className="w-4 h-4" /> Ofertas de Venta
-          </button>
-          <button onClick={() => setActiveTab("boveda")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "boveda" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
-            <IconFolder className="w-4 h-4" /> Bóveda Documentos
-          </button>
-          <button onClick={() => setActiveTab("grafico")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "grafico" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
-            <IconTrendingUp className="w-4 h-4" /> Gráfico de Mercado
-          </button>
+          <button onClick={() => setActiveTab("fiduciantes")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "fiduciantes" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconUser className="w-4 h-4" /> Fiduciantes</button>
+          <button onClick={() => setActiveTab("cdps")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "cdps" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconGrid className="w-4 h-4" /> Mapa de CDPs</button>
+          <button onClick={() => setActiveTab("operaciones")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "operaciones" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconList className="w-4 h-4" /> Registro de Operaciones</button>
+          <button onClick={() => setActiveTab("ofertas")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "ofertas" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconTag className="w-4 h-4" /> Ofertas de Venta</button>
+          <button onClick={() => setActiveTab("boveda")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "boveda" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconFolder className="w-4 h-4" /> Bóveda Documentos</button>
+          <button onClick={() => setActiveTab("grafico")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "grafico" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconTrendingUp className="w-4 h-4" /> Gráfico de Mercado</button>
         </div>
 
         {activeTab === "fiduciantes" && (
@@ -983,7 +972,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </div>
         )}
 
-        {activeTab === "grafico" && <MarketChart operaciones={operaciones} />}
+        {activeTab === "grafico" && <MarketChart operaciones={operaciones} savedConfig={chartConfigData} onSaveConfig={onSaveChartConfig} showGlobalMessage={showGlobalMessage} />}
 
       </main>
 
@@ -1009,6 +998,7 @@ export default function App() {
   const [operaciones, setOperaciones] = useState<any[]>([]);
   const [ofertas, setOfertas] = useState<any[]>([]);
   const [boveda, setBoveda] = useState<any[]>([]);
+  const [chartConfigData, setChartConfigData] = useState<any>(null);
   
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -1069,7 +1059,15 @@ export default function App() {
       setBoveda(docs);
     });
 
-    return () => { uUnsubscribe(); oUnsubscribe(); ofUnsubscribe(); bovUnsubscribe(); };
+    // Subscripción a la configuración del gráfico
+    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart');
+    const cUnsubscribe = onSnapshot(configRef, (docSnap: any) => {
+      if (docSnap.exists()) {
+        setChartConfigData(docSnap.data());
+      }
+    });
+
+    return () => { uUnsubscribe(); oUnsubscribe(); ofUnsubscribe(); bovUnsubscribe(); cUnsubscribe(); };
   }, [firebaseUser]);
 
   useEffect(() => {
@@ -1123,6 +1121,8 @@ export default function App() {
   const handleSaveBoveda = async (data: any) => { try { const id = data.id || `doc_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
   const handleDeleteBoveda = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id)); } catch (e) {} };
 
+  const handleSaveChartConfig = async (configData: any) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart'), configData); } catch (e) { console.error(e); } };
+
   const showGlobalMessage = (type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
     setModalConfig({ isOpen: true, type, title, message, confirmText, cancelText: "Cancelar", onConfirm: () => { setModalConfig((prev: any) => ({ ...prev, isOpen: false })); if (onConfirmCallback) onConfirmCallback(); }, onCancel: () => { setModalConfig((prev: any) => ({ ...prev, isOpen: false })); if (onCancelCallback) onCancelCallback(); } });
   };
@@ -1138,8 +1138,8 @@ export default function App() {
       {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={computedCdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
-      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} setView={setCurrentView} handleLogout={handleLogout} />}
-      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} handleLogout={handleLogout} />}
+      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} onSaveChartConfig={handleSaveChartConfig} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </>
   );
