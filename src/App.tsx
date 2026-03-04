@@ -264,7 +264,8 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
   const width = 800;
   const height = 400;
   const paddingX = simplified ? 45 : 60;
-  const paddingY = simplified ? 45 : 80;
+  // REDUCIDO: Recortamos los márgenes verticales vacíos para que la curva use más espacio del gráfico.
+  const paddingY = simplified ? 25 : 50;
 
   const dataMinY = Math.min(...data.map((d:any) => d.monto));
   const dataMaxY = Math.max(...data.map((d:any) => d.monto));
@@ -345,39 +346,38 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
       <div className="flex-1 flex items-center justify-center overflow-hidden w-full h-full relative p-2">
          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto max-h-full min-w-[500px]">
            
-           {/* Título dentro del gráfico */}
-           <text x={width / 2} y={simplified ? 25 : 30} textAnchor="middle" className={`font-bold fill-slate-300 ${simplified ? 'text-sm' : 'text-lg'}`}>
+           {/* Título dentro del gráfico (+30% fuente) */}
+           <text x={width / 2} y={simplified ? 18 : 25} textAnchor="middle" className={`font-bold fill-slate-300 ${simplified ? 'text-lg' : 'text-2xl'}`}>
               Precio de los CDP y fecha de operación
            </text>
 
-           {/* Eje Y */}
+           {/* Eje Y (+30% fuente) */}
            {yLines.map((val, idx) => {
                const y = getY(val);
                if(y < 0 || y > height) return null;
                return (
                    <g key={`y-${idx}`}>
                      <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#334155" strokeDasharray="4 4" />
-                     <text x={paddingX - 10} y={y + 4} textAnchor="end" className="text-[10px] fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
+                     <text x={paddingX - 10} y={y + 5} textAnchor="end" className="text-[13px] fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
                    </g>
                )
            })}
 
-           {/* Eje X (Modificado para mostrarse en simplificado también) */}
+           {/* Eje X (+30% fuente) */}
            {xLines.map((val, idx) => {
                const x = getX(val);
                if(x < paddingX || x > width - paddingX) return null;
                const dateObj = new Date(val);
-               // Si es simplificado solo muestra el año, sino la fecha completa
                const dateStr = simplified ? dateObj.getFullYear().toString() : formatDateForDisplay(dateObj.toISOString().split('T')[0]);
                return (
                    <g key={`x-${idx}`}>
                       <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke="#1e293b" />
                       <text 
                         x={x} 
-                        y={height - (simplified ? 15 : 20)} 
+                        y={height - (simplified ? 8 : 12)} 
                         textAnchor={simplified ? "middle" : "end"} 
-                        className={`fill-slate-500 font-mono font-bold ${simplified ? 'text-xs' : 'text-[10px]'}`} 
-                        transform={simplified ? "" : `rotate(-45 ${x} ${height - 20})`}
+                        className={`fill-slate-500 font-mono font-bold ${simplified ? 'text-[13px]' : 'text-sm'}`} 
+                        transform={simplified ? "" : `rotate(-45 ${x} ${height - 15})`}
                       >
                         {dateStr}
                       </text>
@@ -398,19 +398,19 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                    key={i}
                    cx={cx}
                    cy={cy}
-                   r={simplified ? "4" : "6"}
+                   r={simplified ? "5" : "7"}
                    fill="#1e293b"
                    stroke="#a78bfa"
                    strokeWidth="3"
                    className="cursor-pointer transition-all duration-300 origin-center"
                    style={{ transformOrigin: `${cx}px ${cy}px` }}
                    onMouseEnter={(e) => {
-                     e.currentTarget.setAttribute('r', '8');
+                     e.currentTarget.setAttribute('r', '9');
                      e.currentTarget.setAttribute('fill', '#8b5cf6');
                      setHoveredPoint({ x: cx, y: cy, ...d });
                    }}
                    onMouseLeave={(e) => {
-                     e.currentTarget.setAttribute('r', simplified ? '4' : '6');
+                     e.currentTarget.setAttribute('r', simplified ? '5' : '7');
                      e.currentTarget.setAttribute('fill', '#1e293b');
                      setHoveredPoint(null);
                    }}
@@ -418,13 +418,13 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                )
            })}
 
-           {/* Tooltip Dinámico */}
+           {/* Tooltip Dinámico (Textos agrandados un +30% y caja ajustada) */}
            {hoveredPoint && (
-               <g transform={`translate(${hoveredPoint.x}, ${Math.max(40, hoveredPoint.y - 45)})`} className="pointer-events-none transition-all duration-100 ease-out">
-                   <rect x="-65" y="-35" width="130" height="45" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
+               <g transform={`translate(${hoveredPoint.x}, ${Math.max(50, hoveredPoint.y - 55)})`} className="pointer-events-none transition-all duration-100 ease-out">
+                   <rect x="-80" y="-45" width="160" height="55" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
                    <polygon points="-8,10 8,10 0,18" fill="#ffffff" />
-                   <text x="0" y="-15" textAnchor="middle" fill="#0f172a" className="text-[12px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
-                   <text x="0" y="2" textAnchor="middle" fill="#64748b" className="text-[10px] font-mono font-bold">{hoveredPoint.fechaStr}</text>
+                   <text x="0" y="-22" textAnchor="middle" fill="#0f172a" className="text-[16px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
+                   <text x="0" y="0" textAnchor="middle" fill="#64748b" className="text-[13px] font-mono font-bold">{hoveredPoint.fechaStr}</text>
                </g>
            )}
          </svg>
@@ -464,7 +464,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v39</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v40</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -632,7 +632,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
           {/* COLUMNA DERECHA (Mercado, Bóveda, CDPs) */}
           <div className="lg:col-span-8 space-y-6">
             
-            {/* SECCIÓN 1: MERCADO ACTIVO (GRILLA 3x3 ESTRICTA BLOQUEADA CON BOTONES ALTOS) */}
+            {/* SECCIÓN 1: MERCADO ACTIVO */}
             <Card className="p-6 bg-slate-100/50 border-t-4 border-t-violet-500">
               <div className="mb-6 border-b border-slate-200 pb-4">
                   <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
@@ -641,8 +641,8 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                   <p className="text-slate-600 mt-1 font-medium">Precios, Tendencias, Ofertas de Compra y Venta (Valores USD)</p>
               </div>
               
-              {/* Contenedor principal: 180px para la fila de los botones inferiores hace que el gráfico sea más bajo */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_180px] gap-4 lg:h-[600px]">
+              {/* Contenedor principal: Altura reducida lg:h-[520px] */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_180px] gap-4 lg:h-[520px]">
                 
                 {/* Cuadrante: Gráfico (2 columnas x 2 filas) */}
                 <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 overflow-hidden shadow-sm h-full bg-white flex flex-col">
@@ -653,28 +653,36 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                 <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
                    <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Venta</h4>
                    
-                   {/* Scroll Window para las tarjetas de Ofertas (Ajustado para que entren 5) */}
+                   {/* Scroll Window para las tarjetas de Ofertas */}
                    <div className="overflow-y-auto space-y-2.5 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                       {ofertasOrdenadas.length > 0 ? (
                         ofertasOrdenadas.map((of: any) => (
-                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col gap-2 group relative overflow-hidden">
+                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all grid grid-cols-2 gap-y-3 group relative overflow-hidden items-center">
                              
-                             {/* Fila Superior: Oferta de Venta y Fecha de Vencimiento */}
-                             <div className="flex justify-between items-start">
+                             {/* Cuadrante Superior Izquierdo */}
+                             <div className="flex justify-start">
                                <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200">
                                  Oferta de Venta
                                </span>
-                               <span className="flex items-center gap-1 text-[9px] font-bold text-red-500 uppercase mt-0.5">
+                             </div>
+
+                             {/* Cuadrante Superior Derecho: Centrado en la columna */}
+                             <div className="flex justify-center">
+                               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase">
                                   <IconClock className="w-3 h-3" /> Vence {formatDateForDisplay(of.vencimiento)}
                                </span>
                              </div>
 
-                             {/* Fila Inferior: Precio y Número de CDP */}
-                             <div className="flex justify-between items-end mt-1">
-                               <span className="text-xl font-black text-slate-800 leading-none">
+                             {/* Cuadrante Inferior Izquierdo: Precio (+10% tamaño) */}
+                             <div className="flex justify-start">
+                               <span className="text-[22px] font-black text-slate-800 leading-none">
                                  USD {Number(of.monto).toLocaleString()}
                                </span>
-                               <span className="text-xs font-bold text-slate-600 mb-0.5">
+                             </div>
+
+                             {/* Cuadrante Inferior Derecho: CDP en cajita azul centrado en la columna */}
+                             <div className="flex justify-center">
+                               <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest">
                                  CDP {of.cdpNumber}
                                </span>
                              </div>
@@ -1080,7 +1088,6 @@ const MercadoApp = () => {
     const ofertasRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas');
     const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot: any) => {
       const ofs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      // Orden por defecto en crudo por fecha. (En la vista las ordenamos por precio)
       ofs.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
       setOfertas(ofs);
     });
@@ -1092,7 +1099,6 @@ const MercadoApp = () => {
       setBoveda(docs);
     });
 
-    // Subscripción a la configuración del gráfico
     const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart');
     const cUnsubscribe = onSnapshot(configRef, (docSnap: any) => {
       if (docSnap.exists()) {
