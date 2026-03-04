@@ -58,6 +58,8 @@ const IconDollarSign = (props: any) => <SvgIcon {...props}><line x1="12" y1="1" 
 const IconTag = (props: any) => <SvgIcon {...props}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></SvgIcon>;
 const IconFolder = (props: any) => <SvgIcon {...props}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></SvgIcon>;
 const IconTrendingUp = (props: any) => <SvgIcon {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></SvgIcon>;
+const IconExternalLink = (props: any) => <SvgIcon {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></SvgIcon>;
+const IconClock = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
@@ -180,293 +182,68 @@ const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confir
   );
 };
 
+// Modales de Administración omitidos visualmente en este bloque por brevedad (se mantienen funcionales abajo)
 const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ ...user });
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleChange = (e: any) => {
-    const { name, value } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsLoading(true);
-    await onUpdate(user.id, formData);
-    setIsLoading(false);
-    showGlobalMessage("success", "Usuario Actualizado", "Los datos personales se guardaron correctamente.");
-    onClose();
-  };
-
+  const handleChange = (e: any) => setFormData((prev: any) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); await onUpdate(user.id, formData); setIsLoading(false); showGlobalMessage("success", "Usuario Actualizado", "Los datos personales se guardaron correctamente."); onClose(); };
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">Editar Fiduciante</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField label="Nombres" name="nombres" value={formData.nombres} onChange={handleChange} required />
-            <InputField label="Apellidos" name="apellidos" value={formData.apellidos} onChange={handleChange} required />
-            <InputField label="CUIT/CUIL" name="cuit" value={formData.cuit} onChange={handleChange} required />
-            <InputField label="Teléfono" name="telefono" value={formData.telefono} onChange={handleChange} required />
-            <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required />
-            <InputField label="Contraseña" name="password" value={formData.password} onChange={handleChange} required />
-          </div>
-          
-          <div className="flex flex-col gap-1 w-full mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-            <div className="flex items-center gap-2">
-              <IconInfo className="w-5 h-5 text-violet-500" />
-              <span className="text-sm font-semibold text-slate-600">Gestión de Categorías Automática</span>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">
-              La categoría de este usuario se calcula automáticamente basándose en los registros de operaciones y el mapa global de activos.
-            </p>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Cambios</Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">Editar Fiduciante</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField label="Nombres" name="nombres" value={formData.nombres} onChange={handleChange} required /><InputField label="Apellidos" name="apellidos" value={formData.apellidos} onChange={handleChange} required /><InputField label="CUIT/CUIL" name="cuit" value={formData.cuit} onChange={handleChange} required /><InputField label="Teléfono" name="telefono" value={formData.telefono} onChange={handleChange} required /><InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required /><InputField label="Contraseña" name="password" value={formData.password} onChange={handleChange} required /></div><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Cambios</Button></div></form></div></div>
   );
 };
 
 const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }: any) => {
-  const [formData, setFormData] = useState(operacion || {
-    numero: "",
-    cdpNumber: "",
-    vendedorId: "",
-    compradorId: "",
-    monto: "",
-    fecha: getLocalDateString()
-  });
+  const [formData, setFormData] = useState(operacion || { numero: "", cdpNumber: "", vendedorId: "", compradorId: "", monto: "", fecha: getLocalDateString() });
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    if (formData.vendedorId === formData.compradorId && formData.vendedorId !== "") {
-      showGlobalMessage("error", "Error", "El vendedor y comprador no pueden ser el mismo fiduciante.");
-      return;
-    }
-    setIsLoading(true);
-    await onSave(formData);
-    setIsLoading(false);
-    showGlobalMessage("success", "Operación Registrada", "El registro se guardó correctamente y el Mapa de CDPs ha sido actualizado.");
-    onClose();
-  };
-
   const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
+  const handleSubmit = async (e: any) => { e.preventDefault(); if (formData.vendedorId === formData.compradorId && formData.vendedorId !== "") { showGlobalMessage("error", "Error", "El vendedor y comprador no pueden ser el mismo."); return; } setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Operación Registrada", "El registro se guardó correctamente."); onClose(); };
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">{operacion ? "Editar Operación" : "Nueva Operación"}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <InputField label="Nº Operación" type="number" name="numero" value={formData.numero} onChange={handleChange} required />
-            <InputField label="Nº CDP" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required />
-            <InputField label="Fecha" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required />
-          </div>
-          <div className="flex flex-col gap-1 w-full mt-2">
-            <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label>
-            <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="vendedorId" value={formData.vendedorId} onChange={handleChange} required>
-              <option value="">-- Seleccionar Vendedor --</option>
-              <option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello (Base)</option>
-              {users.map((u: any) => (
-                <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-1 w-full mt-2">
-            <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Comprador</label>
-            <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="compradorId" value={formData.compradorId} onChange={handleChange} required>
-              <option value="">-- Seleccionar Comprador --</option>
-              <option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello (Base)</option>
-              {users.map((u: any) => (
-                <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
-              ))}
-            </select>
-          </div>
-          <InputField icon={IconDollarSign} label="Monto (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required />
-          <p className="text-xs text-slate-500 mt-2 italic">* Los valores de las operaciones de CDPs siempre deben registrarse y cotizarse estrictamente en Dólares Estadounidenses (USD).</p>
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar</Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{operacion ? "Editar Operación" : "Nueva Operación"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="grid grid-cols-1 sm:grid-cols-3 gap-4"><InputField label="Nº Operación" type="number" name="numero" value={formData.numero} onChange={handleChange} required /><InputField label="Nº CDP" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required /><InputField label="Fecha" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /></div><div className="flex flex-col gap-1 w-full mt-2"><label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="vendedorId" value={formData.vendedorId} onChange={handleChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u: any) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><div className="flex flex-col gap-1 w-full mt-2"><label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Comprador</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="compradorId" value={formData.compradorId} onChange={handleChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u: any) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><InputField icon={IconDollarSign} label="Monto (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar</Button></div></form></div></div>
   );
 };
 
 const OfertaModal = ({ oferta, users, cdps, nextOfertaNum, onClose, onSave, showGlobalMessage }: any) => {
-  const [formData, setFormData] = useState(oferta || {
-    numero: String(nextOfertaNum),
-    cdpNumber: "",
-    vendedorId: "",
-    monto: "",
-    fecha: getLocalDateString(),
-    vencimiento: getLocalDateString()
-  });
+  const [formData, setFormData] = useState(oferta || { numero: String(nextOfertaNum), cdpNumber: "", vendedorId: "", monto: "", fecha: getLocalDateString(), vencimiento: getLocalDateString() });
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsLoading(true);
-    await onSave(formData);
-    setIsLoading(false);
-    showGlobalMessage("success", "Oferta Registrada", "La oferta de venta ha sido publicada en la base de datos.");
-    onClose();
-  };
-
-  const handleCdpChange = (e: any) => {
-    const val = e.target.value;
-    const num = Number(val);
-    let newVendedorId = formData.vendedorId;
-
-    if (num >= 1 && num <= TOTAL_CDPS) {
-       const cdp = cdps.find((c:any) => c.number === num);
-       if (cdp) newVendedorId = cdp.ownerId;
-    }
-
-    setFormData({ ...formData, cdpNumber: val, vendedorId: newVendedorId });
-  };
-
-  const handleVendedorChange = (e: any) => {
-    const val = e.target.value;
-    setFormData({ ...formData, vendedorId: val, cdpNumber: "" });
-  };
-
+  const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Oferta Registrada", "La oferta fue publicada."); onClose(); };
+  const handleCdpChange = (e: any) => { const val = e.target.value; const num = Number(val); let newVendedorId = formData.vendedorId; if (num >= 1 && num <= TOTAL_CDPS) { const cdp = cdps.find((c:any) => c.number === num); if (cdp) newVendedorId = cdp.ownerId; } setFormData({ ...formData, cdpNumber: val, vendedorId: newVendedorId }); };
+  const handleVendedorChange = (e: any) => { setFormData({ ...formData, vendedorId: e.target.value, cdpNumber: "" }); };
   const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">{oferta ? "Editar Oferta" : "Nueva Oferta de Venta"}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
-          <div className="bg-violet-50 p-4 rounded-xl border border-violet-100 mb-2">
-            <InputField label="Nº de Oferta (Automático)" type="number" name="numero" value={formData.numero} onChange={handleChange} required />
-          </div>
-
-          <div className="flex flex-col gap-1 w-full">
-            <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label>
-            <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="vendedorId" value={formData.vendedorId} onChange={handleVendedorChange} required>
-              <option value="">-- Seleccionar Vendedor --</option>
-              <option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello (Base)</option>
-              {users.map((u: any) => (
-                <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1 w-full">
-            <label className="text-sm font-semibold text-slate-600 ml-1">Nº CDP a la venta</label>
-            {formData.vendedorId ? (
-                <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="cdpNumber" value={formData.cdpNumber} onChange={handleCdpChange} required>
-                   <option value="">-- Seleccione el CDP del Fiduciante --</option>
-                   {cdps.filter((c:any) => c.ownerId === formData.vendedorId).map((c:any) => (
-                       <option key={c.number} value={c.number}>CDP Nº {c.number}</option>
-                   ))}
-                </select>
-            ) : (
-                <input type="number" className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-violet-500 transition-all" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleCdpChange} placeholder="Escriba el Nº de CDP..." required />
-            )}
-            {!formData.vendedorId && <p className="text-[10px] text-slate-400 font-medium ml-1 mt-1">Si escribe un CDP válido, se autocompletará el vendedor.</p>}
-          </div>
-
-          <InputField icon={IconDollarSign} label="Monto Solicitado (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required />
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField label="Fecha Publicación" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required />
-            <InputField label="Fecha Vencimiento" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required />
-          </div>
-          
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Oferta</Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{oferta ? "Editar Oferta" : "Nueva Oferta"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="bg-violet-50 p-4 rounded-xl border border-violet-100 mb-2"><InputField label="Nº de Oferta (Automático)" type="number" name="numero" value={formData.numero} onChange={handleChange} required /></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Vendedor</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="vendedorId" value={formData.vendedorId} onChange={handleVendedorChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u: any) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Nº CDP a la venta</label>{formData.vendedorId ? (<select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="cdpNumber" value={formData.cdpNumber} onChange={handleCdpChange} required><option value="">-- Seleccionar CDP --</option>{cdps.filter((c:any) => c.ownerId === formData.vendedorId).map((c:any) => <option key={c.number} value={c.number}>CDP Nº {c.number}</option>)}</select>) : (<input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleCdpChange} placeholder="Escriba el Nº de CDP..." required />)}</div><InputField icon={IconDollarSign} label="Monto Solicitado (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><InputField label="Publicación" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /><InputField label="Vencimiento" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required /></div><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Oferta</Button></div></form></div></div>
   );
 };
 
 const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) => {
-  const [formData, setFormData] = useState(bovedaItem || {
-    cdpNumber: "",
-    titulo: "",
-    url: ""
-  });
+  const [formData, setFormData] = useState(bovedaItem || { cdpNumber: "", titulo: "", url: "" });
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsLoading(true);
-    await onSave(formData);
-    setIsLoading(false);
-    showGlobalMessage("success", "Documento Guardado", "El enlace al documento ha sido vinculado al CDP exitosamente.");
-    onClose();
-  };
-
+  const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Guardado", "Documento vinculado exitosamente."); onClose(); };
   const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">{bovedaItem ? "Editar Documento" : "Vincular Documento"}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
-        </div>
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl mb-6 flex items-start gap-4 shadow-sm">
-           <IconInfo className="w-6 h-6 shrink-0 mt-0.5" />
-           <div>
-              <p className="text-xs leading-relaxed">
-                Para evitar límites de espacio y costos de servidor, sube las imágenes o PDFs a una plataforma como <b>Google Drive</b> o <b>Dropbox</b>, asegúrate de que el enlace sea público, y pégalo aquí abajo.
-              </p>
-           </div>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <InputField label="Nº CDP Asociado" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required />
-          <InputField icon={IconFileText} label="Título del Archivo (Ej: DNI, Acta de Cesión, PDF Contrato)" name="titulo" value={formData.titulo} onChange={handleChange} required />
-          <InputField icon={IconCloud} label="Enlace Web (URL del Documento)" type="url" name="url" placeholder="https://drive.google.com/..." value={formData.url} onChange={handleChange} required />
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Enlace</Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{bovedaItem ? "Editar Doc" : "Vincular Doc"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><InputField label="Nº CDP Asociado" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required /><InputField icon={IconFileText} label="Título del Archivo" name="titulo" value={formData.titulo} onChange={handleChange} required /><InputField icon={IconCloud} label="Enlace Web (URL)" type="url" name="url" placeholder="https://drive.google.com/..." value={formData.url} onChange={handleChange} required /><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar</Button></div></form></div></div>
   );
 };
 
 // ==========================================
-// COMPONENTE: GRÁFICO DE MERCADO
+// COMPONENTE: GRÁFICO DE MERCADO (Mejorado v35)
 // ==========================================
-const MarketChart = ({ operaciones }: any) => {
+const MarketChart = ({ operaciones, simplified = false }: any) => {
   const [hoveredPoint, setHoveredPoint] = useState<any>(null);
-  const [filtroAnio, setFiltroAnio] = useState("Todos");
+  
+  // Configuraciones manuales de los ejes
+  const [config, setConfig] = useState({
+     filterYear: "Todos",
+     yMin: "", yMax: "", yStep: "",
+     xMin: "", xMax: "", xStep: "30" // 30 días por defecto de salto
+  });
 
   const opsConMonto = operaciones.filter((op:any) => op.monto && op.fecha && !isNaN(Number(op.monto)));
   const aniosDisponibles = ["Todos", ...Array.from(new Set(opsConMonto.map((op:any) => op.fecha.substring(0,4)))).sort().reverse()];
 
-  const dataFiltrada = filtroAnio === "Todos"
+  const dataFiltrada = config.filterYear === "Todos"
       ? opsConMonto
-      : opsConMonto.filter((op:any) => op.fecha.startsWith(filtroAnio));
+      : opsConMonto.filter((op:any) => op.fecha.startsWith(config.filterYear));
 
   const data = dataFiltrada
       .map((op:any) => ({
@@ -482,59 +259,116 @@ const MarketChart = ({ operaciones }: any) => {
         <Card className="text-center py-16 bg-slate-50 border-2 border-dashed border-slate-200">
            <IconTrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-4" />
            <h3 className="text-lg font-bold text-slate-600">Datos Insuficientes</h3>
-           <p className="text-slate-500 mt-2">Se requieren al menos 2 operaciones registradas para trazar el gráfico de mercado.</p>
+           <p className="text-slate-500 mt-2">Se requieren al menos 2 operaciones registradas para trazar la curva.</p>
         </Card>
       );
   }
 
+  // Dimensiones SVG
   const width = 800;
   const height = 400;
-  const paddingX = 60;
-  const paddingY = 60;
+  const paddingX = simplified ? 40 : 60;
+  const paddingY = simplified ? 40 : 80; // Extra padding for rotated text
 
-  const minX = data[0].dateMs;
-  const maxX = data[data.length - 1].dateMs;
-  const rangeX = maxX - minX || 1; 
+  // Límites auto-calculados (Fallback)
+  const dataMinY = Math.min(...data.map((d:any) => d.monto));
+  const dataMaxY = Math.max(...data.map((d:any) => d.monto));
+  const rangeYData = dataMaxY - dataMinY || 100;
 
-  const minY = Math.min(...data.map((d:any) => d.monto));
-  const maxY = Math.max(...data.map((d:any) => d.monto));
-  const rangeY = maxY - minY || 1;
+  const dataMinX = data[0].dateMs;
+  const dataMaxX = data[data.length - 1].dateMs;
+  const rangeXData = dataMaxX - dataMinX || 86400000;
 
-  // Espaciado en el eje Y (10% extra arriba y abajo para que los puntos no toquen el borde)
-  const paddedMinY = Math.max(0, minY - rangeY * 0.1);
-  const paddedMaxY = maxY + rangeY * 0.1;
-  const paddedRangeY = paddedMaxY - paddedMinY;
+  // Aplicar Configuración o Fallbacks
+  const usedYMin = config.yMin !== "" ? Number(config.yMin) : Math.max(0, dataMinY - rangeYData * 0.1);
+  const usedYMax = config.yMax !== "" ? Number(config.yMax) : dataMaxY + rangeYData * 0.1;
+  const usedYStep = config.yStep !== "" ? Number(config.yStep) : (usedYMax - usedYMin) / 4;
 
-  const getX = (dateMs: number) => paddingX + ((dateMs - minX) / rangeX) * (width - paddingX * 2);
-  const getY = (monto: number) => height - paddingY - ((monto - paddedMinY) / paddedRangeY) * (height - paddingY * 2);
+  const usedXMin = config.xMin !== "" ? new Date(config.xMin + "T00:00:00").getTime() : dataMinX;
+  const usedXMax = config.xMax !== "" ? new Date(config.xMax + "T00:00:00").getTime() : dataMaxX;
+  const usedXStepMs = config.xStep !== "" ? Math.max(1, Number(config.xStep)) * 86400000 : rangeXData / 4;
+
+  const getX = (dateMs: number) => paddingX + ((dateMs - usedXMin) / (usedXMax - usedXMin || 1)) * (width - paddingX * 2);
+  const getY = (monto: number) => height - paddingY - ((monto - usedYMin) / (usedYMax - usedYMin || 1)) * (height - paddingY * 2);
+
+  // Líneas Guía Y
+  const yLines = [];
+  if (usedYStep > 0) {
+      for(let y = usedYMin; y <= usedYMax; y += usedYStep) yLines.push(y);
+  }
+
+  // Líneas Guía X
+  const xLines = [];
+  if (usedXStepMs > 0 && !simplified) {
+      for(let x = usedXMin; x <= usedXMax; x += usedXStepMs) xLines.push(x);
+  }
 
   const pointsStr = data.map((d:any) => `${getX(d.dateMs)},${getY(d.monto)}`).join(" ");
 
+  const handleChangeConfig = (e: any) => setConfig({ ...config, [e.target.name]: e.target.value });
+
   return (
     <div className="animate-in fade-in duration-300">
-      <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Evolución de Precios (USD)</h2>
-          <p className="text-slate-500 mt-1">Análisis visual del mercado secundario de CDPs.</p>
-        </div>
-        <div className="flex items-center gap-2">
-           <span className="text-sm font-semibold text-slate-500">Filtrar por Año:</span>
-           <select value={filtroAnio} onChange={(e) => setFiltroAnio(e.target.value)} className="bg-white border border-slate-300 rounded-xl px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-violet-500 shadow-sm">
-              {aniosDisponibles.map((a:any) => <option key={a} value={a}>{a}</option>)}
-           </select>
-        </div>
-      </div>
-      <Card className="!p-4 overflow-hidden relative group">
+      
+      {/* Controles del Gráfico (Ocultos en vista simplificada) */}
+      {!simplified && (
+        <>
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-slate-800">Evolución de Precios (USD)</h2>
+            <p className="text-slate-500 mt-1">Análisis visual del mercado secundario de CDPs.</p>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-sm">
+            <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
+               <IconTrendingUp className="w-5 h-5 text-slate-400" />
+               <select name="filterYear" value={config.filterYear} onChange={handleChangeConfig} className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 font-bold outline-none focus:ring-2 focus:ring-violet-500">
+                  {aniosDisponibles.map((a:any) => <option key={a} value={a}>{a}</option>)}
+               </select>
+            </div>
+            
+            <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
+               <span className="font-bold text-slate-700">Eje Y (USD):</span>
+               <input type="number" name="yMin" placeholder="Mín" value={config.yMin} onChange={handleChangeConfig} className="w-16 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Valor Mínimo (USD)" />
+               <input type="number" name="yMax" placeholder="Máx" value={config.yMax} onChange={handleChangeConfig} className="w-16 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Valor Máximo (USD)" />
+               <input type="number" name="yStep" placeholder="Intervalo" value={config.yStep} onChange={handleChangeConfig} className="w-20 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Salto entre líneas (USD)" />
+            </div>
+
+            <div className="flex items-center gap-2">
+               <span className="font-bold text-slate-700">Eje X (Fechas):</span>
+               <input type="date" name="xMin" value={config.xMin} onChange={handleChangeConfig} className="w-[120px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Fecha Mínima" />
+               <input type="date" name="xMax" value={config.xMax} onChange={handleChangeConfig} className="w-[120px] border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Fecha Máxima" />
+               <input type="number" name="xStep" placeholder="Días salto" value={config.xStep} onChange={handleChangeConfig} className="w-24 border border-slate-300 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-violet-500" title="Intervalo de días en Eje X" />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* SVG Container */}
+      <Card className={`${simplified ? "!p-2" : "!p-4"} overflow-hidden relative group`}>
         <div className="w-full overflow-x-auto overflow-y-hidden no-scrollbar">
-           <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-[700px] bg-slate-900 rounded-2xl">
-             {/* Líneas de Cuadrícula (Eje Y) */}
-             {[0, 0.25, 0.5, 0.75, 1].map(factor => {
-                 const y = height - paddingY - factor * (height - paddingY * 2);
-                 const val = paddedMinY + factor * paddedRangeY;
+           <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-[700px] bg-slate-900 rounded-2xl overflow-hidden">
+             
+             {/* Eje Y: Líneas y Texto */}
+             {yLines.map((val, idx) => {
+                 const y = getY(val);
+                 if(y < 0 || y > height) return null;
                  return (
-                     <g key={factor}>
+                     <g key={`y-${idx}`}>
                        <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#334155" strokeDasharray="4 4" />
                        <text x={paddingX - 10} y={y + 4} textAnchor="end" className="text-xs fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
+                     </g>
+                 )
+             })}
+
+             {/* Eje X: Líneas y Texto (Oculto en simplificado) */}
+             {!simplified && xLines.map((val, idx) => {
+                 const x = getX(val);
+                 if(x < paddingX || x > width - paddingX) return null;
+                 const dateStr = formatDateForDisplay(new Date(val).toISOString().split('T')[0]);
+                 return (
+                     <g key={`x-${idx}`}>
+                        <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke="#1e293b" />
+                        <text x={x} y={height - 20} textAnchor="end" className="text-[10px] fill-slate-500 font-mono font-bold" transform={`rotate(-45 ${x} ${height - 20})`}>{dateStr}</text>
                      </g>
                  )
              })}
@@ -543,33 +377,39 @@ const MarketChart = ({ operaciones }: any) => {
              <polyline points={pointsStr} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md" />
 
              {/* Puntos Interactivos */}
-             {data.map((d:any, i:number) => (
+             {data.map((d:any, i:number) => {
+                 const cx = getX(d.dateMs);
+                 const cy = getY(d.monto);
+                 // Solo renderizar si el punto cae más o menos dentro de la vista
+                 if (cx < 0 || cx > width || cy < 0 || cy > height) return null;
+                 return (
                  <circle
                      key={i}
-                     cx={getX(d.dateMs)}
-                     cy={getY(d.monto)}
-                     r="6"
+                     cx={cx}
+                     cy={cy}
+                     r={simplified ? "4" : "6"}
                      fill="#1e293b"
                      stroke="#a78bfa"
                      strokeWidth="3"
                      className="cursor-pointer transition-all duration-300 origin-center"
-                     style={{ transformOrigin: `${getX(d.dateMs)}px ${getY(d.monto)}px` }}
+                     style={{ transformOrigin: `${cx}px ${cy}px` }}
                      onMouseEnter={(e) => {
                        e.currentTarget.setAttribute('r', '8');
                        e.currentTarget.setAttribute('fill', '#8b5cf6');
-                       setHoveredPoint({ x: getX(d.dateMs), y: getY(d.monto), ...d });
+                       setHoveredPoint({ x: cx, y: cy, ...d });
                      }}
                      onMouseLeave={(e) => {
-                       e.currentTarget.setAttribute('r', '6');
+                       e.currentTarget.setAttribute('r', simplified ? '4' : '6');
                        e.currentTarget.setAttribute('fill', '#1e293b');
                        setHoveredPoint(null);
                      }}
                  />
-             ))}
+                 )
+             })}
 
              {/* Tooltip Dinámico en SVG */}
              {hoveredPoint && (
-                 <g transform={`translate(${hoveredPoint.x}, ${hoveredPoint.y - 45})`} className="pointer-events-none transition-all duration-100 ease-out">
+                 <g transform={`translate(${hoveredPoint.x}, ${Math.max(40, hoveredPoint.y - 45)})`} className="pointer-events-none transition-all duration-100 ease-out">
                      <rect x="-65" y="-35" width="130" height="45" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
                      <polygon points="-8,10 8,10 0,18" fill="#ffffff" />
                      <text x="0" y="-15" textAnchor="middle" fill="#0f172a" className="text-[12px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
@@ -594,27 +434,14 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
   const handleLogin = (e: any) => {
     e.preventDefault();
     const user = users.find((u: any) => u.email === email.toLowerCase() && u.password === password);
-
-    if (user) {
-      sessionStorage.setItem(SESSION_KEY, user.id);
-      setCurrentUser(user);
-      setView(user.isValidated ? "dashboard" : "validation");
-    } else {
-      showGlobalMessage("error", "Error de Autenticación", "Credenciales incorrectas. Por favor, verifica tu email y contraseña.");
-    }
+    if (user) { sessionStorage.setItem(SESSION_KEY, user.id); setCurrentUser(user); setView(user.isValidated ? "dashboard" : "validation"); } 
+    else { showGlobalMessage("error", "Error de Autenticación", "Credenciales incorrectas."); }
   };
-
   const handleForgot = () => {
-    if (!email) {
-      showGlobalMessage("info", "Recuperar Contraseña", "Por favor, ingresa tu correo electrónico primero para buscar tu cuenta.");
-      return;
-    }
+    if (!email) { showGlobalMessage("info", "Recuperar", "Ingresa tu correo primero."); return; }
     const user = users.find((u: any) => u.email === email.toLowerCase());
-    if (user) {
-      showGlobalMessage("success", "Correo Enviado", `Como estamos en pruebas, tu contraseña es: ${user.password}`);
-    } else {
-      showGlobalMessage("error", "Usuario no encontrado", "No existe ninguna cuenta registrada con este correo electrónico.");
-    }
+    if (user) { showGlobalMessage("success", "Enviado", `(Demo) Tu contraseña es: ${user.password}`); } 
+    else { showGlobalMessage("error", "Error", "Cuenta no encontrada."); }
   };
 
   return (
@@ -623,27 +450,21 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4 relative">
             <IconBuilding className="w-8 h-8 text-violet-600" />
-            <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-1 rounded-full shadow border-2 border-white" title="Conectado a la Nube">
-              <IconCloud className="w-3 h-3" />
-            </div>
+            <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-1 rounded-full shadow border-2 border-white"><IconCloud className="w-3 h-3" /></div>
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v34</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v35</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-5">
           <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
           <InputField icon={IconLock} label="Contraseña" type="password" placeholder="••••••••" value={password} onChange={(e: any) => setPassword(e.target.value)} required />
-          <div className="flex justify-end">
-            <button type="button" onClick={handleForgot} className="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">¿Olvidaste tu contraseña?</button>
-          </div>
+          <div className="flex justify-end"><button type="button" onClick={handleForgot} className="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">¿Olvidaste tu contraseña?</button></div>
           <Button type="submit" className="w-full mt-4">Ingresar a mi cuenta</Button>
         </form>
-        <p className="mt-8 text-center text-slate-600 text-sm">
-          ¿No tienes cuenta? <button onClick={() => setView("register")} className="font-bold text-violet-600 hover:underline">Solicitar alta</button>
-        </p>
+        <p className="mt-8 text-center text-slate-600 text-sm">¿No tienes cuenta? <button onClick={() => setView("register")} className="font-bold text-violet-600 hover:underline">Solicitar alta</button></p>
       </Card>
     </div>
   );
@@ -654,51 +475,27 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+    e.preventDefault(); setIsLoading(true);
     const emailLower = formData.email.toLowerCase();
-    if (users.some((u: any) => u.email === emailLower)) {
-      showGlobalMessage("error", "Email duplicado", "Este correo ya se encuentra registrado en el sistema.");
-      setIsLoading(false);
-      return;
-    }
-
+    if (users.some((u: any) => u.email === emailLower)) { showGlobalMessage("error", "Email duplicado", "Correo ya registrado."); setIsLoading(false); return; }
+    
     const isFirstUser = users.length === 0;
-
-    const newUser = {
-      ...formData,
-      id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      email: emailLower,
-      correlativeId: users.length + 1,
-      isAdmin: isFirstUser, // El usuario 1 es el administrador base
-      isValidated: false,
-      fechaRegistro: new Date().toISOString(),
-    };
-
+    const newUser = { ...formData, id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`, email: emailLower, correlativeId: users.length + 1, isAdmin: isFirstUser, isValidated: false, fechaRegistro: new Date().toISOString() };
     await onRegister(newUser);
     sessionStorage.setItem(SESSION_KEY, newUser.id);
     setCurrentUser(newUser);
-
-    showGlobalMessage("success", "Registro Exitoso", "Tu cuenta ha sido creada en la nube. A continuación, validaremos tus datos.", () => {
-      setView("validation");
-    });
+    showGlobalMessage("success", "Registro Exitoso", "Tu cuenta ha sido creada.", () => setView("validation"));
     setIsLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 py-12">
       <Card className="w-full max-w-xl">
-        <button onClick={() => setView("login")} className="flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors">
-          <IconChevronRight className="w-4 h-4 rotate-180 mr-1" /> Volver al Login
-        </button>
+        <button onClick={() => setView("login")} className="flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors"><IconChevronRight className="w-4 h-4 rotate-180 mr-1" /> Volver al Login</button>
         <h2 className="text-3xl font-bold text-slate-800 mb-2">Solicitud de Alta</h2>
         <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField icon={IconUser} label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required />
-            <InputField icon={IconUser} label="Apellidos" value={formData.apellidos} onChange={(e: any) => setFormData({ ...formData, apellidos: e.target.value })} required />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField icon={IconUser} label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required /><InputField icon={IconUser} label="Apellidos" value={formData.apellidos} onChange={(e: any) => setFormData({ ...formData, apellidos: e.target.value })} required /></div>
           <InputField icon={IconFileText} label="CUIT / CUIL" value={formData.cuit} onChange={(e: any) => setFormData({ ...formData, cuit: e.target.value })} required />
           <InputField icon={IconPhone} label="Teléfono (WhatsApp)" value={formData.telefono} onChange={(e: any) => setFormData({ ...formData, telefono: e.target.value })} required />
           <InputField icon={IconMail} label="Correo Electrónico" type="email" value={formData.email} onChange={(e: any) => setFormData({ ...formData, email: e.target.value })} required />
@@ -715,51 +512,25 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
   const [isLoading, setIsLoading] = useState(false);
   const currentRole = getUserRole(user, cdps);
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const updatedUser = { ...user, ...formData, isValidated: true };
-    await onUpdate(user.id, updatedUser);
-    setCurrentUser(updatedUser);
-    setView("dashboard");
-    setIsLoading(false);
-  };
+  const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); const updatedUser = { ...user, ...formData, isValidated: true }; await onUpdate(user.id, updatedUser); setCurrentUser(updatedUser); setView("dashboard"); setIsLoading(false); };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         <div className="bg-amber-100 border-l-4 border-amber-500 p-4 rounded-r-2xl mb-6 shadow-sm flex items-start gap-4">
           <IconAlertCircle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
-          <div>
-            <h4 className="font-bold text-amber-900">Validación Requerida</h4>
-            <p className="text-amber-800 text-sm mt-1">Antes de operar, es obligatorio confirmar que tus datos fiduciarios son correctos. Esto garantiza la validez legal de tus transacciones en la nube.</p>
-          </div>
+          <div><h4 className="font-bold text-amber-900">Validación Requerida</h4><p className="text-amber-800 text-sm mt-1">Antes de operar, es obligatorio confirmar que tus datos fiduciarios son correctos.</p></div>
         </div>
         <Card>
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-8 pb-8 border-b border-slate-100">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-800">Perfil Fiduciario</h2>
-              <p className="text-slate-500">Revisión de legajo digital</p>
-            </div>
-            <div className="text-center md:text-right">
-              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Categoría Oficial</span>
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${currentRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : currentRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>
-                {currentRole === ROLES.ADMIN && <IconShield className="w-4 h-4" />}
-                {currentRole}
-              </span>
-              <div className="mt-2 text-xl font-black text-slate-800 tracking-tight">Socio Nº {formatId(user.correlativeId)}</div>
-            </div>
+            <div><h2 className="text-2xl font-bold text-slate-800">Perfil Fiduciario</h2><p className="text-slate-500">Revisión de legajo digital</p></div>
+            <div className="text-center md:text-right"><span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Categoría Oficial</span><span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${currentRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : currentRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>{currentRole === ROLES.ADMIN && <IconShield className="w-4 h-4" />}{currentRole}</span><div className="mt-2 text-xl font-black text-slate-800 tracking-tight">Socio Nº {formatId(user.correlativeId)}</div></div>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required />
-              <InputField label="Apellidos" value={formData.apellidos} onChange={(e: any) => setFormData({ ...formData, apellidos: e.target.value })} required />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required /><InputField label="Apellidos" value={formData.apellidos} onChange={(e: any) => setFormData({ ...formData, apellidos: e.target.value })} required /></div>
             <InputField label="CUIT / CUIL" value={formData.cuit} onChange={(e: any) => setFormData({ ...formData, cuit: e.target.value })} required />
             <InputField label="Teléfono de Contacto" value={formData.telefono} onChange={(e: any) => setFormData({ ...formData, telefono: e.target.value })} required />
-            <div className="pt-6">
-              <Button type="submit" className="w-full" isLoading={isLoading} icon={IconCheckCircle}>Confirmo que mis datos son correctos</Button>
-            </div>
+            <div className="pt-6"><Button type="submit" className="w-full" isLoading={isLoading} icon={IconCheckCircle}>Confirmo que mis datos son correctos</Button></div>
           </form>
         </Card>
       </div>
@@ -767,14 +538,18 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
   );
 };
 
-const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
+const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, setView, handleLogout }: any) => {
   const misCdps = cdps.filter((c: any) => c.ownerId === user.id);
   const currentRole = getUserRole(user, cdps);
+  
+  // Estado para la bóveda inteligente
+  const [selectedBovedaCdp, setSelectedBovedaCdp] = useState("");
+  const bovedaDocsFiltered = selectedBovedaCdp ? boveda.filter((d:any) => String(d.cdpNumber) === String(selectedBovedaCdp)) : [];
 
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
               <IconBuilding className="w-5 h-5 text-white" />
@@ -794,14 +569,16 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-800">Bienvenido, {user.nombres}</h2>
-          <p className="text-slate-500 mt-1">Categoría: <span className="font-bold text-violet-600">{currentRole}</span></p>
-        </div>
-
+      <main className="max-w-[1400px] mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* COLUMNA IZQUIERDA (Mensaje, Credencial, Legajo) */}
           <div className="lg:col-span-4 space-y-6">
+            <div className="mb-2">
+              <h2 className="text-3xl font-bold text-slate-800">Bienvenido, {user.nombres}</h2>
+              <p className="text-slate-500 mt-1">Categoría Oficial: <span className="font-bold text-violet-600">{currentRole}</span></p>
+            </div>
+
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-violet-900 p-8 text-white shadow-2xl shadow-violet-900/20 border border-white/10">
               <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-violet-500/20 rounded-full blur-3xl"></div>
@@ -841,38 +618,109 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
             </Card>
           </div>
 
-          <div className="lg:col-span-8 space-y-8">
-            <div>
-              <h3 className="text-xl font-bold text-slate-800 mb-4">Acciones Rápidas</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
-                  <div className="w-14 h-14 bg-violet-50 text-violet-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <IconBuilding className="w-7 h-7" />
-                  </div>
-                  <h4 className="text-xl font-bold text-slate-800 mb-2">Mercado Activo</h4>
-                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Explora oportunidades y cede participaciones (Valores en USD).</p>
-                  <div className="flex items-center text-sm font-bold text-violet-600">
-                    Ver mercado <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-                <div className="group cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-violet-200/50 hover:border-violet-200 transition-all duration-300">
-                  <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <IconFileText className="w-7 h-7" />
-                  </div>
-                  <h4 className="text-xl font-bold text-slate-800 mb-2">Mis Documentos</h4>
-                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Accede a tus Certificados de Participación y anexos.</p>
-                  <div className="flex items-center text-sm font-bold text-blue-600">
-                    Ingresar a bóveda <IconChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                  </div>
+          {/* COLUMNA DERECHA (Mercado, Bóveda, CDPs) */}
+          <div className="lg:col-span-8 space-y-6">
+            
+            {/* SECCIÓN 1: MERCADO ACTIVO */}
+            <Card className="p-6">
+              <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <IconTrendingUp className="w-6 h-6 text-violet-600" /> Mercado Activo
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">Tendencia de precios e instrumentos en venta (Valores USD).</p>
                 </div>
               </div>
-            </div>
+              
+              <div className="bg-slate-50 rounded-2xl border border-slate-200 mb-6">
+                 <MarketChart operaciones={operaciones} simplified={true} />
+              </div>
 
+              <h4 className="text-lg font-bold text-slate-800 mb-4">CDPs Disponibles para Compra</h4>
+              {ofertas.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {ofertas.map((of: any) => (
+                    <div key={of.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-violet-300 transition-all flex flex-col gap-3">
+                       <div className="flex justify-between items-center">
+                          <span className="bg-violet-100 text-violet-700 font-black text-xs px-2.5 py-1 rounded-lg">CDP {of.cdpNumber}</span>
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded-lg uppercase">
+                             <IconClock className="w-3 h-3" /> Vence: {formatDateForDisplay(of.vencimiento)}
+                          </span>
+                       </div>
+                       <div className="text-center py-2">
+                          <span className="text-xs text-slate-400 font-bold uppercase tracking-widest block mb-1">Valor Solicitado</span>
+                          <span className="text-2xl font-black text-slate-800">USD {Number(of.monto).toLocaleString()}</span>
+                       </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                 <div className="text-center py-8 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                    <IconTag className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-slate-500 text-sm font-medium">No hay ofertas de venta publicadas en este momento.</p>
+                 </div>
+              )}
+            </Card>
+
+            {/* SECCIÓN 2: BÓVEDA DOCUMENTOS */}
+            <Card className="p-6">
+              <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <IconFolder className="w-6 h-6 text-blue-600" /> Bóveda de Documentos
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">Accede a las copias digitales de tus certificados legales.</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                 <div className="flex-1">
+                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Selecciona un activo de tu propiedad:</label>
+                   <select 
+                     className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold text-slate-700" 
+                     value={selectedBovedaCdp} 
+                     onChange={(e) => setSelectedBovedaCdp(e.target.value)}
+                   >
+                     <option value="">-- Mis CDPs Asignados --</option>
+                     {misCdps.map((c:any) => <option key={c.number} value={c.number}>Certificado Nº {c.number}</option>)}
+                   </select>
+                 </div>
+              </div>
+
+              {selectedBovedaCdp ? (
+                bovedaDocsFiltered.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-300">
+                     {bovedaDocsFiltered.map((doc:any) => (
+                        <a key={doc.id} href={doc.url} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 hover:border-blue-300 rounded-2xl transition-all group shadow-sm">
+                           <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-500">
+                                 <IconFileText className="w-5 h-5" />
+                              </div>
+                              <span className="font-bold text-slate-700 text-sm line-clamp-2">{doc.titulo}</span>
+                           </div>
+                           <IconExternalLink className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                        </a>
+                     ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 animate-in fade-in">
+                    <IconFileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-slate-500 text-sm font-medium">No hay documentos vinculados a este CDP todavía.</p>
+                  </div>
+                )
+              ) : (
+                 <div className="text-center py-6 bg-slate-50 rounded-xl border border-slate-200 text-slate-400 text-sm">
+                    Utiliza el menú superior para ver tus documentos.
+                 </div>
+              )}
+            </Card>
+
+            {/* SECCIÓN 3: MIS CDPS ASIGNADOS */}
             <Card className="p-6 border-t-4 border-t-violet-500">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <IconFileText className="w-6 h-6 text-violet-500" /> Mis CDPs Asignados
+                    <IconGrid className="w-6 h-6 text-violet-500" /> Mis CDPs Asignados
                   </h3>
                   <p className="text-slate-500 text-sm mt-1">Derechos de Participación a tu nombre.</p>
                 </div>
@@ -882,11 +730,11 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
               </div>
 
               {misCdps.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {misCdps.map((cdp: any) => (
                     <div key={cdp.id} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center group hover:border-violet-400 hover:shadow-md transition-all">
                       <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Activo</p>
-                      <p className="font-bold text-slate-800 text-lg">CDP Número {cdp.number}</p>
+                      <p className="font-bold text-slate-800 text-lg">CDP {cdp.number}</p>
                     </div>
                   ))}
                 </div>
@@ -897,6 +745,7 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
                 </div>
               )}
             </Card>
+
           </div>
         </div>
       </main>
@@ -984,28 +833,16 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </button>
         </div>
 
-        {/* CONTENIDO FIDUCIANTES */}
         {activeTab === "fiduciantes" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex justify-between items-end">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">Directorio de Socios</h2>
-                <p className="text-slate-500 mt-1">Sincronización en tiempo real desde Firebase.</p>
-              </div>
+              <div><h2 className="text-2xl font-bold text-slate-800">Directorio de Socios</h2></div>
               <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-semibold text-slate-600">Total: {users.length}</div>
             </div>
             <Card className="!p-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
-                      <th className="p-4 font-semibold">ID</th>
-                      <th className="p-4 font-semibold">Fiduciante</th>
-                      <th className="p-4 font-semibold">Categoría Oficial</th>
-                      <th className="p-4 font-semibold">Contacto</th>
-                      <th className="p-4 font-semibold text-right">Acciones</th>
-                    </tr>
-                  </thead>
+                  <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">ID</th><th className="p-4 font-semibold">Fiduciante</th><th className="p-4 font-semibold">Categoría Oficial</th><th className="p-4 font-semibold">Contacto</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
                     {users.map((u: any) => {
                       const uRole = getUserRole(u, cdps);
@@ -1016,7 +853,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
                           <td className="p-4 align-middle"><span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${uRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : uRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>{uRole}</span></td>
                           <td className="p-4 align-middle"><p className="text-sm font-medium text-slate-700">{u.email}</p><p className="text-sm text-slate-500 mt-0.5">{u.telefono}</p></td>
                           <td className="p-4 align-middle text-right space-x-2">
-                            <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar"><IconEdit className="w-5 h-5" /></button>
+                            <button onClick={() => setEditingUser(u)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
                             <button onClick={() => handleDeleteUserRequest(u)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
                           </td>
                         </tr>
@@ -1029,22 +866,12 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </div>
         )}
 
-        {/* CONTENIDO CDPs */}
         {activeTab === "cdps" && (
           <div className="animate-in fade-in duration-300">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">Mapa Global de Activos</h2>
-              <p className="text-slate-500 mt-1">El registro de titularidad está automatizado por Event Sourcing.</p>
-            </div>
+            <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800">Mapa Global de Activos</h2></div>
             <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl mb-6 flex items-start gap-4 shadow-sm">
                <IconInfo className="w-6 h-6 shrink-0 mt-0.5" />
-               <div>
-                  <h4 className="font-bold">Asignación Dinámica Activada</h4>
-                  <p className="text-sm mt-1 leading-relaxed">
-                    Por regla de negocio, los 413 CDPs inician bajo la titularidad de <b>Sergio Gabriel Argumedo Rosello</b>.<br/>
-                    El sistema lee el <b>Registro de Operaciones</b> cronológicamente y actualiza de forma automática a los nuevos propietarios.
-                  </p>
-               </div>
+               <div><h4 className="font-bold">Asignación Dinámica Activada</h4><p className="text-sm mt-1 leading-relaxed">El sistema lee el <b>Registro de Operaciones</b> cronológicamente y actualiza de forma automática a los nuevos propietarios.</p></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {Array.from({ length: TOTAL_CDPS }, (_, i) => i + 1).map(num => {
@@ -1052,17 +879,10 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
                 const currentOwnerId = cdpInfo ? cdpInfo.ownerId : "";
                 const ownerName = getUserName(currentOwnerId);
                 const isBaseOwner = currentOwnerId === "base_owner_sergio" || ownerName.toLowerCase().includes("argumedo");
-                
                 return (
                   <div key={num} className={`bg-white p-4 rounded-2xl border transition-all shadow-sm flex flex-col gap-3 ${isBaseOwner ? "border-slate-200" : "border-violet-300 bg-violet-50/40"}`}>
-                    <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                      <span className="font-black text-slate-800 text-sm">CDP Número {num}</span>
-                      <IconFileText className={`w-4 h-4 ${isBaseOwner ? "text-slate-300" : "text-violet-500"}`} />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Propietario Actual:</label>
-                      <div className="text-sm font-bold text-slate-700 truncate" title={ownerName}>{ownerName}</div>
-                    </div>
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-2"><span className="font-black text-slate-800 text-sm">CDP Número {num}</span><IconFileText className={`w-4 h-4 ${isBaseOwner ? "text-slate-300" : "text-violet-500"}`} /></div>
+                    <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Propietario Actual:</label><div className="text-sm font-bold text-slate-700 truncate" title={ownerName}>{ownerName}</div></div>
                   </div>
                 );
               })}
@@ -1070,35 +890,18 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </div>
         )}
 
-        {/* CONTENIDO OPERACIONES */}
         {activeTab === "operaciones" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">Historial de Transacciones</h2>
-                <p className="text-slate-500 mt-1">Llevá el registro de las cesiones y compra-ventas en USD.</p>
-              </div>
+              <div><h2 className="text-2xl font-bold text-slate-800">Historial de Transacciones</h2></div>
               <Button onClick={() => setEditingOperacion(null)} icon={IconList} className="whitespace-nowrap">+ Nueva Operación</Button>
             </div>
             <Card className="!p-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
-                      <th className="p-4 font-semibold">Nº Oper.</th>
-                      <th className="p-4 font-semibold">Fecha</th>
-                      <th className="p-4 font-semibold">Nº CDP</th>
-                      <th className="p-4 font-semibold">Vendedor</th>
-                      <th className="p-4 font-semibold">Comprador</th>
-                      <th className="p-4 font-semibold text-right">Monto (USD)</th>
-                      <th className="p-4 font-semibold text-right">Acciones</th>
-                    </tr>
-                  </thead>
+                  <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº Oper.</th><th className="p-4 font-semibold">Fecha</th><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Vendedor</th><th className="p-4 font-semibold">Comprador</th><th className="p-4 font-semibold text-right">Monto (USD)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
-                    {operaciones.length === 0 ? (
-                      <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td></tr>
-                    ) : (
-                      operaciones.map((op: any) => (
+                    {operaciones.length === 0 ? <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td></tr> : operaciones.map((op: any) => (
                         <tr key={op.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{op.numero}</span></td>
                           <td className="p-4 align-middle text-sm text-slate-600 font-medium">{formatDateForDisplay(op.fecha)}</td>
@@ -1111,8 +914,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
                             <button onClick={() => handleDeleteOperacionRequest(op)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
                           </td>
                         </tr>
-                      ))
-                    )}
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -1120,35 +922,18 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </div>
         )}
 
-        {/* CONTENIDO OFERTAS */}
         {activeTab === "ofertas" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">Mercado: Ofertas de Venta</h2>
-                <p className="text-slate-500 mt-1">CDPs puestos a la venta por sus fiduciantes.</p>
-              </div>
+              <div><h2 className="text-2xl font-bold text-slate-800">Ofertas de Venta</h2></div>
               <Button onClick={() => setEditingOferta(null)} icon={IconTag} className="whitespace-nowrap">+ Nueva Oferta</Button>
             </div>
             <Card className="!p-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
-                      <th className="p-4 font-semibold">Nº Oferta</th>
-                      <th className="p-4 font-semibold">Publicada</th>
-                      <th className="p-4 font-semibold">Nº CDP</th>
-                      <th className="p-4 font-semibold">Vendedor</th>
-                      <th className="p-4 font-semibold">Vencimiento</th>
-                      <th className="p-4 font-semibold text-right">Monto (USD)</th>
-                      <th className="p-4 font-semibold text-right">Acciones</th>
-                    </tr>
-                  </thead>
+                  <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº Oferta</th><th className="p-4 font-semibold">Publicada</th><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Vendedor</th><th className="p-4 font-semibold">Vencimiento</th><th className="p-4 font-semibold text-right">Monto (USD)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
-                    {ofertas.length === 0 ? (
-                      <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay ofertas de venta activas.</td></tr>
-                    ) : (
-                      ofertas.map((of: any) => (
+                    {ofertas.length === 0 ? <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay ofertas de venta activas.</td></tr> : ofertas.map((of: any) => (
                         <tr key={of.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{of.numero}</span></td>
                           <td className="p-4 align-middle text-sm text-slate-600">{formatDateForDisplay(of.fecha)}</td>
@@ -1161,8 +946,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
                             <button onClick={() => handleDeleteOfertaRequest(of)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
                           </td>
                         </tr>
-                      ))
-                    )}
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -1170,47 +954,28 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </div>
         )}
 
-        {/* CONTENIDO BÓVEDA */}
         {activeTab === "boveda" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">Bóveda de Documentos (PDF/Imágenes)</h2>
-                <p className="text-slate-500 mt-1">Repositorio de enlaces a los contratos y certificados escaneados.</p>
-              </div>
+              <div><h2 className="text-2xl font-bold text-slate-800">Bóveda de Documentos</h2></div>
               <Button onClick={() => setEditingBoveda(null)} icon={IconFolder} className="whitespace-nowrap">+ Cargar Documento</Button>
             </div>
             <Card className="!p-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
-                      <th className="p-4 font-semibold">Nº CDP</th>
-                      <th className="p-4 font-semibold">Título del Documento</th>
-                      <th className="p-4 font-semibold">Enlace (URL)</th>
-                      <th className="p-4 font-semibold text-right">Acciones</th>
-                    </tr>
-                  </thead>
+                  <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Título del Documento</th><th className="p-4 font-semibold">Enlace (URL)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
-                    {boveda.length === 0 ? (
-                      <tr><td colSpan={4} className="p-8 text-center text-slate-500 font-medium">La bóveda de documentos está vacía.</td></tr>
-                    ) : (
-                      boveda.map((doc: any) => (
+                    {boveda.length === 0 ? <tr><td colSpan={4} className="p-8 text-center text-slate-500 font-medium">La bóveda de documentos está vacía.</td></tr> : boveda.map((doc: any) => (
                         <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">CDP {doc.cdpNumber}</span></td>
                           <td className="p-4 align-middle text-sm font-bold text-slate-800">{doc.titulo}</td>
-                          <td className="p-4 align-middle">
-                            <a href={doc.url} target="_blank" rel="noreferrer" className="text-sm font-medium text-blue-500 hover:underline flex items-center gap-1">
-                              Abrir Archivo <IconChevronRight className="w-3 h-3" />
-                            </a>
-                          </td>
+                          <td className="p-4 align-middle"><a href={doc.url} target="_blank" rel="noreferrer" className="text-sm font-medium text-blue-500 hover:underline flex items-center gap-1">Abrir Archivo <IconChevronRight className="w-3 h-3" /></a></td>
                           <td className="p-4 align-middle text-right space-x-2">
                             <button onClick={() => setEditingBoveda(doc)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
                             <button onClick={() => handleDeleteBovedaRequest(doc)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
                           </td>
                         </tr>
-                      ))
-                    )}
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -1218,12 +983,10 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </div>
         )}
 
-        {/* CONTENIDO GRÁFICO */}
         {activeTab === "grafico" && <MarketChart operaciones={operaciones} />}
 
       </main>
 
-      {/* RENDERIZADO DE MODALES */}
       {editingUser && <AdminEditModal user={editingUser} onClose={() => setEditingUser(undefined)} onUpdate={(id: string, data: any) => { onUpdateUser(id, data); if (id === currentUser.id) { setCurrentUser(data); if (!data.isAdmin) setView("dashboard"); } }} showGlobalMessage={showGlobalMessage} />}
       {editingOperacion !== undefined && <OperacionModal operacion={editingOperacion} users={users} onClose={() => setEditingOperacion(undefined)} onSave={onSaveOperacion} showGlobalMessage={showGlobalMessage} />}
       {editingOferta !== undefined && <OfertaModal oferta={editingOferta} users={users} cdps={cdps} nextOfertaNum={nextOfertaNum} onClose={() => setEditingOferta(undefined)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
@@ -1240,7 +1003,6 @@ export default function App() {
   const [currentView, setCurrentView] = useState("login");
   const [currentUser, setCurrentUser] = useState<any>(null);
   
-  // Estados de Firebase y Derivados
   const [firebaseUser, setFirebaseUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [computedCdps, setComputedCdps] = useState<any[]>([]);
@@ -1276,7 +1038,6 @@ export default function App() {
   useEffect(() => {
     if (!firebaseConfig || !firebaseUser) return;
     
-    // Fiduciantes
     const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'fiduciantes');
     const uUnsubscribe = onSnapshot(usersRef, (snapshot: any) => {
       setUsers(snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })));
@@ -1284,7 +1045,6 @@ export default function App() {
       setDbError(null);
     }, () => { setDbError("Error de permisos."); setIsInitializing(false); });
 
-    // Operaciones
     const operacionesRef = collection(db, 'artifacts', appId, 'public', 'data', 'operaciones');
     const oUnsubscribe = onSnapshot(operacionesRef, (snapshot: any) => {
       const ops = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
@@ -1295,7 +1055,6 @@ export default function App() {
       setOperaciones(ops);
     });
 
-    // Ofertas
     const ofertasRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas');
     const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot: any) => {
       const ofs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
@@ -1303,7 +1062,6 @@ export default function App() {
       setOfertas(ofs);
     });
 
-    // Bóveda
     const bovedaRef = collection(db, 'artifacts', appId, 'public', 'data', 'boveda');
     const bovUnsubscribe = onSnapshot(bovedaRef, (snapshot: any) => {
       const docs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
@@ -1380,7 +1138,7 @@ export default function App() {
       {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={computedCdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
-      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} setView={setCurrentView} handleLogout={handleLogout} />}
+      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} setView={setCurrentView} handleLogout={handleLogout} />}
       {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </>
