@@ -128,7 +128,7 @@ const Button = ({ children, variant = "primary", isLoading = false, icon: Icon, 
 
   return (
     <button className={`${baseStyle} ${variants[variant]} ${className}`} disabled={isLoading || props.disabled} {...props}>
-      {isLoading ? <Spinner /> : Icon && <Icon className="w-5 h-5 shrink-0" />}
+      {isLoading ? <Spinner /> : (Icon && typeof Icon === 'function' && <Icon className="w-5 h-5 shrink-0" />)}
       {children}
     </button>
   );
@@ -138,7 +138,7 @@ const InputField = ({ label, icon: Icon, error, ...props }: any) => (
   <div className="flex flex-col gap-1 w-full">
     {label && <label className="text-sm font-semibold text-slate-600 ml-1">{label}</label>}
     <div className="relative">
-      {Icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icon className="w-5 h-5" /></div>}
+      {Icon && typeof Icon === 'function' && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icon className="w-5 h-5" /></div>}
       <input
         className={`w-full bg-slate-50 border ${error ? "border-red-400 focus:ring-red-500" : "border-slate-200 focus:ring-violet-500"} text-slate-800 rounded-2xl py-3 px-4 ${Icon ? "pl-12" : ""} outline-none focus:ring-2 transition-all`}
         {...props}
@@ -464,7 +464,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v38</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v39</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -608,7 +608,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
               </div>
             </div>
 
-            <Card className="p-6">
+            <Card className="p-6 border-t-4 border-t-violet-500">
               <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <IconUser className="w-5 h-5 text-violet-500" /> Legajo Digital
               </h3>
@@ -633,7 +633,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
           <div className="lg:col-span-8 space-y-6">
             
             {/* SECCIÓN 1: MERCADO ACTIVO (GRILLA 3x3 ESTRICTA BLOQUEADA CON BOTONES ALTOS) */}
-            <Card className="p-6 bg-slate-100/50">
+            <Card className="p-6 bg-slate-100/50 border-t-4 border-t-violet-500">
               <div className="mb-6 border-b border-slate-200 pb-4">
                   <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
                     <IconTrendingUp className="w-7 h-7 text-violet-600" /> Mercado Activo
@@ -657,20 +657,26 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    <div className="overflow-y-auto space-y-2.5 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                       {ofertasOrdenadas.length > 0 ? (
                         ofertasOrdenadas.map((of: any) => (
-                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col gap-1.5 group relative overflow-hidden">
+                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col gap-2 group relative overflow-hidden">
                              
-                             <div className="flex justify-between items-center">
-                               <div className="flex items-center gap-2">
-                                 <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200">Oferta de Venta</span>
-                                 <span className="text-xs font-bold text-slate-600">CDP {of.cdpNumber}</span>
-                               </div>
-                               <span className="flex items-center gap-1 text-[9px] font-bold text-red-500 uppercase">
+                             {/* Fila Superior: Oferta de Venta y Fecha de Vencimiento */}
+                             <div className="flex justify-between items-start">
+                               <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200">
+                                 Oferta de Venta
+                               </span>
+                               <span className="flex items-center gap-1 text-[9px] font-bold text-red-500 uppercase mt-0.5">
                                   <IconClock className="w-3 h-3" /> Vence {formatDateForDisplay(of.vencimiento)}
                                </span>
                              </div>
 
+                             {/* Fila Inferior: Precio y Número de CDP */}
                              <div className="flex justify-between items-end mt-1">
-                               <span className="text-xl font-black text-slate-800">USD {Number(of.monto).toLocaleString()}</span>
+                               <span className="text-xl font-black text-slate-800 leading-none">
+                                 USD {Number(of.monto).toLocaleString()}
+                               </span>
+                               <span className="text-xs font-bold text-slate-600 mb-0.5">
+                                 CDP {of.cdpNumber}
+                               </span>
                              </div>
 
                           </div>
@@ -704,7 +710,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
             </Card>
 
             {/* SECCIÓN 2: BÓVEDA DOCUMENTOS */}
-            <Card className="p-6">
+            <Card className="p-6 border-t-4 border-t-blue-500">
               <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -1014,7 +1020,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
 // COMPONENTE PRINCIPAL APP
 // ==========================================
 
-export default function App() {
+const MercadoApp = () => {
   const [currentView, setCurrentView] = useState("login");
   const [currentUser, setCurrentUser] = useState<any>(null);
   
@@ -1161,13 +1167,15 @@ export default function App() {
   if (isInitializing || !isDbReady) return <div style={{ display: 'flex', height: '100vh', width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', color: '#64748b' }}><div><div style={{ fontWeight: 600, fontSize: '1.125rem', marginBottom: '0.5rem', color: '#7c3aed' }}>Mercado de CDP</div><p style={{ fontSize: '0.875rem' }}>Conectando de forma segura con la Nube...</p></div></div>;
 
   return (
-    <>
+    <React.Fragment>
       {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={computedCdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} handleLogout={handleLogout} />}
       {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} onSaveChartConfig={handleSaveChartConfig} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
-    </>
+    </React.Fragment>
   );
-}
+};
+
+export default MercadoApp;
