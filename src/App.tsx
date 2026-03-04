@@ -23,10 +23,10 @@ const ROLES = {
 };
 
 const TOTAL_CDPS = 413;
-const SESSION_KEY = "cdp_session_v23"; // Mantenemos la llave base de sesión segura
+const SESSION_KEY = "cdp_session_v23";
 
 // ==========================================
-// ÍCONOS INTEGRADOS (Compatibles con TypeScript para Vercel)
+// ÍCONOS INTEGRADOS
 // ==========================================
 const SvgIcon = ({ children, ...props }: any) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -57,6 +57,7 @@ const IconList = (props: any) => <SvgIcon {...props}><line x1="8" y1="6" x2="21"
 const IconDollarSign = (props: any) => <SvgIcon {...props}><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></SvgIcon>;
 const IconTag = (props: any) => <SvgIcon {...props}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></SvgIcon>;
 const IconFolder = (props: any) => <SvgIcon {...props}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></SvgIcon>;
+const IconTrendingUp = (props: any) => <SvgIcon {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
@@ -83,7 +84,6 @@ if (firebaseConfig) {
 
 const formatId = (num: number) => `#${String(num).padStart(4, "0")}`;
 
-// Helpers de Fecha (Solución al Bug de Zona Horaria)
 const getLocalDateString = () => {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -96,7 +96,6 @@ const formatDateForDisplay = (dateStr: string) => {
   return dateStr;
 };
 
-// LÓGICA DE NEGOCIO: Determinación de Categoría (Automática)
 const getUserRole = (user: any, cdps: any[]) => {
   if (user.isAdmin || user.correlativeId === 1) return ROLES.ADMIN;
   const ownsCdp = cdps.some((c: any) => c.ownerId === user.id);
@@ -244,7 +243,7 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
     vendedorId: "",
     compradorId: "",
     monto: "",
-    fecha: getLocalDateString() // Usa la función corregida local
+    fecha: getLocalDateString()
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -309,9 +308,9 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
   );
 };
 
-const OfertaModal = ({ oferta, users, onClose, onSave, showGlobalMessage }: any) => {
+const OfertaModal = ({ oferta, users, cdps, nextOfertaNum, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState(oferta || {
-    numero: "",
+    numero: String(nextOfertaNum),
     cdpNumber: "",
     vendedorId: "",
     monto: "",
@@ -329,6 +328,24 @@ const OfertaModal = ({ oferta, users, onClose, onSave, showGlobalMessage }: any)
     onClose();
   };
 
+  const handleCdpChange = (e: any) => {
+    const val = e.target.value;
+    const num = Number(val);
+    let newVendedorId = formData.vendedorId;
+
+    if (num >= 1 && num <= TOTAL_CDPS) {
+       const cdp = cdps.find((c:any) => c.number === num);
+       if (cdp) newVendedorId = cdp.ownerId;
+    }
+
+    setFormData({ ...formData, cdpNumber: val, vendedorId: newVendedorId });
+  };
+
+  const handleVendedorChange = (e: any) => {
+    const val = e.target.value;
+    setFormData({ ...formData, vendedorId: val, cdpNumber: "" });
+  };
+
   const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   return (
@@ -340,13 +357,14 @@ const OfertaModal = ({ oferta, users, onClose, onSave, showGlobalMessage }: any)
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField label="Nº de Oferta" type="number" name="numero" value={formData.numero} onChange={handleChange} required />
-            <InputField label="Nº CDP a la venta" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required />
+          
+          <div className="bg-violet-50 p-4 rounded-xl border border-violet-100 mb-2">
+            <InputField label="Nº de Oferta (Automático)" type="number" name="numero" value={formData.numero} onChange={handleChange} required />
           </div>
-          <div className="flex flex-col gap-1 w-full mt-2">
+
+          <div className="flex flex-col gap-1 w-full">
             <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label>
-            <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="vendedorId" value={formData.vendedorId} onChange={handleChange} required>
+            <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="vendedorId" value={formData.vendedorId} onChange={handleVendedorChange} required>
               <option value="">-- Seleccionar Vendedor --</option>
               <option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello (Base)</option>
               {users.map((u: any) => (
@@ -354,11 +372,29 @@ const OfertaModal = ({ oferta, users, onClose, onSave, showGlobalMessage }: any)
               ))}
             </select>
           </div>
+
+          <div className="flex flex-col gap-1 w-full">
+            <label className="text-sm font-semibold text-slate-600 ml-1">Nº CDP a la venta</label>
+            {formData.vendedorId ? (
+                <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="cdpNumber" value={formData.cdpNumber} onChange={handleCdpChange} required>
+                   <option value="">-- Seleccione el CDP del Fiduciante --</option>
+                   {cdps.filter((c:any) => c.ownerId === formData.vendedorId).map((c:any) => (
+                       <option key={c.number} value={c.number}>CDP Nº {c.number}</option>
+                   ))}
+                </select>
+            ) : (
+                <input type="number" className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-violet-500 transition-all" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleCdpChange} placeholder="Escriba el Nº de CDP..." required />
+            )}
+            {!formData.vendedorId && <p className="text-[10px] text-slate-400 font-medium ml-1 mt-1">Si escribe un CDP válido, se autocompletará el vendedor.</p>}
+          </div>
+
           <InputField icon={IconDollarSign} label="Monto Solicitado (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required />
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField label="Fecha Publicación" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required />
             <InputField label="Fecha Vencimiento" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required />
           </div>
+          
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
             <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Oferta</Button>
@@ -419,6 +455,135 @@ const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) =>
 };
 
 // ==========================================
+// COMPONENTE: GRÁFICO DE MERCADO
+// ==========================================
+const MarketChart = ({ operaciones }: any) => {
+  const [hoveredPoint, setHoveredPoint] = useState<any>(null);
+  const [filtroAnio, setFiltroAnio] = useState("Todos");
+
+  const opsConMonto = operaciones.filter((op:any) => op.monto && op.fecha && !isNaN(Number(op.monto)));
+  const aniosDisponibles = ["Todos", ...Array.from(new Set(opsConMonto.map((op:any) => op.fecha.substring(0,4)))).sort().reverse()];
+
+  const dataFiltrada = filtroAnio === "Todos"
+      ? opsConMonto
+      : opsConMonto.filter((op:any) => op.fecha.startsWith(filtroAnio));
+
+  const data = dataFiltrada
+      .map((op:any) => ({
+          dateMs: new Date(op.fecha + "T00:00:00").getTime(),
+          monto: Number(op.monto),
+          fechaStr: formatDateForDisplay(op.fecha),
+          id: op.id
+      }))
+      .sort((a:any, b:any) => a.dateMs - b.dateMs);
+
+  if (data.length < 2) {
+      return (
+        <Card className="text-center py-16 bg-slate-50 border-2 border-dashed border-slate-200">
+           <IconTrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+           <h3 className="text-lg font-bold text-slate-600">Datos Insuficientes</h3>
+           <p className="text-slate-500 mt-2">Se requieren al menos 2 operaciones registradas para trazar el gráfico de mercado.</p>
+        </Card>
+      );
+  }
+
+  const width = 800;
+  const height = 400;
+  const paddingX = 60;
+  const paddingY = 60;
+
+  const minX = data[0].dateMs;
+  const maxX = data[data.length - 1].dateMs;
+  const rangeX = maxX - minX || 1; 
+
+  const minY = Math.min(...data.map((d:any) => d.monto));
+  const maxY = Math.max(...data.map((d:any) => d.monto));
+  const rangeY = maxY - minY || 1;
+
+  // Espaciado en el eje Y (10% extra arriba y abajo para que los puntos no toquen el borde)
+  const paddedMinY = Math.max(0, minY - rangeY * 0.1);
+  const paddedMaxY = maxY + rangeY * 0.1;
+  const paddedRangeY = paddedMaxY - paddedMinY;
+
+  const getX = (dateMs: number) => paddingX + ((dateMs - minX) / rangeX) * (width - paddingX * 2);
+  const getY = (monto: number) => height - paddingY - ((monto - paddedMinY) / paddedRangeY) * (height - paddingY * 2);
+
+  const pointsStr = data.map((d:any) => `${getX(d.dateMs)},${getY(d.monto)}`).join(" ");
+
+  return (
+    <div className="animate-in fade-in duration-300">
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">Evolución de Precios (USD)</h2>
+          <p className="text-slate-500 mt-1">Análisis visual del mercado secundario de CDPs.</p>
+        </div>
+        <div className="flex items-center gap-2">
+           <span className="text-sm font-semibold text-slate-500">Filtrar por Año:</span>
+           <select value={filtroAnio} onChange={(e) => setFiltroAnio(e.target.value)} className="bg-white border border-slate-300 rounded-xl px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-violet-500 shadow-sm">
+              {aniosDisponibles.map((a:any) => <option key={a} value={a}>{a}</option>)}
+           </select>
+        </div>
+      </div>
+      <Card className="!p-4 overflow-hidden relative group">
+        <div className="w-full overflow-x-auto overflow-y-hidden no-scrollbar">
+           <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-[700px] bg-slate-900 rounded-2xl">
+             {/* Líneas de Cuadrícula (Eje Y) */}
+             {[0, 0.25, 0.5, 0.75, 1].map(factor => {
+                 const y = height - paddingY - factor * (height - paddingY * 2);
+                 const val = paddedMinY + factor * paddedRangeY;
+                 return (
+                     <g key={factor}>
+                       <line x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke="#334155" strokeDasharray="4 4" />
+                       <text x={paddingX - 10} y={y + 4} textAnchor="end" className="text-xs fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
+                     </g>
+                 )
+             })}
+
+             {/* Línea Principal del Gráfico */}
+             <polyline points={pointsStr} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md" />
+
+             {/* Puntos Interactivos */}
+             {data.map((d:any, i:number) => (
+                 <circle
+                     key={i}
+                     cx={getX(d.dateMs)}
+                     cy={getY(d.monto)}
+                     r="6"
+                     fill="#1e293b"
+                     stroke="#a78bfa"
+                     strokeWidth="3"
+                     className="cursor-pointer transition-all duration-300 origin-center"
+                     style={{ transformOrigin: `${getX(d.dateMs)}px ${getY(d.monto)}px` }}
+                     onMouseEnter={(e) => {
+                       e.currentTarget.setAttribute('r', '8');
+                       e.currentTarget.setAttribute('fill', '#8b5cf6');
+                       setHoveredPoint({ x: getX(d.dateMs), y: getY(d.monto), ...d });
+                     }}
+                     onMouseLeave={(e) => {
+                       e.currentTarget.setAttribute('r', '6');
+                       e.currentTarget.setAttribute('fill', '#1e293b');
+                       setHoveredPoint(null);
+                     }}
+                 />
+             ))}
+
+             {/* Tooltip Dinámico en SVG */}
+             {hoveredPoint && (
+                 <g transform={`translate(${hoveredPoint.x}, ${hoveredPoint.y - 45})`} className="pointer-events-none transition-all duration-100 ease-out">
+                     <rect x="-65" y="-35" width="130" height="45" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
+                     <polygon points="-8,10 8,10 0,18" fill="#ffffff" />
+                     <text x="0" y="-15" textAnchor="middle" fill="#0f172a" className="text-[12px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
+                     <text x="0" y="2" textAnchor="middle" fill="#64748b" className="text-[10px] font-mono font-bold">{hoveredPoint.fechaStr}</text>
+                 </g>
+             )}
+           </svg>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ==========================================
 // VISTAS DE LA APLICACIÓN
 // ==========================================
 
@@ -464,7 +629,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v33</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v34</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -740,11 +905,13 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
 };
 
 const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, showGlobalMessage }: any) => {
-  const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes", "cdps", "operaciones", "ofertas", "boveda"
+  const [activeTab, setActiveTab] = useState("fiduciantes"); 
   const [editingUser, setEditingUser] = useState<any>(undefined);
   const [editingOperacion, setEditingOperacion] = useState<any>(undefined);
   const [editingOferta, setEditingOferta] = useState<any>(undefined);
   const [editingBoveda, setEditingBoveda] = useState<any>(undefined);
+
+  const nextOfertaNum = ofertas.length > 0 ? Math.max(...ofertas.map((o:any) => Number(o.numero) || 0)) + 1 : 1;
 
   const handleDeleteUserRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) {
@@ -783,7 +950,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center relative">
               <IconSettings className="w-5 h-5 text-violet-400" />
@@ -795,7 +962,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-[1400px] mx-auto px-4 py-8">
         <div className="flex flex-wrap gap-3 mb-8 border-b border-slate-200 pb-4">
           <button onClick={() => setActiveTab("fiduciantes")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "fiduciantes" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
             <IconUser className="w-4 h-4" /> Fiduciantes
@@ -811,6 +978,9 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </button>
           <button onClick={() => setActiveTab("boveda")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "boveda" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
             <IconFolder className="w-4 h-4" /> Bóveda Documentos
+          </button>
+          <button onClick={() => setActiveTab("grafico")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "grafico" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
+            <IconTrendingUp className="w-4 h-4" /> Gráfico de Mercado
           </button>
         </div>
 
@@ -1048,12 +1218,15 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
           </div>
         )}
 
+        {/* CONTENIDO GRÁFICO */}
+        {activeTab === "grafico" && <MarketChart operaciones={operaciones} />}
+
       </main>
 
       {/* RENDERIZADO DE MODALES */}
       {editingUser && <AdminEditModal user={editingUser} onClose={() => setEditingUser(undefined)} onUpdate={(id: string, data: any) => { onUpdateUser(id, data); if (id === currentUser.id) { setCurrentUser(data); if (!data.isAdmin) setView("dashboard"); } }} showGlobalMessage={showGlobalMessage} />}
       {editingOperacion !== undefined && <OperacionModal operacion={editingOperacion} users={users} onClose={() => setEditingOperacion(undefined)} onSave={onSaveOperacion} showGlobalMessage={showGlobalMessage} />}
-      {editingOferta !== undefined && <OfertaModal oferta={editingOferta} users={users} onClose={() => setEditingOferta(undefined)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
+      {editingOferta !== undefined && <OfertaModal oferta={editingOferta} users={users} cdps={cdps} nextOfertaNum={nextOfertaNum} onClose={() => setEditingOferta(undefined)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
       {editingBoveda !== undefined && <BovedaModal bovedaItem={editingBoveda} onClose={() => setEditingBoveda(undefined)} onSave={onSaveBoveda} showGlobalMessage={showGlobalMessage} />}
     </div>
   );
