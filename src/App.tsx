@@ -208,73 +208,13 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => 
               <span className="text-sm font-semibold text-slate-600">Gestión de Categorías Automática</span>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              La categoría de este usuario ya no se edita manualmente. El sistema verifica si posee al menos 1 CDP asignado en el mapa para otorgarle el estatus de &quot;Fiduciante Activo&quot;.
+              La categoría de este usuario se calcula automáticamente basándose en los registros de operaciones y el mapa global de activos.
             </p>
           </div>
 
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
             <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Cambios</Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-const BulkAssignModal = ({ users, onClose, onConfirm, showGlobalMessage }: any) => {
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
-  const [owner, setOwner] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const s = parseInt(start);
-    const eNum = parseInt(end);
-
-    if (isNaN(s) || isNaN(eNum) || s < 1 || eNum > TOTAL_CDPS || s > eNum) {
-      showGlobalMessage("error", "Rango Inválido", `Por favor ingresa un rango válido (Desde menor o igual a Hasta, máximo ${TOTAL_CDPS}).`);
-      return;
-    }
-
-    setIsLoading(true);
-    await onConfirm(s, eNum, owner);
-    setIsLoading(false);
-    showGlobalMessage("success", "Asignación Exitosa", `Se actualizaron correctamente los CDPs del ${s} al ${eNum}.`);
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full relative z-10 shadow-2xl scale-100 animate-in zoom-in-95">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">Asignación Múltiple</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
-        </div>
-        <p className="text-slate-500 mb-6 text-sm">Transfiere la titularidad de un rango completo de CDPs en una sola acción.</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <InputField label="Desde CDP Nº" type="number" min="1" max={TOTAL_CDPS} value={start} onChange={(e: any) => setStart(e.target.value)} required />
-            <InputField label="Hasta CDP Nº" type="number" min="1" max={TOTAL_CDPS} value={end} onChange={(e: any) => setEnd(e.target.value)} required />
-          </div>
-          <div className="flex flex-col gap-1 w-full mt-2">
-            <label className="text-sm font-semibold text-slate-600 ml-1">Nuevo Propietario</label>
-            <select
-              className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700"
-              value={owner}
-              onChange={(e) => setOwner(e.target.value)}
-            >
-              <option value="">-- Sin Asignar (Liberar) --</option>
-              {users.map((u: any) => (
-                <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-3 pt-6">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Aplicar</Button>
           </div>
         </form>
       </div>
@@ -302,7 +242,7 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
     setIsLoading(true);
     await onSave(formData);
     setIsLoading(false);
-    showGlobalMessage("success", "Operación Registrada", "El registro se guardó correctamente.");
+    showGlobalMessage("success", "Operación Registrada", "El registro se guardó correctamente y el Mapa de CDPs ha sido actualizado.");
     onClose();
   };
 
@@ -318,7 +258,7 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <InputField label="Nº Operación" name="numero" value={formData.numero} onChange={handleChange} required />
+            <InputField label="Nº Operación" type="number" name="numero" value={formData.numero} onChange={handleChange} required />
             <InputField label="Nº CDP" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required />
             <InputField label="Fecha" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required />
           </div>
@@ -326,6 +266,7 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
             <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label>
             <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="vendedorId" value={formData.vendedorId} onChange={handleChange} required>
               <option value="">-- Seleccionar Vendedor --</option>
+              <option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello (Base)</option>
               {users.map((u: any) => (
                 <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
               ))}
@@ -335,6 +276,7 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
             <label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Comprador</label>
             <select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700" name="compradorId" value={formData.compradorId} onChange={handleChange} required>
               <option value="">-- Seleccionar Comprador --</option>
+              <option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello (Base)</option>
               {users.map((u: any) => (
                 <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
               ))}
@@ -398,7 +340,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v30</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v31</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -673,11 +615,10 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
   );
 };
 
-const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentUser, onUpdateUser, onUpdateCDP, onBulkUpdateCDP, onDeleteUser, onSaveOperacion, onDeleteOperacion, showGlobalMessage }: any) => {
+const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, showGlobalMessage }: any) => {
   const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes", "cdps" o "operaciones"
   const [editingUser, setEditingUser] = useState<any>(null);
   const [editingOperacion, setEditingOperacion] = useState<any>(null);
-  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const handleDeleteUserRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) {
@@ -699,13 +640,14 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
       "confirm", "Eliminar Operación", `¿Estás seguro de que deseas eliminar la operación #${operacion.numero}?`,
       async () => {
         await onDeleteOperacion(operacion.id);
-        showGlobalMessage("success", "Operación Eliminada", "El registro fue borrado exitosamente de la base de datos.");
+        showGlobalMessage("success", "Operación Eliminada", "El registro fue borrado exitosamente y el mapa recalculará la titularidad.");
       },
       null, "Sí, Eliminar"
     );
   };
 
   const getUserName = (id: string) => {
+    if (id === "base_owner_sergio") return "Sergio Gabriel Argumedo Rosello";
     const user = users.find((u: any) => u.id === id);
     return user ? `${user.nombres} ${user.apellidos}` : "Usuario Desconocido";
   };
@@ -806,40 +748,40 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
 
         {activeTab === "cdps" && (
           <div className="animate-in fade-in duration-300">
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">Mapa Global de Activos</h2>
-                <p className="text-slate-500 mt-1">Asigna a qué fiduciante pertenece cada uno de los 413 CDPs disponibles.</p>
-              </div>
-              <Button onClick={() => setIsBulkModalOpen(true)} icon={IconGrid} className="whitespace-nowrap">
-                Asignación Múltiple
-              </Button>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-slate-800">Mapa Global de Activos</h2>
+              <p className="text-slate-500 mt-1">El registro de titularidad está automatizado por Event Sourcing.</p>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl mb-6 flex items-start gap-4 shadow-sm">
+               <IconInfo className="w-6 h-6 shrink-0 mt-0.5" />
+               <div>
+                  <h4 className="font-bold">Asignación Dinámica Activada</h4>
+                  <p className="text-sm mt-1 leading-relaxed">
+                    Por regla de negocio, los 413 CDPs inician bajo la titularidad de <b>Sergio Gabriel Argumedo Rosello</b>.<br/>
+                    El sistema lee el <b>Registro de Operaciones</b> cronológicamente y actualiza de forma automática a los nuevos propietarios.
+                  </p>
+               </div>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {Array.from({ length: TOTAL_CDPS }, (_, i) => i + 1).map(num => {
                 const cdpInfo = cdps.find((c: any) => c.number === num);
                 const currentOwnerId = cdpInfo ? cdpInfo.ownerId : "";
-                const hasOwner = currentOwnerId !== "";
+                const ownerName = getUserName(currentOwnerId);
+                const isBaseOwner = currentOwnerId === "base_owner_sergio" || ownerName.toLowerCase().includes("argumedo");
                 
                 return (
-                  <div key={num} className={`bg-white p-4 rounded-2xl border transition-all shadow-sm flex flex-col gap-3 ${hasOwner ? "border-violet-300" : "border-slate-200"}`}>
+                  <div key={num} className={`bg-white p-4 rounded-2xl border transition-all shadow-sm flex flex-col gap-3 ${isBaseOwner ? "border-slate-200" : "border-violet-300 bg-violet-50/40"}`}>
                     <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                       <span className="font-black text-slate-800 text-sm">CDP Número {num}</span>
-                      <IconFileText className={`w-4 h-4 ${hasOwner ? "text-violet-500" : "text-slate-300"}`} />
+                      <IconFileText className={`w-4 h-4 ${isBaseOwner ? "text-slate-300" : "text-violet-500"}`} />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Propietario:</label>
-                      <select 
-                        className="w-full text-sm p-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-slate-700"
-                        value={currentOwnerId}
-                        onChange={(e) => onUpdateCDP(num, e.target.value)}
-                      >
-                        <option value="">-- Sin Asignar --</option>
-                        {users.map((u: any) => (
-                          <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>
-                        ))}
-                      </select>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Propietario Actual:</label>
+                      <div className="text-sm font-bold text-slate-700 truncate" title={ownerName}>
+                        {ownerName}
+                      </div>
                     </div>
                   </div>
                 );
@@ -919,15 +861,6 @@ const AdminView = ({ users, cdps, operaciones, setView, currentUser, setCurrentU
         />
       )}
 
-      {isBulkModalOpen && (
-        <BulkAssignModal 
-          users={users}
-          onClose={() => setIsBulkModalOpen(false)}
-          onConfirm={onBulkUpdateCDP}
-          showGlobalMessage={showGlobalMessage}
-        />
-      )}
-
       {(activeTab === "operaciones" && editingOperacion !== undefined) && (
         <OperacionModal
           operacion={editingOperacion}
@@ -949,11 +882,11 @@ export default function App() {
   const [currentView, setCurrentView] = useState("login");
   const [currentUser, setCurrentUser] = useState<any>(null);
   
-  // Estados de Firebase
+  // Estados de Firebase y Derivados
   const [firebaseUser, setFirebaseUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
-  const [cdps, setCdps] = useState<any[]>([]); // Estado para los activos (CDPs)
-  const [operaciones, setOperaciones] = useState<any[]>([]); // Estado de operaciones
+  const [computedCdps, setComputedCdps] = useState<any[]>([]); // Estado derivado
+  const [operaciones, setOperaciones] = useState<any[]>([]);
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
@@ -988,7 +921,7 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // 2. Escuchar la Base de Datos (Usuarios, CDPs y Operaciones)
+  // 2. Escuchar la Base de Datos (Usuarios y Operaciones)
   useEffect(() => {
     if (!firebaseConfig || !firebaseUser) return;
     
@@ -1004,28 +937,70 @@ export default function App() {
       setIsInitializing(false);
     });
 
-    const cdpsRef = collection(db, 'artifacts', appId, 'public', 'data', 'cdps');
-    const cUnsubscribe = onSnapshot(cdpsRef, (snapshot: any) => {
-      const cdpsData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      setCdps(cdpsData);
-    });
-
     const operacionesRef = collection(db, 'artifacts', appId, 'public', 'data', 'operaciones');
     const oUnsubscribe = onSnapshot(operacionesRef, (snapshot: any) => {
       const operacionesData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      // Ordenar por fecha descendente
-      operacionesData.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+      
+      // Ordenar: Más NUEVAS (fecha reciente) arriba. En caso de misma fecha, mayor N° de operación arriba.
+      operacionesData.sort((a: any, b: any) => {
+          const dateDiff = new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
+          if (dateDiff === 0) {
+              return Number(b.numero) - Number(a.numero);
+          }
+          return dateDiff;
+      });
       setOperaciones(operacionesData);
     });
 
     return () => {
       uUnsubscribe();
-      cUnsubscribe();
       oUnsubscribe();
     };
   }, [firebaseUser]);
 
-  // 3. Restaurar Sesión
+  // 3. EVENT SOURCING: Calcular titularidad de CDPs al vuelo basándose en Operaciones
+  useEffect(() => {
+    if (users.length === 0) return;
+
+    // A. Encontrar al dueño base (Sergio Gabriel Argumedo Rosello) o usar ID de fallback
+    let baseOwnerId = "base_owner_sergio"; // ID Virtual
+    const sergio = users.find(u => u.nombres?.toLowerCase().includes("sergio") && u.apellidos?.toLowerCase().includes("argumedo"));
+    if (sergio) {
+      baseOwnerId = sergio.id;
+    }
+
+    // B. Crear mapa base: Los 413 CDPs son de Sergio
+    let ownershipMap: Record<number, string> = {};
+    for (let i = 1; i <= TOTAL_CDPS; i++) {
+        ownershipMap[i] = baseOwnerId;
+    }
+
+    // C. Replicar la historia: Ordenar operaciones de más VIEJAS a más NUEVAS para aplicar el traspaso
+    const chronologicalOps = [...operaciones].sort((a, b) => {
+        const dateDiff = new Date(a.fecha).getTime() - new Date(b.fecha).getTime();
+        if (dateDiff === 0) return Number(a.numero) - Number(b.numero);
+        return dateDiff;
+    });
+
+    // D. Traspasar titularidad a medida que avanzan las operaciones
+    chronologicalOps.forEach(op => {
+        const cdpNum = Number(op.cdpNumber);
+        if (cdpNum >= 1 && cdpNum <= TOTAL_CDPS && op.compradorId) {
+            ownershipMap[cdpNum] = op.compradorId;
+        }
+    });
+
+    // E. Convertir a Array para que la app lo consuma
+    const newComputedCdps = Object.keys(ownershipMap).map(numStr => ({
+        id: `cdp_${numStr}`,
+        number: Number(numStr),
+        ownerId: ownershipMap[Number(numStr)]
+    }));
+
+    setComputedCdps(newComputedCdps);
+  }, [users, operaciones]);
+
+  // 4. Restaurar Sesión
   useEffect(() => {
     if (isDbReady && isInitializing) {
       const sessionId = sessionStorage.getItem(SESSION_KEY);
@@ -1079,48 +1054,6 @@ export default function App() {
     } catch (e) { console.error("Error al eliminar operación", e); }
   };
 
-  // Función para asignar o desasignar un CDP individual
-  const handleUpdateCDP = async (num: number, ownerId: string) => {
-    try {
-      const cdpId = `cdp_${num}`;
-      if (!ownerId) {
-        // Si seleccionan "Sin asignar", borramos el documento
-        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId));
-      } else {
-        // Si asignan a alguien, creamos o actualizamos
-        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId), {
-          id: cdpId,
-          number: num,
-          ownerId: ownerId,
-          updatedAt: new Date().toISOString()
-        });
-      }
-    } catch (e) { console.error("Error al asignar CDP", e); }
-  };
-
-  // Función para asignación múltiple (Bulk Assign)
-  const handleBulkUpdateCDP = async (start: number, end: number, ownerId: string) => {
-    try {
-      const promises = [];
-      for (let i = start; i <= end; i++) {
-        const cdpId = `cdp_${i}`;
-        if (!ownerId) {
-          promises.push(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId)));
-        } else {
-          promises.push(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cdps', cdpId), {
-            id: cdpId,
-            number: i,
-            ownerId: ownerId,
-            updatedAt: new Date().toISOString()
-          }));
-        }
-      }
-      await Promise.all(promises);
-    } catch (e) { 
-      console.error("Error en asignación múltiple", e); 
-    }
-  };
-
   const showGlobalMessage = (type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
     setModalConfig({
       isOpen: true, type, title, message, confirmText, cancelText: "Cancelar",
@@ -1163,7 +1096,7 @@ export default function App() {
     );
   }
 
-  // SOLUCIÓN AL "CÍRCULO NEGRO": Estilos nativos de CSS sin depender de Tailwind durante el primer segundo de carga.
+  // SOLUCIÓN AL "CÍRCULO NEGRO": Estilos nativos de CSS
   if (isInitializing || !isDbReady) {
     return (
       <div style={{ display: 'flex', height: '100vh', width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', color: '#64748b', fontFamily: 'system-ui, sans-serif' }}>
@@ -1179,9 +1112,9 @@ export default function App() {
     <>
       {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
-      {currentView === "validation" && <ValidationView user={currentUser} cdps={cdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
-      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={cdps} setView={setCurrentView} handleLogout={handleLogout} />}
-      {currentView === "admin" && <AdminView users={users} cdps={cdps} operaciones={operaciones} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onUpdateCDP={handleUpdateCDP} onBulkUpdateCDP={handleBulkUpdateCDP} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "validation" && <ValidationView user={currentUser} cdps={computedCdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} setView={setCurrentView} handleLogout={handleLogout} />}
+      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </>
   );
