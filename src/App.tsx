@@ -61,6 +61,7 @@ const IconTrendingUp = (props: any) => <SvgIcon {...props}><polyline points="23 
 const IconExternalLink = (props: any) => <SvgIcon {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></SvgIcon>;
 const IconClock = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></SvgIcon>;
 const IconSave = (props: any) => <SvgIcon {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></SvgIcon>;
+const IconShoppingCart = (props: any) => <SvgIcon {...props}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
@@ -127,7 +128,7 @@ const Button = ({ children, variant = "primary", isLoading = false, icon: Icon, 
 
   return (
     <button className={`${baseStyle} ${variants[variant]} ${className}`} disabled={isLoading || props.disabled} {...props}>
-      {isLoading ? <Spinner /> : Icon && <Icon className="w-5 h-5" />}
+      {isLoading ? <Spinner /> : Icon && <Icon className="w-5 h-5 shrink-0" />}
       {children}
     </button>
   );
@@ -233,12 +234,10 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
   const defaultConfig = { filterYear: "Todos", yMin: "", yMax: "", yStep: "", xMin: "", xMax: "", xStep: "30" };
   const [localConfig, setLocalConfig] = useState(savedConfig || defaultConfig);
 
-  // Sincronizar si entran props nuevas desde la nube (útil para el Admin cuando carga)
   useEffect(() => {
     if (savedConfig) setLocalConfig(savedConfig);
   }, [savedConfig]);
 
-  // Si estamos en vista simplificada (Dashboard Fiduciante), usamos estrictamente lo guardado en la nube.
   const activeConfig = simplified ? (savedConfig || defaultConfig) : localConfig;
 
   const opsConMonto = operaciones.filter((op:any) => op.monto && op.fecha && !isNaN(Number(op.monto)));
@@ -254,7 +253,7 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
 
   if (data.length < 2) {
       return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl min-h-[300px]">
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 min-h-[300px]">
            <IconTrendingUp className="w-12 h-12 text-slate-300 mb-4" />
            <h3 className="text-lg font-bold text-slate-600">Datos Insuficientes</h3>
            <p className="text-slate-500 mt-2 text-center text-sm">Se requieren al menos 2 operaciones para trazar la curva.</p>
@@ -306,9 +305,9 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
   };
 
   return (
-    <div className="animate-in fade-in duration-300 h-full flex flex-col w-full relative">
+    <div className="animate-in fade-in duration-300 h-full flex flex-col w-full relative bg-slate-900 overflow-hidden">
       {!simplified && (
-        <div className="p-4">
+        <div className="p-4 bg-white border-b border-slate-200 shrink-0">
           <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div>
               <h2 className="text-2xl font-bold text-slate-800">Evolución de Precios (USD)</h2>
@@ -317,10 +316,10 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
             <Button onClick={handleSave} isLoading={isSaving} icon={IconSave} className="!py-2 !px-4 text-sm whitespace-nowrap shadow-sm">Guardar Cambios</Button>
           </div>
           
-          <div className="flex flex-wrap items-center gap-4 mb-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-sm">
+          <div className="flex flex-wrap items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm">
             <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
                <IconTrendingUp className="w-5 h-5 text-slate-400" />
-               <select name="filterYear" value={localConfig.filterYear} onChange={handleChangeConfig} className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 font-bold outline-none focus:ring-2 focus:ring-violet-500">
+               <select name="filterYear" value={localConfig.filterYear} onChange={handleChangeConfig} className="bg-white border border-slate-300 rounded-lg px-2 py-1.5 font-bold outline-none focus:ring-2 focus:ring-violet-500">
                   {aniosDisponibles.map((a:any) => <option key={a} value={a}>{a}</option>)}
                </select>
             </div>
@@ -342,9 +341,9 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
         </div>
       )}
 
-      {/* SVG Container: Se expande para llenar el contenedor padre */}
-      <div className={`w-full h-full flex items-center justify-center overflow-x-auto overflow-y-hidden no-scrollbar bg-slate-900 ${simplified ? "rounded-2xl" : "rounded-2xl border-4 border-slate-900"}`}>
-         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-[500px] max-h-full">
+      {/* SVG Container: Expande 100% de la altura restante */}
+      <div className="flex-1 flex items-center justify-center overflow-hidden w-full h-full relative p-2">
+         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto max-h-full min-w-[500px]">
            
            {/* Eje Y */}
            {yLines.map((val, idx) => {
@@ -450,7 +449,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v36</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v37</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -540,6 +539,9 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
   const [selectedBovedaCdp, setSelectedBovedaCdp] = useState("");
   const bovedaDocsFiltered = selectedBovedaCdp ? boveda.filter((d:any) => String(d.cdpNumber) === String(selectedBovedaCdp)) : [];
 
+  // Ordenar ofertas de menor a mayor monto
+  const ofertasOrdenadas = [...ofertas].sort((a, b) => Number(a.monto) - Number(b.monto));
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
@@ -615,7 +617,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
           {/* COLUMNA DERECHA (Mercado, Bóveda, CDPs) */}
           <div className="lg:col-span-8 space-y-6">
             
-            {/* SECCIÓN 1: MERCADO ACTIVO (GRILLA 3x3 ESTRICTA) */}
+            {/* SECCIÓN 1: MERCADO ACTIVO (GRILLA 3x3 ESTRICTA BLOQUEADA) */}
             <Card className="p-6 bg-slate-100/50">
               <div className="mb-6 border-b border-slate-200 pb-4">
                   <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
@@ -624,30 +626,40 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                   <p className="text-slate-600 mt-1 font-medium">Precios, Tendencias, Ofertas de Compra y Venta (Valores USD)</p>
               </div>
               
-              {/* Estructura CSS Grid: 3 Columnas, 3 Filas */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_auto] gap-4">
+              {/* Contenedor principal con altura máxima estricta para forzar la grilla y el scroll */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_120px] gap-4 lg:h-[600px]">
                 
-                {/* Cuadrante: Gráfico (2 columnas x 2 filas, arriba a la izquierda) */}
-                <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 min-h-[300px] overflow-hidden shadow-sm">
+                {/* Cuadrante: Gráfico (2 columnas x 2 filas, h-full lo restringe a las 2 filas sin expandirse) */}
+                <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 overflow-hidden shadow-sm h-full bg-white flex flex-col">
                    <MarketChart operaciones={operaciones} simplified={true} savedConfig={chartConfigData} />
                 </div>
 
-                {/* Cuadrante: Ofertas (1 columna x 3 filas, derecha) */}
-                <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-auto">
+                {/* Cuadrante: Ofertas (1 columna x 3 filas, funciona como ventana scrolleable) */}
+                <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
                    <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Compra</h4>
                    
-                   <div className="overflow-y-auto space-y-3 flex-1 no-scrollbar pr-1">
-                      {ofertas.length > 0 ? (
-                        ofertas.map((of: any) => (
-                          <div key={of.id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 shadow-sm hover:shadow hover:border-violet-300 transition-all">
-                             <div className="flex justify-between items-center mb-2">
-                                <span className="bg-violet-100 text-violet-700 font-black text-[10px] px-2 py-0.5 rounded-md">CDP {of.cdpNumber}</span>
-                                <span className="flex items-center gap-1 text-[9px] font-bold text-red-500 uppercase">
-                                   <IconClock className="w-2.5 h-2.5" /> Vence {formatDateForDisplay(of.vencimiento)}
-                                </span>
+                   {/* Scroll Window para las tarjetas de Ofertas */}
+                   <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+                      {ofertasOrdenadas.length > 0 ? (
+                        ofertasOrdenadas.map((of: any) => (
+                          <div key={of.id} className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-5 shadow-sm hover:shadow-md hover:border-violet-300 transition-all flex flex-col items-center relative overflow-hidden group">
+                             
+                             <div className="absolute top-0 w-full bg-violet-100 text-center py-1 group-hover:bg-violet-600 transition-colors">
+                               <span className="text-[10px] font-black text-violet-800 group-hover:text-white uppercase tracking-widest">Oferta de Venta</span>
                              </div>
-                             <div className="text-center">
-                                <span className="text-xl font-black text-slate-800 block">USD {Number(of.monto).toLocaleString()}</span>
+
+                             <div className="mt-6 text-center">
+                               <span className="block font-black text-slate-800 text-lg">CDP {of.cdpNumber}</span>
+                             </div>
+
+                             <div className="mt-1 text-center">
+                                <span className="text-2xl font-black text-slate-800 block">USD {Number(of.monto).toLocaleString()}</span>
+                             </div>
+
+                             <div className="mt-3 w-full flex justify-center">
+                                <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded-md uppercase border border-red-100">
+                                   <IconClock className="w-3 h-3" /> Vence {formatDateForDisplay(of.vencimiento)}
+                                </span>
                              </div>
                           </div>
                         ))
@@ -660,18 +672,21 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    </div>
                 </div>
 
-                {/* Cuadrante: Botón Compra (1 columna x 1 fila, abajo a la izquierda) */}
-                <div className="lg:col-span-1 lg:row-span-1">
-                   <Button variant="outline" className="w-full h-full min-h-[60px] text-sm !border-2 !border-violet-600 !text-violet-700 hover:!bg-violet-50 transition-colors shadow-sm bg-white">
-                     Hacer oferta de compra de CDP
-                   </Button>
+                {/* Cuadrante: Botón Compra (1 columna x 1 fila) */}
+                <div className="lg:col-span-1 lg:row-span-1 h-full">
+                   {/* Usamos botón personalizado para asegurar el Flex Column vertical y el tamaño exacto */}
+                   <button className="w-full h-full min-h-[100px] flex flex-col items-center justify-center gap-2 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl">
+                     <IconShoppingCart className="w-8 h-8 text-violet-600" />
+                     <span className="text-sm font-bold text-center leading-tight">Hacer oferta de<br/>compra de CDP</span>
+                   </button>
                 </div>
 
-                {/* Cuadrante: Botón Venta (1 columna x 1 fila, abajo al medio) */}
-                <div className="lg:col-span-1 lg:row-span-1">
-                   <Button variant="primary" className="w-full h-full min-h-[60px] text-sm shadow-sm">
-                     Hacer oferta de Venta de CDP
-                   </Button>
+                {/* Cuadrante: Botón Venta (1 columna x 1 fila) */}
+                <div className="lg:col-span-1 lg:row-span-1 h-full">
+                   <button className="w-full h-full min-h-[100px] flex flex-col items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white transition-colors shadow-md shadow-violet-500/30 rounded-2xl">
+                     <IconTag className="w-8 h-8 text-white" />
+                     <span className="text-sm font-bold text-center leading-tight">Hacer oferta de<br/>Venta de CDP</span>
+                   </button>
                 </div>
 
               </div>
@@ -1048,6 +1063,7 @@ export default function App() {
     const ofertasRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas');
     const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot: any) => {
       const ofs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      // Orden por defecto en crudo por fecha. (En la vista las ordenamos por precio)
       ofs.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
       setOfertas(ofs);
     });
