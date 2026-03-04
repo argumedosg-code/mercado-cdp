@@ -464,7 +464,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v32</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v33</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -741,10 +741,10 @@ const DashboardView = ({ user, cdps, setView, handleLogout }: any) => {
 
 const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, showGlobalMessage }: any) => {
   const [activeTab, setActiveTab] = useState("fiduciantes"); // "fiduciantes", "cdps", "operaciones", "ofertas", "boveda"
-  const [editingUser, setEditingUser] = useState<any>(null);
-  const [editingOperacion, setEditingOperacion] = useState<any>(null);
-  const [editingOferta, setEditingOferta] = useState<any>(null);
-  const [editingBoveda, setEditingBoveda] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<any>(undefined);
+  const [editingOperacion, setEditingOperacion] = useState<any>(undefined);
+  const [editingOferta, setEditingOferta] = useState<any>(undefined);
+  const [editingBoveda, setEditingBoveda] = useState<any>(undefined);
 
   const handleDeleteUserRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) {
@@ -804,7 +804,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
             <IconGrid className="w-4 h-4" /> Mapa de CDPs
           </button>
           <button onClick={() => setActiveTab("operaciones")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "operaciones" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
-            <IconList className="w-4 h-4" /> Operaciones
+            <IconList className="w-4 h-4" /> Registro de Operaciones
           </button>
           <button onClick={() => setActiveTab("ofertas")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "ofertas" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}>
             <IconTag className="w-4 h-4" /> Ofertas de Venta
@@ -1051,10 +1051,10 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, setView, current
       </main>
 
       {/* RENDERIZADO DE MODALES */}
-      {editingUser && <AdminEditModal user={editingUser} onClose={() => setEditingUser(null)} onUpdate={(id: string, data: any) => { onUpdateUser(id, data); if (id === currentUser.id) { setCurrentUser(data); if (!data.isAdmin) setView("dashboard"); } }} showGlobalMessage={showGlobalMessage} />}
-      {editingOperacion !== null && <OperacionModal operacion={editingOperacion} users={users} onClose={() => setEditingOperacion(null)} onSave={onSaveOperacion} showGlobalMessage={showGlobalMessage} />}
-      {editingOferta !== null && <OfertaModal oferta={editingOferta} users={users} onClose={() => setEditingOferta(null)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
-      {editingBoveda !== null && <BovedaModal bovedaItem={editingBoveda} onClose={() => setEditingBoveda(null)} onSave={onSaveBoveda} showGlobalMessage={showGlobalMessage} />}
+      {editingUser && <AdminEditModal user={editingUser} onClose={() => setEditingUser(undefined)} onUpdate={(id: string, data: any) => { onUpdateUser(id, data); if (id === currentUser.id) { setCurrentUser(data); if (!data.isAdmin) setView("dashboard"); } }} showGlobalMessage={showGlobalMessage} />}
+      {editingOperacion !== undefined && <OperacionModal operacion={editingOperacion} users={users} onClose={() => setEditingOperacion(undefined)} onSave={onSaveOperacion} showGlobalMessage={showGlobalMessage} />}
+      {editingOferta !== undefined && <OfertaModal oferta={editingOferta} users={users} onClose={() => setEditingOferta(undefined)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
+      {editingBoveda !== undefined && <BovedaModal bovedaItem={editingBoveda} onClose={() => setEditingBoveda(undefined)} onSave={onSaveBoveda} showGlobalMessage={showGlobalMessage} />}
     </div>
   );
 };
