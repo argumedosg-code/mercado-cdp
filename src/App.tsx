@@ -149,7 +149,7 @@ const InputField = ({ label, icon: Icon, error, ...props }: any) => (
 );
 
 const Card = ({ children, className = "" }: any) => (
-  <div className={`bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 ${className}`}>
+  <div className={`bg-white rounded-3xl shadow-xl shadow-slate-200/50 ${className}`}>
     {children}
   </div>
 );
@@ -449,7 +449,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md border-2 border-slate-200">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4 relative">
             <IconBuilding className="w-8 h-8 text-violet-600" />
@@ -457,7 +457,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v42</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v43</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -493,7 +493,7 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 py-12">
-      <Card className="w-full max-w-xl">
+      <Card className="w-full max-w-xl border-2 border-slate-200">
         <button onClick={() => setView("login")} className="flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors"><IconChevronRight className="w-4 h-4 rotate-180 mr-1" /> Volver al Login</button>
         <h2 className="text-3xl font-bold text-slate-800 mb-2">Solicitud de Alta</h2>
         <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP.</p>
@@ -524,7 +524,7 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
           <IconAlertCircle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
           <div><h4 className="font-bold text-amber-900">Validación Requerida</h4><p className="text-amber-800 text-sm mt-1">Antes de operar, es obligatorio confirmar que tus datos fiduciarios son correctos.</p></div>
         </div>
-        <Card>
+        <Card className="border-2 border-slate-200">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-8 pb-8 border-b border-slate-100">
             <div><h2 className="text-2xl font-bold text-slate-800">Perfil Fiduciario</h2><p className="text-slate-500">Revisión de legajo digital</p></div>
             <div className="text-center md:text-right"><span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Categoría Oficial</span><span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${currentRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : currentRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>{currentRole === ROLES.ADMIN && <IconShield className="w-4 h-4" />}{currentRole}</span><div className="mt-2 text-xl font-black text-slate-800 tracking-tight">Socio Nº {formatId(user.correlativeId)}</div></div>
@@ -562,7 +562,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
           </div>
           <div className="flex items-center gap-4">
             {user.isAdmin || user.correlativeId === 1 ? (
-              <Button variant="outline" className="!py-2 !px-4 !rounded-xl text-sm" icon={IconShield} onClick={() => setView("admin")}>
+              <Button variant="outline" className="!py-2 !px-4 !rounded-xl text-sm border-2 border-slate-300" icon={IconShield} onClick={() => setView("admin")}>
                 Panel Admin
               </Button>
             ) : null}
@@ -601,7 +601,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
               </div>
             </div>
 
-            <Card className="p-6 border-t-4 border-t-violet-500">
+            <Card className="p-6 border-2 border-slate-300 border-t-4 border-t-violet-500">
               <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <IconUser className="w-5 h-5 text-violet-500" /> Legajo Digital
               </h3>
@@ -626,7 +626,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
           <div className="lg:col-span-8 space-y-6">
             
             {/* SECCIÓN 1: MERCADO ACTIVO */}
-            <Card className="p-6 bg-slate-100/50 border-t-4 border-t-violet-500">
+            <Card className="p-6 bg-slate-100/50 border-2 border-slate-300 border-t-4 border-t-violet-500">
               <div className="mb-6 border-b border-slate-200 pb-4">
                   <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
                     <IconTrendingUp className="w-7 h-7 text-violet-600" /> Mercado Activo
@@ -651,7 +651,6 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                         ofertasOrdenadas.map((of: any) => (
                           <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col justify-between group relative overflow-hidden min-h-[85px] gap-3">
                              
-                             {/* Fila Superior: Oferta de Venta (Izquierda) - CDP Número (Derecha) */}
                              <div className="flex justify-between items-start gap-2 w-full">
                                <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">
                                  Oferta de Venta
@@ -662,7 +661,6 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                                </span>
                              </div>
 
-                             {/* Fila Inferior: Precio (Izquierda) - Fecha Vencimiento (Derecha) */}
                              <div className="flex justify-between items-end gap-2 w-full">
                                <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
                                  <span className="text-[11px] font-black">U$S</span>
@@ -705,7 +703,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
             </Card>
 
             {/* SECCIÓN 2: BÓVEDA DOCUMENTOS */}
-            <Card className="p-6 border-t-4 border-t-blue-500">
+            <Card className="p-6 border-2 border-slate-300 border-t-4 border-t-blue-500">
               <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -755,10 +753,20 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                     Utiliza el menú superior para ver tus documentos.
                  </div>
               )}
+
+              {/* Cuadro informativo de Bóveda */}
+              <div className="mt-6 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl flex items-start gap-4 shadow-sm">
+                 <IconInfo className="w-6 h-6 shrink-0 mt-0.5" />
+                 <div className="text-sm leading-relaxed font-medium">
+                   <p>El fiduciante asocia el archivo de la foto de la primer página del CDP.</p>
+                   <p className="mt-1">En caso de querer ver más documentación en la bóveda de documentos, por favor solicitarlo al Whatsapp 2614722618.</p>
+                 </div>
+              </div>
+
             </Card>
 
             {/* SECCIÓN 3: MIS CDPS ASIGNADOS */}
-            <Card className="p-6 border-t-4 border-t-violet-500">
+            <Card className="p-6 border-2 border-slate-300 border-t-4 border-t-violet-500">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -855,7 +863,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
               <div><h2 className="text-2xl font-bold text-slate-800">Directorio de Socios</h2></div>
               <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-semibold text-slate-600">Total: {users.length}</div>
             </div>
-            <Card className="!p-0 overflow-hidden">
+            <Card className="!p-0 overflow-hidden border-2 border-slate-200">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">ID</th><th className="p-4 font-semibold">Fiduciante</th><th className="p-4 font-semibold">Categoría Oficial</th><th className="p-4 font-semibold">Contacto</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
@@ -912,7 +920,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
               <div><h2 className="text-2xl font-bold text-slate-800">Historial de Transacciones</h2></div>
               <Button onClick={() => setEditingOperacion(null)} icon={IconList} className="whitespace-nowrap">+ Nueva Operación</Button>
             </div>
-            <Card className="!p-0 overflow-hidden">
+            <Card className="!p-0 overflow-hidden border-2 border-slate-200">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº Oper.</th><th className="p-4 font-semibold">Fecha</th><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Vendedor</th><th className="p-4 font-semibold">Comprador</th><th className="p-4 font-semibold text-right">Monto (USD)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
@@ -944,7 +952,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
               <div><h2 className="text-2xl font-bold text-slate-800">Ofertas de Venta</h2></div>
               <Button onClick={() => setEditingOferta(null)} icon={IconTag} className="whitespace-nowrap">+ Nueva Oferta</Button>
             </div>
-            <Card className="!p-0 overflow-hidden">
+            <Card className="!p-0 overflow-hidden border-2 border-slate-200">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº Oferta</th><th className="p-4 font-semibold">Publicada</th><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Vendedor</th><th className="p-4 font-semibold">Vencimiento</th><th className="p-4 font-semibold text-right">Monto (USD)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
@@ -976,7 +984,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
               <div><h2 className="text-2xl font-bold text-slate-800">Bóveda de Documentos</h2></div>
               <Button onClick={() => setEditingBoveda(null)} icon={IconFolder} className="whitespace-nowrap">+ Cargar Documento</Button>
             </div>
-            <Card className="!p-0 overflow-hidden">
+            <Card className="!p-0 overflow-hidden border-2 border-slate-200">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Título del Documento</th><th className="p-4 font-semibold">Enlace (URL)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
@@ -1075,14 +1083,16 @@ const MercadoApp = () => {
     const ofertasRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas');
     const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot: any) => {
       const ofs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      ofs.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+      // Ordenamiento por número de oferta (la más nueva / más alta arriba)
+      ofs.sort((a: any, b: any) => Number(b.numero) - Number(a.numero));
       setOfertas(ofs);
     });
 
     const bovedaRef = collection(db, 'artifacts', appId, 'public', 'data', 'boveda');
     const bovUnsubscribe = onSnapshot(bovedaRef, (snapshot: any) => {
       const docs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      docs.sort((a: any, b: any) => Number(a.cdpNumber) - Number(b.cdpNumber));
+      // Ordenamiento de documentos por fecha de actualización (los más nuevos arriba)
+      docs.sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
       setBoveda(docs);
     });
 
