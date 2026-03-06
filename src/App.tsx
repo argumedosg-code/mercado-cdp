@@ -93,6 +93,12 @@ const getLocalDateString = () => {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 };
 
+const getFutureDateString = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
+
 const formatDateForDisplay = (dateStr: string) => {
   if (!dateStr) return "";
   const parts = dateStr.split('-');
@@ -140,7 +146,7 @@ const InputField = ({ label, icon: Icon, error, ...props }: any) => (
     <div className="relative">
       {Icon && typeof Icon === 'function' && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icon className="w-5 h-5" /></div>}
       <input
-        className={`w-full bg-slate-50 border ${error ? "border-red-400 focus:ring-red-500" : "border-slate-200 focus:ring-violet-500"} text-slate-800 rounded-2xl py-3 px-4 ${Icon ? "pl-12" : ""} outline-none focus:ring-2 transition-all`}
+        className={`w-full bg-slate-50 border ${error ? "border-red-400 focus:ring-red-500" : "border-slate-200 focus:ring-violet-500"} text-slate-800 rounded-2xl py-3 px-4 ${Icon ? "pl-12" : ""} outline-none focus:ring-2 transition-all disabled:opacity-60 disabled:bg-slate-100 disabled:cursor-not-allowed`}
         {...props}
       />
     </div>
@@ -167,7 +173,7 @@ const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confir
     confirm: <IconAlertCircle className="w-12 h-12 text-amber-500" />,
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={type === "confirm" ? onCancel : onConfirm}></div>
       <div className="bg-white rounded-3xl p-8 max-w-sm w-full relative z-10 shadow-2xl scale-100 animate-in zoom-in-95 flex flex-col items-center text-center">
         <div className="mb-4 bg-slate-50 p-4 rounded-full">{icons[type]}</div>
@@ -181,6 +187,126 @@ const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confir
     </div>
   );
 };
+
+// --- Modales para el DASHBOARD del Fiduciante ---
+
+const DashboardOfertaVentaModal = ({ user, misCdps, nextOfertaNum, onClose, onSave, showGlobalMessage }: any) => {
+  const [formData, setFormData] = useState({
+    nombres: user.nombres || "", apellidos: user.apellidos || "", email: user.email || "", cuit: user.cuit || "", telefono: user.telefono || "",
+    cdpNumber: misCdps.length > 0 ? misCdps[0].number : "",
+    monto: "",
+    vencimiento: getFutureDateString(30) // Vencimiento por defecto 30 días
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const payload = { numero: String(nextOfertaNum), vendedorId: user.id, cdpNumber: formData.cdpNumber, monto: formData.monto, fecha: getLocalDateString(), vencimiento: formData.vencimiento, ...formData };
+    await onSave(payload);
+    setIsLoading(false);
+    showGlobalMessage("success", "Oferta Publicada", "Tu CDP se ha puesto a la venta en el Mercado Activo.");
+    onClose();
+  };
+
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative z-10 shadow-2xl max-h-[95vh] overflow-y-auto animate-in zoom-in-95">
+        <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+          <div><h2 className="text-2xl font-black text-slate-800 flex items-center gap-2"><IconTag className="w-6 h-6 text-violet-600" /> Hacer oferta de Venta</h2><p className="text-sm text-slate-500 mt-1">Completa los datos para publicar tu CDP en el mercado.</p></div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+             <h4 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-3">Tus Datos Fiduciarios (Autocompletado)</h4>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <InputField label="Nombres" name="nombres" value={formData.nombres} onChange={handleChange} required />
+               <InputField label="Apellidos" name="apellidos" value={formData.apellidos} onChange={handleChange} required />
+               <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+               <InputField label="CUIT / CUIL" name="cuit" value={formData.cuit} onChange={handleChange} required />
+               <div className="md:col-span-2"><InputField label="Teléfono (WhatsApp)" name="telefono" value={formData.telefono} onChange={handleChange} required /></div>
+             </div>
+          </div>
+          <div className="bg-violet-50 p-5 rounded-2xl border-2 border-violet-200">
+             <h4 className="text-sm font-bold text-violet-700 uppercase tracking-wider mb-4 flex items-center gap-2"><IconTrendingUp className="w-4 h-4" /> Detalles de la Oferta</h4>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <div className="flex flex-col gap-1 w-full">
+                 <label className="text-sm font-semibold text-slate-700 ml-1">Selecciona tu CDP a vender</label>
+                 <select className="w-full bg-white border border-slate-300 rounded-2xl py-3 px-4 outline-none focus:ring-2 focus:ring-violet-500 font-bold text-slate-800" name="cdpNumber" value={formData.cdpNumber} onChange={handleChange} required>
+                   {misCdps.map((c:any) => <option key={c.number} value={c.number}>Certificado Nº {c.number}</option>)}
+                 </select>
+               </div>
+               <InputField icon={IconDollarSign} label="Oferta de Venta (U$S)" type="number" name="monto" min="1" step="0.01" value={formData.monto} onChange={handleChange} placeholder="Ej: 15000" required />
+             </div>
+             <div className="mt-4"><InputField label="Vencimiento de la oferta" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required /></div>
+          </div>
+          <div className="flex gap-4 pt-2">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Publicar Oferta</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const DashboardOfertaCompraModal = ({ user, nextCompraNum, onClose, onSave, showGlobalMessage }: any) => {
+  const [formData, setFormData] = useState({
+    nombres: user.nombres || "", apellidos: user.apellidos || "", email: user.email || "", cuit: user.cuit || "", telefono: user.telefono || "",
+    monto: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const payload = { numero: String(nextCompraNum), compradorId: user.id, monto: formData.monto, fecha: getLocalDateString(), ...formData };
+    await onSave(payload);
+    setIsLoading(false);
+    showGlobalMessage("success", "Oferta de Compra Registrada", "Tu intención de compra ha sido guardada y será revisada por el administrador.");
+    onClose();
+  };
+
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative z-10 shadow-2xl max-h-[95vh] overflow-y-auto animate-in zoom-in-95">
+        <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+          <div><h2 className="text-2xl font-black text-slate-800 flex items-center gap-2"><IconShoppingCart className="w-6 h-6 text-blue-600" /> Hacer oferta de Compra</h2><p className="text-sm text-slate-500 mt-1">Registra tu intención de compra para adquirir un nuevo CDP.</p></div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+             <h4 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-3">Tus Datos de Contacto (Autocompletado)</h4>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <InputField label="Nombres" name="nombres" value={formData.nombres} onChange={handleChange} required />
+               <InputField label="Apellidos" name="apellidos" value={formData.apellidos} onChange={handleChange} required />
+               <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+               <InputField label="CUIT / CUIL" name="cuit" value={formData.cuit} onChange={handleChange} required />
+               <div className="md:col-span-2"><InputField label="Teléfono (WhatsApp)" name="telefono" value={formData.telefono} onChange={handleChange} required /></div>
+             </div>
+          </div>
+          <div className="bg-blue-50 p-5 rounded-2xl border-2 border-blue-200">
+             <h4 className="text-sm font-bold text-blue-700 uppercase tracking-wider mb-4 flex items-center gap-2"><IconDollarSign className="w-4 h-4" /> Oferta Económica</h4>
+             <InputField icon={IconDollarSign} label="Oferta dispuesta a pagar (U$S)" type="number" name="monto" min="1" step="0.01" value={formData.monto} onChange={handleChange} placeholder="Ej: 14500" required />
+          </div>
+          <div className="flex gap-4 pt-2">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" variant="primary" className="flex-1 !bg-blue-600 hover:!bg-blue-700 shadow-blue-500/30" isLoading={isLoading}>Enviar Intención de Compra</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+
+// --- Modales para el PANEL DE ADMINISTRACIÓN ---
 
 const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ ...user });
@@ -203,14 +329,24 @@ const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }
 };
 
 const OfertaModal = ({ oferta, users, cdps, nextOfertaNum, onClose, onSave, showGlobalMessage }: any) => {
-  const [formData, setFormData] = useState(oferta || { numero: String(nextOfertaNum), cdpNumber: "", vendedorId: "", monto: "", fecha: getLocalDateString(), vencimiento: getLocalDateString() });
+  const [formData, setFormData] = useState(oferta || { numero: String(nextOfertaNum), cdpNumber: "", vendedorId: "", monto: "", fecha: getLocalDateString(), vencimiento: getFutureDateString(30) });
   const [isLoading, setIsLoading] = useState(false);
   const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Oferta Registrada", "La oferta fue publicada."); onClose(); };
   const handleCdpChange = (e: any) => { const val = e.target.value; const num = Number(val); let newVendedorId = formData.vendedorId; if (num >= 1 && num <= TOTAL_CDPS) { const cdp = cdps.find((c:any) => c.number === num); if (cdp) newVendedorId = cdp.ownerId; } setFormData({ ...formData, cdpNumber: val, vendedorId: newVendedorId }); };
   const handleVendedorChange = (e: any) => { setFormData({ ...formData, vendedorId: e.target.value, cdpNumber: "" }); };
   const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{oferta ? "Editar Oferta" : "Nueva Oferta"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="bg-violet-50 p-4 rounded-xl border border-violet-100 mb-2"><InputField label="Nº de Oferta (Automático)" type="number" name="numero" value={formData.numero} onChange={handleChange} required /></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Vendedor</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="vendedorId" value={formData.vendedorId} onChange={handleVendedorChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u: any) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Nº CDP a la venta</label>{formData.vendedorId ? (<select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="cdpNumber" value={formData.cdpNumber} onChange={handleCdpChange} required><option value="">-- Seleccionar CDP --</option>{cdps.filter((c:any) => c.ownerId === formData.vendedorId).map((c:any) => <option key={c.number} value={c.number}>CDP Nº {c.number}</option>)}</select>) : (<input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleCdpChange} placeholder="Escriba el Nº de CDP..." required />)}</div><InputField icon={IconDollarSign} label="Monto Solicitado (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><InputField label="Publicación" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /><InputField label="Vencimiento" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required /></div><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Oferta</Button></div></form></div></div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{oferta ? "Editar Oferta de Venta" : "Nueva Oferta de Venta"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="bg-violet-50 p-4 rounded-xl border border-violet-100 mb-2"><InputField label="Nº de Oferta (Automático)" type="number" name="numero" value={formData.numero} onChange={handleChange} required /></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Vendedor</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="vendedorId" value={formData.vendedorId} onChange={handleVendedorChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u: any) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Nº CDP a la venta</label>{formData.vendedorId ? (<select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="cdpNumber" value={formData.cdpNumber} onChange={handleCdpChange} required><option value="">-- Seleccionar CDP --</option>{cdps.filter((c:any) => c.ownerId === formData.vendedorId).map((c:any) => <option key={c.number} value={c.number}>CDP Nº {c.number}</option>)}</select>) : (<input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleCdpChange} placeholder="Escriba el Nº de CDP..." required />)}</div><InputField icon={IconDollarSign} label="Monto Solicitado (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><InputField label="Publicación" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /><InputField label="Vencimiento" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required /></div><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Oferta</Button></div></form></div></div>
+  );
+};
+
+const AdminOfertaCompraModal = ({ oferta, nextCompraNum, onClose, onSave, showGlobalMessage }: any) => {
+  const [formData, setFormData] = useState(oferta || { numero: String(nextCompraNum), nombres: "", apellidos: "", email: "", cuit: "", telefono: "", monto: "", fecha: getLocalDateString() });
+  const [isLoading, setIsLoading] = useState(false);
+  const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Oferta Actualizada", "La oferta de compra fue guardada correctamente."); onClose(); };
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{oferta ? "Editar Oferta Compra" : "Nueva Oferta Compra"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-2"><InputField label="Nº de Oferta" type="number" name="numero" value={formData.numero} onChange={handleChange} required /></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField label="Nombres" name="nombres" value={formData.nombres} onChange={handleChange} required /><InputField label="Apellidos" name="apellidos" value={formData.apellidos} onChange={handleChange} required /></div><InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} required /><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField label="CUIT/CUIL" name="cuit" value={formData.cuit} onChange={handleChange} required /><InputField label="Teléfono" name="telefono" value={formData.telefono} onChange={handleChange} required /></div><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><InputField label="Fecha de Oferta" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /><InputField icon={IconDollarSign} label="Monto (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /></div><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1 !bg-blue-600 hover:!bg-blue-700" isLoading={isLoading}>Guardar</Button></div></form></div></div>
   );
 };
 
@@ -457,7 +593,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v43</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v44</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -541,14 +677,30 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
   );
 };
 
-const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigData, setView, handleLogout }: any) => {
+const DashboardView = ({ user, cdps, operaciones, ofertas, ofertasCompra, boveda, chartConfigData, setView, handleLogout, onSaveOferta, onSaveOfertaCompra, showGlobalMessage }: any) => {
   const misCdps = cdps.filter((c: any) => c.ownerId === user.id);
   const currentRole = getUserRole(user, cdps);
+  
   const [selectedBovedaCdp, setSelectedBovedaCdp] = useState("");
   const bovedaDocsFiltered = selectedBovedaCdp ? boveda.filter((d:any) => String(d.cdpNumber) === String(selectedBovedaCdp)) : [];
 
+  const [showVentaModal, setShowVentaModal] = useState(false);
+  const [showCompraModal, setShowCompraModal] = useState(false);
+
+  // Calcular el próximo número de oferta
+  const nextOfertaNum = ofertas.length > 0 ? Math.max(...ofertas.map((o:any) => Number(o.numero) || 0)) + 1 : 1;
+  const nextCompraNum = ofertasCompra.length > 0 ? Math.max(...ofertasCompra.map((o:any) => Number(o.numero) || 0)) + 1 : 1;
+
   // Ordenar ofertas de menor a mayor monto
   const ofertasOrdenadas = [...ofertas].sort((a, b) => Number(a.monto) - Number(b.monto));
+
+  const handleOpenVenta = () => {
+    if (misCdps.length === 0) {
+      showGlobalMessage("error", "Sin activos", "No posees ningún CDP asignado para poder vender. Para vender, primero debes ser propietario de al menos un CDP.");
+    } else {
+      setShowVentaModal(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -685,7 +837,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
 
                 {/* Cuadrante: Botón Compra */}
                 <div className="lg:col-span-1 lg:row-span-1 h-full">
-                   <button className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl group">
+                   <button onClick={() => setShowCompraModal(true)} className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl group">
                      <IconShoppingCart className="w-10 h-10 text-violet-600 group-hover:scale-110 transition-transform" />
                      <span className="text-base font-bold text-center leading-tight">Hacer oferta de<br/>compra de CDP</span>
                    </button>
@@ -693,7 +845,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
 
                 {/* Cuadrante: Botón Venta */}
                 <div className="lg:col-span-1 lg:row-span-1 h-full">
-                   <button className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-violet-600 hover:bg-violet-700 text-white transition-colors shadow-md shadow-violet-500/30 rounded-2xl group">
+                   <button onClick={handleOpenVenta} className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-violet-600 hover:bg-violet-700 text-white transition-colors shadow-md shadow-violet-500/30 rounded-2xl group">
                      <IconTag className="w-10 h-10 text-white group-hover:scale-110 transition-transform" />
                      <span className="text-base font-bold text-center leading-tight">Hacer oferta de<br/>Venta de CDP</span>
                    </button>
@@ -799,18 +951,25 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
           </div>
         </div>
       </main>
+
+      {/* Renderizado de Modales del Dashboard */}
+      {showVentaModal && <DashboardOfertaVentaModal user={user} misCdps={misCdps} nextOfertaNum={nextOfertaNum} onClose={() => setShowVentaModal(false)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
+      {showCompraModal && <DashboardOfertaCompraModal user={user} nextCompraNum={nextCompraNum} onClose={() => setShowCompraModal(false)} onSave={onSaveOfertaCompra} showGlobalMessage={showGlobalMessage} />}
+      
     </div>
   );
 };
 
-const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, onSaveChartConfig, showGlobalMessage }: any) => {
+const AdminView = ({ users, cdps, operaciones, ofertas, ofertasCompra, boveda, chartConfigData, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveOfertaCompra, onDeleteOfertaCompra, onSaveBoveda, onDeleteBoveda, onSaveChartConfig, showGlobalMessage }: any) => {
   const [activeTab, setActiveTab] = useState("fiduciantes"); 
   const [editingUser, setEditingUser] = useState<any>(undefined);
   const [editingOperacion, setEditingOperacion] = useState<any>(undefined);
   const [editingOferta, setEditingOferta] = useState<any>(undefined);
+  const [editingOfertaCompra, setEditingOfertaCompra] = useState<any>(undefined);
   const [editingBoveda, setEditingBoveda] = useState<any>(undefined);
 
   const nextOfertaNum = ofertas.length > 0 ? Math.max(...ofertas.map((o:any) => Number(o.numero) || 0)) + 1 : 1;
+  const nextCompraNum = ofertasCompra.length > 0 ? Math.max(...ofertasCompra.map((o:any) => Number(o.numero) || 0)) + 1 : 1;
 
   const handleDeleteUserRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) { showGlobalMessage("error", "Acción Denegada", "No puedes eliminar tu propia cuenta de administrador."); return; }
@@ -822,7 +981,11 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
   };
 
   const handleDeleteOfertaRequest = (oferta: any) => {
-    showGlobalMessage("confirm", "Eliminar Oferta", `¿Estás seguro de que deseas eliminar la oferta #${oferta.numero}?`, async () => { await onDeleteOferta(oferta.id); showGlobalMessage("success", "Oferta Eliminada", "La oferta fue removida del mercado."); }, null, "Sí, Eliminar");
+    showGlobalMessage("confirm", "Eliminar Oferta de Venta", `¿Estás seguro de que deseas eliminar la oferta #${oferta.numero}?`, async () => { await onDeleteOferta(oferta.id); showGlobalMessage("success", "Oferta Eliminada", "La oferta de venta fue removida del mercado."); }, null, "Sí, Eliminar");
+  };
+
+  const handleDeleteOfertaCompraRequest = (ofertaCompra: any) => {
+    showGlobalMessage("confirm", "Eliminar Oferta de Compra", `¿Estás seguro de que deseas eliminar la intención de compra #${ofertaCompra.numero}?`, async () => { await onDeleteOfertaCompra(ofertaCompra.id); showGlobalMessage("success", "Oferta Eliminada", "La intención de compra fue borrada."); }, null, "Sí, Eliminar");
   };
 
   const handleDeleteBovedaRequest = (docInfo: any) => {
@@ -853,6 +1016,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
           <button onClick={() => setActiveTab("cdps")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "cdps" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconGrid className="w-4 h-4" /> Mapa de CDPs</button>
           <button onClick={() => setActiveTab("operaciones")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "operaciones" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconList className="w-4 h-4" /> Registro de Operaciones</button>
           <button onClick={() => setActiveTab("ofertas")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "ofertas" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconTag className="w-4 h-4" /> Ofertas de Venta</button>
+          <button onClick={() => setActiveTab("ofertas_compra")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "ofertas_compra" ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconShoppingCart className="w-4 h-4" /> Ofertas de Compra</button>
           <button onClick={() => setActiveTab("boveda")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "boveda" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconFolder className="w-4 h-4" /> Bóveda Documentos</button>
           <button onClick={() => setActiveTab("grafico")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "grafico" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconTrendingUp className="w-4 h-4" /> Gráfico de Mercado</button>
         </div>
@@ -950,7 +1114,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
               <div><h2 className="text-2xl font-bold text-slate-800">Ofertas de Venta</h2></div>
-              <Button onClick={() => setEditingOferta(null)} icon={IconTag} className="whitespace-nowrap">+ Nueva Oferta</Button>
+              <Button onClick={() => setEditingOferta(null)} icon={IconTag} className="whitespace-nowrap">+ Nueva Oferta Venta</Button>
             </div>
             <Card className="!p-0 overflow-hidden border-2 border-slate-200">
               <div className="overflow-x-auto">
@@ -962,12 +1126,43 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
                           <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{of.numero}</span></td>
                           <td className="p-4 align-middle text-sm text-slate-600">{formatDateForDisplay(of.fecha)}</td>
                           <td className="p-4 align-middle"><span className="inline-flex items-center px-2 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs font-bold">CDP {of.cdpNumber}</span></td>
-                          <td className="p-4 align-middle text-sm font-semibold text-slate-700">{getUserName(of.vendedorId)}</td>
+                          <td className="p-4 align-middle text-sm font-semibold text-slate-700">{of.vendedorId ? getUserName(of.vendedorId) : `${of.nombres} ${of.apellidos}`}</td>
                           <td className="p-4 align-middle text-sm text-red-500 font-medium">{formatDateForDisplay(of.vencimiento)}</td>
                           <td className="p-4 align-middle text-right font-bold text-slate-800">USD {Number(of.monto).toLocaleString()}</td>
                           <td className="p-4 align-middle text-right space-x-2">
                             <button onClick={() => setEditingOferta(of)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
                             <button onClick={() => handleDeleteOfertaRequest(of)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === "ofertas_compra" && (
+          <div className="animate-in fade-in duration-300">
+            <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+              <div><h2 className="text-2xl font-bold text-slate-800">Ofertas de Compra</h2><p className="text-sm text-slate-500 mt-1">Intenciones de compra solicitadas por los fiduciantes.</p></div>
+              <Button onClick={() => setEditingOfertaCompra(null)} icon={IconShoppingCart} className="whitespace-nowrap !bg-blue-600 hover:!bg-blue-700 shadow-blue-500/30">+ Nueva Oferta Compra</Button>
+            </div>
+            <Card className="!p-0 overflow-hidden border-2 border-slate-200">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº Oferta</th><th className="p-4 font-semibold">Fecha</th><th className="p-4 font-semibold">Comprador</th><th className="p-4 font-semibold">Contacto</th><th className="p-4 font-semibold text-right">Monto (USD)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {ofertasCompra.length === 0 ? <tr><td colSpan={6} className="p-8 text-center text-slate-500 font-medium">No hay intenciones de compra registradas.</td></tr> : ofertasCompra.map((oc: any) => (
+                        <tr key={oc.id} className="hover:bg-blue-50/30 transition-colors">
+                          <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{oc.numero}</span></td>
+                          <td className="p-4 align-middle text-sm text-slate-600">{formatDateForDisplay(oc.fecha)}</td>
+                          <td className="p-4 align-middle"><p className="font-bold text-slate-800">{oc.nombres} {oc.apellidos}</p><p className="text-xs text-slate-500 font-mono">CUIT: {oc.cuit}</p></td>
+                          <td className="p-4 align-middle text-sm font-medium text-slate-700"><p>{oc.email}</p><p className="text-slate-500">{oc.telefono}</p></td>
+                          <td className="p-4 align-middle text-right font-bold text-blue-700">USD {Number(oc.monto).toLocaleString()}</td>
+                          <td className="p-4 align-middle text-right space-x-2">
+                            <button onClick={() => setEditingOfertaCompra(oc)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><IconEdit className="w-5 h-5" /></button>
+                            <button onClick={() => handleDeleteOfertaCompraRequest(oc)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><IconTrash2 className="w-5 h-5" /></button>
                           </td>
                         </tr>
                       ))}
@@ -1014,6 +1209,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
       {editingUser && <AdminEditModal user={editingUser} onClose={() => setEditingUser(undefined)} onUpdate={(id: string, data: any) => { onUpdateUser(id, data); if (id === currentUser.id) { setCurrentUser(data); if (!data.isAdmin) setView("dashboard"); } }} showGlobalMessage={showGlobalMessage} />}
       {editingOperacion !== undefined && <OperacionModal operacion={editingOperacion} users={users} onClose={() => setEditingOperacion(undefined)} onSave={onSaveOperacion} showGlobalMessage={showGlobalMessage} />}
       {editingOferta !== undefined && <OfertaModal oferta={editingOferta} users={users} cdps={cdps} nextOfertaNum={nextOfertaNum} onClose={() => setEditingOferta(undefined)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
+      {editingOfertaCompra !== undefined && <AdminOfertaCompraModal oferta={editingOfertaCompra} nextCompraNum={nextCompraNum} onClose={() => setEditingOfertaCompra(undefined)} onSave={onSaveOfertaCompra} showGlobalMessage={showGlobalMessage} />}
       {editingBoveda !== undefined && <BovedaModal bovedaItem={editingBoveda} onClose={() => setEditingBoveda(undefined)} onSave={onSaveBoveda} showGlobalMessage={showGlobalMessage} />}
     </div>
   );
@@ -1032,6 +1228,7 @@ const MercadoApp = () => {
   const [computedCdps, setComputedCdps] = useState<any[]>([]);
   const [operaciones, setOperaciones] = useState<any[]>([]);
   const [ofertas, setOfertas] = useState<any[]>([]);
+  const [ofertasCompra, setOfertasCompra] = useState<any[]>([]);
   const [boveda, setBoveda] = useState<any[]>([]);
   const [chartConfigData, setChartConfigData] = useState<any>(null);
   
@@ -1083,15 +1280,21 @@ const MercadoApp = () => {
     const ofertasRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas');
     const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot: any) => {
       const ofs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      // Ordenamiento por número de oferta (la más nueva / más alta arriba)
       ofs.sort((a: any, b: any) => Number(b.numero) - Number(a.numero));
       setOfertas(ofs);
+    });
+
+    // Nueva suscripción a Ofertas de Compra
+    const ofertasCompraRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas_compra');
+    const ocUnsubscribe = onSnapshot(ofertasCompraRef, (snapshot: any) => {
+      const ocs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      ocs.sort((a: any, b: any) => Number(b.numero) - Number(a.numero));
+      setOfertasCompra(ocs);
     });
 
     const bovedaRef = collection(db, 'artifacts', appId, 'public', 'data', 'boveda');
     const bovUnsubscribe = onSnapshot(bovedaRef, (snapshot: any) => {
       const docs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      // Ordenamiento de documentos por fecha de actualización (los más nuevos arriba)
       docs.sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
       setBoveda(docs);
     });
@@ -1103,7 +1306,7 @@ const MercadoApp = () => {
       }
     });
 
-    return () => { uUnsubscribe(); oUnsubscribe(); ofUnsubscribe(); bovUnsubscribe(); cUnsubscribe(); };
+    return () => { uUnsubscribe(); oUnsubscribe(); ofUnsubscribe(); ocUnsubscribe(); bovUnsubscribe(); cUnsubscribe(); };
   }, [firebaseUser]);
 
   useEffect(() => {
@@ -1154,6 +1357,9 @@ const MercadoApp = () => {
   const handleSaveOferta = async (data: any) => { try { const id = data.id || `of_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
   const handleDeleteOferta = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas', id)); } catch (e) {} };
 
+  const handleSaveOfertaCompra = async (data: any) => { try { const id = data.id || `ofc_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas_compra', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
+  const handleDeleteOfertaCompra = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas_compra', id)); } catch (e) {} };
+
   const handleSaveBoveda = async (data: any) => { try { const id = data.id || `doc_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
   const handleDeleteBoveda = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id)); } catch (e) {} };
 
@@ -1174,8 +1380,8 @@ const MercadoApp = () => {
       {currentView === "login" && <LoginView users={users} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={computedCdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
-      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} handleLogout={handleLogout} />}
-      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} onSaveChartConfig={handleSaveChartConfig} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} ofertasCompra={ofertasCompra} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} handleLogout={handleLogout} onSaveOferta={handleSaveOferta} onSaveOfertaCompra={handleSaveOfertaCompra} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} ofertasCompra={ofertasCompra} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveOfertaCompra={handleSaveOfertaCompra} onDeleteOfertaCompra={handleDeleteOfertaCompra} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} onSaveChartConfig={handleSaveChartConfig} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </React.Fragment>
   );
