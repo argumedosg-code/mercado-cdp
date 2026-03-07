@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc } from "firebase/firestore";
 
@@ -64,9 +64,9 @@ const IconSave = (props: any) => <SvgIcon {...props}><path d="M19 21H5a2 2 0 0 1
 const IconShoppingCart = (props: any) => <SvgIcon {...props}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></SvgIcon>;
 
 // ==========================================
-// CONFIGURACIÓN SEGURA DE FIREBASE (SSR FIX)
+// CONFIGURACIÓN DE FIREBASE (FIX VERCEL SSR)
 // ==========================================
-const codeSandboxFirebaseConfig = {
+const fallbackFirebaseConfig = {
   apiKey: "AIzaSyAKURp61wvvL-YfYhfUQzVsl4sQX69TCHc",
   authDomain: "mercado-cdp-violetas.firebaseapp.com",
   projectId: "mercado-cdp-violetas",
@@ -77,16 +77,21 @@ const codeSandboxFirebaseConfig = {
 
 const firebaseConfig = typeof window !== 'undefined' && typeof (window as any).__firebase_config !== 'undefined'
   ? JSON.parse((window as any).__firebase_config) 
-  : codeSandboxFirebaseConfig;
+  : fallbackFirebaseConfig;
 
 let app: any, auth: any, db: any, appId: string = 'mi-mercado-cdp';
 
+// Patrón de inicialización segura para evitar "FirebaseApp already exists" en Vercel SSR
 if (firebaseConfig) {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  if (typeof window !== 'undefined' && typeof (window as any).__app_id !== 'undefined') {
-    appId = (window as any).__app_id;
+  try {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    auth = getAuth(app);
+    db = getFirestore(app);
+    if (typeof window !== 'undefined' && typeof (window as any).__app_id !== 'undefined') {
+      appId = (window as any).__app_id;
+    }
+  } catch (error) {
+    console.error("Firebase init error:", error);
   }
 }
 
@@ -597,7 +602,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v45</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v46</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
