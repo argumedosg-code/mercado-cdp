@@ -532,7 +532,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v44</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v48</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -891,7 +891,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
   );
 };
 
-const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, onSaveChartConfig, showGlobalMessage }: any) => {
+const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, chartConfigData, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, onDeleteSolicitud, onSaveChartConfig, showGlobalMessage }: any) => {
   const [activeTab, setActiveTab] = useState("fiduciantes"); 
   const [editingUser, setEditingUser] = useState<any>(undefined);
   const [editingOperacion, setEditingOperacion] = useState<any>(undefined);
@@ -915,6 +915,10 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
 
   const handleDeleteBovedaRequest = (docInfo: any) => {
     showGlobalMessage("confirm", "Desvincular Documento", `¿Estás seguro de que deseas borrar este documento del CDP #${docInfo.cdpNumber}?`, async () => { await onDeleteBoveda(docInfo.id); showGlobalMessage("success", "Documento Borrado", "El enlace se desvinculó de la bóveda."); }, null, "Sí, Borrar");
+  };
+
+  const handleDeleteSolicitudRequest = (solicitud: any) => {
+    showGlobalMessage("confirm", "Eliminar Solicitud", `¿Eliminar la solicitud de ${solicitud.nombres} ${solicitud.apellidos}?`, async () => { await onDeleteSolicitud(solicitud.id); showGlobalMessage("success", "Solicitud Eliminada", "La solicitud fue borrada del sistema."); }, null, "Sí, Eliminar");
   };
 
   const getUserName = (id: string) => {
@@ -941,6 +945,9 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
           <button onClick={() => setActiveTab("cdps")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "cdps" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconGrid className="w-4 h-4" /> Mapa de CDPs</button>
           <button onClick={() => setActiveTab("operaciones")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "operaciones" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconList className="w-4 h-4" /> Registro de Operaciones</button>
           <button onClick={() => setActiveTab("ofertas")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "ofertas" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconTag className="w-4 h-4" /> Ofertas de Venta</button>
+          {/* NUEVO BOTON PARA SOLICITUDES */}
+          <button onClick={() => setActiveTab("solicitudes")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "solicitudes" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconMail className="w-4 h-4" /> Solicitudes Usuarios {solicitudes.length > 0 && <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-1">{solicitudes.length}</span>}</button>
+          
           <button onClick={() => setActiveTab("boveda")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "boveda" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconFolder className="w-4 h-4" /> Bóveda Documentos</button>
           <button onClick={() => setActiveTab("grafico")} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2 ${activeTab === "grafico" ? "bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/30" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"}`}><IconTrendingUp className="w-4 h-4" /> Gráfico de Mercado</button>
         </div>
@@ -1066,6 +1073,68 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, chartConfigData,
           </div>
         )}
 
+        {/* NUEVA PESTAÑA: SOLICITUDES DE USUARIOS */}
+        {activeTab === "solicitudes" && (
+          <div className="animate-in fade-in duration-300">
+            <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">Bandeja de Solicitudes</h2>
+                <p className="text-slate-500 mt-1">Ofertas de compra y venta enviadas por los fiduciantes.</p>
+              </div>
+            </div>
+            <Card className="!p-0 overflow-hidden border-2 border-slate-200">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
+                      <th className="p-4 font-semibold">Fecha</th>
+                      <th className="p-4 font-semibold">Tipo</th>
+                      <th className="p-4 font-semibold">Fiduciante</th>
+                      <th className="p-4 font-semibold">Contacto</th>
+                      <th className="p-4 font-semibold text-right">Monto</th>
+                      <th className="p-4 font-semibold text-right">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {solicitudes.length === 0 ? (
+                      <tr><td colSpan={6} className="p-8 text-center text-slate-500 font-medium">No hay solicitudes pendientes en este momento.</td></tr>
+                    ) : (
+                      solicitudes.map((sol: any) => (
+                        <tr key={sol.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 align-middle text-sm font-medium text-slate-600">
+                            {new Date(sol.fechaSolicitud).toLocaleDateString()}
+                          </td>
+                          <td className="p-4 align-middle">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-black tracking-widest uppercase ${sol.tipo === 'COMPRA' ? 'bg-violet-100 text-violet-700 border border-violet-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}`}>
+                              {sol.tipo}
+                            </span>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <p className="font-bold text-slate-800">{sol.nombres} {sol.apellidos}</p>
+                            <p className="text-xs text-slate-500 font-mono mt-0.5">CUIT: {sol.cuit}</p>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <p className="text-sm font-medium text-slate-700">{sol.email}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{sol.telefono}</p>
+                          </td>
+                          <td className="p-4 align-middle text-right">
+                            <p className="font-black text-slate-800 text-lg">U$S {Number(sol.monto).toLocaleString()}</p>
+                          </td>
+                          <td className="p-4 align-middle text-right">
+                            <button onClick={() => handleDeleteSolicitudRequest(sol)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Borrar Solicitud">
+                              <IconTrash2 className="w-5 h-5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+
         {activeTab === "boveda" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -1121,6 +1190,7 @@ const MercadoApp = () => {
   const [operaciones, setOperaciones] = useState<any[]>([]);
   const [ofertas, setOfertas] = useState<any[]>([]);
   const [boveda, setBoveda] = useState<any[]>([]);
+  const [solicitudes, setSolicitudes] = useState<any[]>([]);
   const [chartConfigData, setChartConfigData] = useState<any>(null);
   
   const [isDbReady, setIsDbReady] = useState(false);
@@ -1171,7 +1241,6 @@ const MercadoApp = () => {
     const ofertasRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas');
     const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot: any) => {
       const ofs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      // Ordenamiento por número de oferta (la más nueva / más alta arriba)
       ofs.sort((a: any, b: any) => Number(b.numero) - Number(a.numero));
       setOfertas(ofs);
     });
@@ -1179,9 +1248,16 @@ const MercadoApp = () => {
     const bovedaRef = collection(db, 'artifacts', appId, 'public', 'data', 'boveda');
     const bovUnsubscribe = onSnapshot(bovedaRef, (snapshot: any) => {
       const docs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      // Ordenamiento de documentos por fecha de actualización (los más nuevos arriba)
       docs.sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
       setBoveda(docs);
+    });
+
+    // NUEVO: Listener para las Solicitudes de Ofertas
+    const solicitudesRef = collection(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas');
+    const solUnsubscribe = onSnapshot(solicitudesRef, (snapshot: any) => {
+      const sols = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      sols.sort((a: any, b: any) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime());
+      setSolicitudes(sols);
     });
 
     const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart');
@@ -1191,7 +1267,7 @@ const MercadoApp = () => {
       }
     });
 
-    return () => { uUnsubscribe(); oUnsubscribe(); ofUnsubscribe(); bovUnsubscribe(); cUnsubscribe(); };
+    return () => { uUnsubscribe(); oUnsubscribe(); ofUnsubscribe(); bovUnsubscribe(); solUnsubscribe(); cUnsubscribe(); };
   }, [firebaseUser]);
 
   useEffect(() => {
@@ -1245,7 +1321,6 @@ const MercadoApp = () => {
   const handleSaveBoveda = async (data: any) => { try { const id = data.id || `doc_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
   const handleDeleteBoveda = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id)); } catch (e) {} };
 
-  // NUEVO: Función para guardar las solicitudes de Compra/Venta de los usuarios
   const handleSaveUserOffer = async (data: any) => { 
     try { 
       const id = `solicitud_${Date.now()}`; 
@@ -1258,6 +1333,9 @@ const MercadoApp = () => {
       }); 
     } catch (e) { console.error(e); } 
   };
+  
+  // NUEVO: Función para eliminar solicitudes desde el panel admin
+  const handleDeleteSolicitud = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas', id)); } catch (e) {} };
 
   const handleSaveChartConfig = async (configData: any) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart'), configData); } catch (e) { console.error(e); } };
 
@@ -1279,7 +1357,7 @@ const MercadoApp = () => {
       
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} handleLogout={handleLogout} onSaveUserOffer={handleSaveUserOffer} showGlobalMessage={showGlobalMessage} />}
       
-      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} onSaveChartConfig={handleSaveChartConfig} showGlobalMessage={showGlobalMessage} />}
+      {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} solicitudes={solicitudes} chartConfigData={chartConfigData} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} onDeleteSolicitud={handleDeleteSolicitud} onSaveChartConfig={handleSaveChartConfig} showGlobalMessage={showGlobalMessage} />}
       <GlobalModal {...modalConfig} />
     </React.Fragment>
   );
