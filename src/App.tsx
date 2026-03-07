@@ -232,13 +232,13 @@ const UserOfferModal = ({ isOpen, offerType, user, onClose, onSave, showGlobalMe
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen && user) {
+    if (isOpen) {
       setFormData({ 
-        nombres: user.nombres || "", 
-        apellidos: user.apellidos || "", 
-        cuit: user.cuit || "", 
-        telefono: user.telefono || "", 
-        email: user.email || "", 
+        nombres: user?.nombres || "", 
+        apellidos: user?.apellidos || "", 
+        cuit: user?.cuit || "", 
+        telefono: user?.telefono || "", 
+        email: user?.email || "", 
         monto: "" 
       });
     }
@@ -532,7 +532,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v49</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v50</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -540,7 +540,11 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
           <InputField icon={IconLock} label="Contraseña" type="password" placeholder="••••••••" value={password} onChange={(e: any) => setPassword(e.target.value)} required />
           <div className="flex justify-end"><button type="button" onClick={handleForgot} className="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">¿Olvidaste tu contraseña?</button></div>
-          <Button type="submit" className="w-full mt-4">Ingresar a mi cuenta</Button>
+          
+          <div className="flex flex-col gap-3 mt-4">
+             <Button type="submit" className="w-full">Ingresar a mi cuenta</Button>
+             <Button type="button" variant="outline" className="w-full" onClick={() => setView("guest_dashboard")}>Acceso Invitados</Button>
+          </div>
         </form>
         <p className="mt-8 text-center text-slate-600 text-sm">¿No tienes cuenta? <button onClick={() => setView("register")} className="font-bold text-violet-600 hover:underline">Solicitar alta</button></p>
       </Card>
@@ -615,6 +619,112 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
     </div>
   );
 };
+
+// ==========================================
+// NUEVO: VISTA DEL DASHBOARD PARA INVITADOS
+// ==========================================
+const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, onSaveUserOffer, showGlobalMessage }: any) => {
+  const [offerModalConfig, setOfferModalConfig] = useState<{isOpen: boolean, type: string}>({ isOpen: false, type: "COMPRA" });
+  const ofertasOrdenadas = [...ofertas].sort((a, b) => Number(a.monto) - Number(b.monto));
+
+  const handleVentaClick = () => {
+    showGlobalMessage("info", "Acceso Restringido", "Para publicar ofertas de venta de CDPs en el mercado, debes registrarte y poseer un legajo de fiduciante validado.");
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div className="max-w-[1000px] mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center shadow-lg">
+              <IconUser className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-slate-800">Portal de Invitados</h1>
+          </div>
+          <button onClick={() => setView("login")} className="flex items-center gap-2 text-slate-500 hover:text-violet-600 font-semibold transition-colors">
+            <span className="hidden sm:inline">Volver al Inicio</span> <IconLogOut className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-[1000px] mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-slate-800">Mercado Activo de CDPs</h2>
+          <p className="text-slate-500 mt-1">Visualización del estado del mercado y recepción de ofertas de compra externas.</p>
+        </div>
+        
+        <Card className="p-6 bg-slate-100/50 border-2 border-slate-300 border-t-4 border-t-violet-500">
+          <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_180px] gap-4 lg:h-[520px]">
+            
+            {/* Cuadrante: Gráfico */}
+            <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 overflow-hidden shadow-sm h-full bg-white flex flex-col">
+               <MarketChart operaciones={operaciones} simplified={true} savedConfig={chartConfigData} />
+            </div>
+
+            {/* Cuadrante: Ofertas */}
+            <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
+               <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles</h4>
+               
+               <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+                  {ofertasOrdenadas.length > 0 ? (
+                    ofertasOrdenadas.map((of: any) => (
+                      <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col justify-between min-h-[85px] gap-3">
+                         <div className="flex justify-between items-start gap-2 w-full">
+                           <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">Oferta Venta</span>
+                           <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">CDP {of.cdpNumber}</span>
+                         </div>
+                         <div className="flex justify-between items-end gap-2 w-full">
+                           <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
+                             <span className="text-[11px] font-black">U$S</span>
+                             <span className="text-[22px] font-black leading-none">{Number(of.monto).toLocaleString()}</span>
+                           </div>
+                           <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mb-0.5">
+                              <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
+                           </span>
+                         </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                       <IconTag className="w-8 h-8 text-slate-300 mb-2" />
+                       <p className="text-slate-400 text-sm font-medium">No hay ofertas publicadas.</p>
+                    </div>
+                  )}
+               </div>
+            </div>
+
+            {/* Cuadrante: Botón Compra (Funcional) */}
+            <div className="lg:col-span-1 lg:row-span-1 h-full">
+               <button onClick={() => setOfferModalConfig({ isOpen: true, type: "COMPRA" })} className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl group cursor-pointer">
+                 <IconShoppingCart className="w-10 h-10 text-violet-600 group-hover:scale-110 transition-transform" />
+                 <span className="text-base font-bold text-center leading-tight">Hacer oferta de<br/>compra de CDP</span>
+               </button>
+            </div>
+
+            {/* Cuadrante: Botón Venta (Bloqueado para Invitados) */}
+            <div className="lg:col-span-1 lg:row-span-1 h-full">
+               <button onClick={handleVentaClick} className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-slate-200 text-slate-400 border border-slate-300 transition-colors rounded-2xl cursor-not-allowed shadow-inner">
+                 <IconTag className="w-10 h-10 text-slate-400 opacity-70" />
+                 <span className="text-base font-bold text-center leading-tight opacity-70">Hacer oferta de<br/>Venta de CDP</span>
+               </button>
+            </div>
+
+          </div>
+        </Card>
+      </main>
+
+      <UserOfferModal 
+        isOpen={offerModalConfig.isOpen} 
+        offerType={offerModalConfig.type} 
+        user={null} 
+        onClose={() => setOfferModalConfig({ isOpen: false, type: "COMPRA" })} 
+        onSave={onSaveUserOffer} 
+        showGlobalMessage={showGlobalMessage} 
+      />
+    </div>
+  );
+};
+
 
 const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigData, setView, handleLogout, onSaveUserOffer, showGlobalMessage }: any) => {
   const misCdps = cdps.filter((c: any) => c.ownerId === user.id);
@@ -1251,7 +1361,6 @@ const MercadoApp = () => {
       setBoveda(docs);
     });
 
-    // NUEVO: Listener para las Solicitudes de Ofertas
     const solicitudesRef = collection(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas');
     const solUnsubscribe = onSnapshot(solicitudesRef, (snapshot: any) => {
       const sols = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
@@ -1326,14 +1435,13 @@ const MercadoApp = () => {
       await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas', id), { 
         ...data, 
         id, 
-        userId: currentUser.id,
+        userId: currentUser ? currentUser.id : 'GUEST', // Registramos como GUEST si no hay usuario logueado
         fechaSolicitud: new Date().toISOString(),
         estado: 'PENDIENTE'
       }); 
     } catch (e) { console.error(e); } 
   };
   
-  // NUEVO: Función para eliminar solicitudes desde el panel admin
   const handleDeleteSolicitud = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas', id)); } catch (e) {} };
 
   const handleSaveChartConfig = async (configData: any) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart'), configData); } catch (e) { console.error(e); } };
@@ -1354,6 +1462,9 @@ const MercadoApp = () => {
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={computedCdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       
+      {/* NUEVA VISTA PARA INVITADOS */}
+      {currentView === "guest_dashboard" && <GuestDashboardView operaciones={operaciones} ofertas={ofertas} chartConfigData={chartConfigData} setView={setCurrentView} onSaveUserOffer={handleSaveUserOffer} showGlobalMessage={showGlobalMessage} />}
+
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} handleLogout={handleLogout} onSaveUserOffer={handleSaveUserOffer} showGlobalMessage={showGlobalMessage} />}
       
       {currentView === "admin" && <AdminView users={users} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} solicitudes={solicitudes} chartConfigData={chartConfigData} setView={setCurrentView} currentUser={currentUser} setCurrentUser={setCurrentUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} onSaveOperacion={handleSaveOperacion} onDeleteOperacion={handleDeleteOperacion} onSaveOferta={handleSaveOferta} onDeleteOferta={handleDeleteOferta} onSaveBoveda={handleSaveBoveda} onDeleteBoveda={handleDeleteBoveda} onDeleteSolicitud={handleDeleteSolicitud} onSaveChartConfig={handleSaveChartConfig} showGlobalMessage={showGlobalMessage} />}
