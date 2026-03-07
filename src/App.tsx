@@ -225,7 +225,7 @@ const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) =>
 };
 
 // ==========================================
-// NUEVO: MODAL DE SOLICITUD DE OFERTA (COMPRA/VENTA)
+// MODAL DE SOLICITUD DE OFERTA (COMPRA/VENTA)
 // ==========================================
 const UserOfferModal = ({ isOpen, offerType, user, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ nombres: "", apellidos: "", cuit: "", telefono: "", email: "", monto: "" });
@@ -524,7 +524,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-2 border-slate-200">
+      <Card className="w-full max-w-md border-2 border-slate-200 p-8 sm:p-10">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4 relative">
             <IconBuilding className="w-8 h-8 text-violet-600" />
@@ -532,20 +532,26 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v50</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v51</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
-        <form onSubmit={handleLogin} className="space-y-5">
+        
+        {/* Formulario con ancho máximo restringido para evitar que toque los bordes */}
+        <form onSubmit={handleLogin} className="space-y-5 max-w-[260px] mx-auto w-full">
           <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
           <InputField icon={IconLock} label="Contraseña" type="password" placeholder="••••••••" value={password} onChange={(e: any) => setPassword(e.target.value)} required />
-          <div className="flex justify-end"><button type="button" onClick={handleForgot} className="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">¿Olvidaste tu contraseña?</button></div>
+          
+          <div className="flex justify-center mt-2">
+            <button type="button" onClick={handleForgot} className="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">¿Olvidaste tu contraseña?</button>
+          </div>
           
           <div className="flex flex-col gap-3 mt-4">
              <Button type="submit" className="w-full">Ingresar a mi cuenta</Button>
-             <Button type="button" variant="outline" className="w-full" onClick={() => setView("guest_dashboard")}>Acceso Invitados</Button>
+             <Button type="button" variant="primary" className="w-full" onClick={() => setView("guest_dashboard")}>Acceso Invitados</Button>
           </div>
         </form>
+        
         <p className="mt-8 text-center text-slate-600 text-sm">¿No tienes cuenta? <button onClick={() => setView("register")} className="font-bold text-violet-600 hover:underline">Solicitar alta</button></p>
       </Card>
     </div>
@@ -572,7 +578,7 @@ const RegisterView = ({ users, onRegister, setView, setCurrentUser, showGlobalMe
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 py-12">
-      <Card className="w-full max-w-xl border-2 border-slate-200">
+      <Card className="w-full max-w-xl border-2 border-slate-200 p-8 sm:p-10">
         <button onClick={() => setView("login")} className="flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors"><IconChevronRight className="w-4 h-4 rotate-180 mr-1" /> Volver al Login</button>
         <h2 className="text-3xl font-bold text-slate-800 mb-2">Solicitud de Alta</h2>
         <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP.</p>
@@ -603,7 +609,7 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
           <IconAlertCircle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
           <div><h4 className="font-bold text-amber-900">Validación Requerida</h4><p className="text-amber-800 text-sm mt-1">Antes de operar, es obligatorio confirmar que tus datos fiduciarios son correctos.</p></div>
         </div>
-        <Card className="border-2 border-slate-200">
+        <Card className="border-2 border-slate-200 p-8 sm:p-10">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-8 pb-8 border-b border-slate-100">
             <div><h2 className="text-2xl font-bold text-slate-800">Perfil Fiduciario</h2><p className="text-slate-500">Revisión de legajo digital</p></div>
             <div className="text-center md:text-right"><span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Categoría Oficial</span><span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${currentRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : currentRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>{currentRole === ROLES.ADMIN && <IconShield className="w-4 h-4" />}{currentRole}</span><div className="mt-2 text-xl font-black text-slate-800 tracking-tight">Socio Nº {formatId(user.correlativeId)}</div></div>
@@ -621,7 +627,7 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
 };
 
 // ==========================================
-// NUEVO: VISTA DEL DASHBOARD PARA INVITADOS
+// VISTA DEL DASHBOARD PARA INVITADOS
 // ==========================================
 const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, onSaveUserOffer, showGlobalMessage }: any) => {
   const [offerModalConfig, setOfferModalConfig] = useState<{isOpen: boolean, type: string}>({ isOpen: false, type: "COMPRA" });
