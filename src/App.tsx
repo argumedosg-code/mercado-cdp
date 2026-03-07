@@ -64,7 +64,7 @@ const IconSave = (props: any) => <SvgIcon {...props}><path d="M19 21H5a2 2 0 0 1
 const IconShoppingCart = (props: any) => <SvgIcon {...props}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></SvgIcon>;
 
 // ==========================================
-// CONFIGURACIÓN DE BASE DE DATOS FIREBASE
+// CONFIGURACIÓN SEGURA DE FIREBASE (SSR FIX)
 // ==========================================
 const codeSandboxFirebaseConfig = {
   apiKey: "AIzaSyAKURp61wvvL-YfYhfUQzVsl4sQX69TCHc",
@@ -75,15 +75,19 @@ const codeSandboxFirebaseConfig = {
   appId: "1:1035972951086:web:6ff86cbf17dd4c1a0533bf"
 };
 
-const firebaseConfig = typeof (window as any).__firebase_config !== 'undefined' ? JSON.parse((window as any).__firebase_config) : codeSandboxFirebaseConfig;
+const firebaseConfig = typeof window !== 'undefined' && typeof (window as any).__firebase_config !== 'undefined'
+  ? JSON.parse((window as any).__firebase_config) 
+  : codeSandboxFirebaseConfig;
 
-let app: any, auth: any, db: any, appId: string;
+let app: any, auth: any, db: any, appId: string = 'mi-mercado-cdp';
 
 if (firebaseConfig) {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
-  appId = typeof (window as any).__app_id !== 'undefined' ? (window as any).__app_id : 'mi-mercado-cdp';
+  if (typeof window !== 'undefined' && typeof (window as any).__app_id !== 'undefined') {
+    appId = (window as any).__app_id;
+  }
 }
 
 const formatId = (num: number) => `#${String(num).padStart(4, "0")}`;
@@ -192,10 +196,10 @@ const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confir
 
 const DashboardOfertaVentaModal = ({ user, misCdps, nextOfertaNum, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({
-    nombres: user.nombres || "", apellidos: user.apellidos || "", email: user.email || "", cuit: user.cuit || "", telefono: user.telefono || "",
-    cdpNumber: misCdps.length > 0 ? misCdps[0].number : "",
+    nombres: user?.nombres || "", apellidos: user?.apellidos || "", email: user?.email || "", cuit: user?.cuit || "", telefono: user?.telefono || "",
+    cdpNumber: misCdps?.length > 0 ? misCdps[0].number : "",
     monto: "",
-    vencimiento: getFutureDateString(30) // Vencimiento por defecto 30 días
+    vencimiento: getFutureDateString(30)
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -255,7 +259,7 @@ const DashboardOfertaVentaModal = ({ user, misCdps, nextOfertaNum, onClose, onSa
 
 const DashboardOfertaCompraModal = ({ user, nextCompraNum, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({
-    nombres: user.nombres || "", apellidos: user.apellidos || "", email: user.email || "", cuit: user.cuit || "", telefono: user.telefono || "",
+    nombres: user?.nombres || "", apellidos: user?.apellidos || "", email: user?.email || "", cuit: user?.cuit || "", telefono: user?.telefono || "",
     monto: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -593,7 +597,7 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v44</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v45</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -1126,7 +1130,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, ofertasCompra, boveda, c
                           <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{of.numero}</span></td>
                           <td className="p-4 align-middle text-sm text-slate-600">{formatDateForDisplay(of.fecha)}</td>
                           <td className="p-4 align-middle"><span className="inline-flex items-center px-2 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs font-bold">CDP {of.cdpNumber}</span></td>
-                          <td className="p-4 align-middle text-sm font-semibold text-slate-700">{of.vendedorId ? getUserName(of.vendedorId) : `${of.nombres} ${of.apellidos}`}</td>
+                          <td className="p-4 align-middle text-sm font-semibold text-slate-700">{of.vendedorId ? getUserName(of.vendedorId) : `${of.nombres || ''} ${of.apellidos || ''}`.trim() || 'Desconocido'}</td>
                           <td className="p-4 align-middle text-sm text-red-500 font-medium">{formatDateForDisplay(of.vencimiento)}</td>
                           <td className="p-4 align-middle text-right font-bold text-slate-800">USD {Number(of.monto).toLocaleString()}</td>
                           <td className="p-4 align-middle text-right space-x-2">
@@ -1242,7 +1246,7 @@ const MercadoApp = () => {
     if (!firebaseConfig) return;
     const initAuth = async () => {
       try {
-        if (typeof (window as any).__initial_auth_token !== 'undefined' && (window as any).__initial_auth_token) {
+        if (typeof window !== 'undefined' && typeof (window as any).__initial_auth_token !== 'undefined' && (window as any).__initial_auth_token) {
           await signInWithCustomToken(auth, (window as any).__initial_auth_token);
         } else {
           await signInAnonymously(auth);
@@ -1284,7 +1288,6 @@ const MercadoApp = () => {
       setOfertas(ofs);
     });
 
-    // Nueva suscripción a Ofertas de Compra
     const ofertasCompraRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas_compra');
     const ocUnsubscribe = onSnapshot(ofertasCompraRef, (snapshot: any) => {
       const ocs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
