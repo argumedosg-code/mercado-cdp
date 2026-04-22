@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc } from "firebase/firestore";
@@ -24,6 +24,9 @@ const ROLES = {
 
 const TOTAL_CDPS = 413;
 const SESSION_KEY = "cdp_session_v23";
+
+// TIEMPO DE INACTIVIDAD PERMITIDO (5 MINUTOS)
+const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; 
 
 // ==========================================
 // ÍCONOS INTEGRADOS
@@ -165,12 +168,13 @@ const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confir
     error: <IconAlertCircle className="w-12 h-12 text-red-500" />,
     info: <IconInfo className="w-12 h-12 text-violet-500" />,
     confirm: <IconAlertCircle className="w-12 h-12 text-amber-500" />,
+    warning: <IconAlertCircle className="w-12 h-12 text-orange-500" />
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={type === "confirm" ? onCancel : onConfirm}></div>
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" onClick={type === "confirm" ? onCancel : onConfirm}></div>
       <div className="bg-white rounded-3xl p-8 max-w-sm w-full relative z-10 shadow-2xl scale-100 animate-in zoom-in-95 flex flex-col items-center text-center">
-        <div className="mb-4 bg-slate-50 p-4 rounded-full">{icons[type]}</div>
+        <div className="mb-4 bg-slate-50 p-4 rounded-full">{icons[type] || icons.info}</div>
         <h3 className="text-2xl font-bold text-slate-800 mb-2">{title}</h3>
         <p className="text-slate-600 mb-8">{message}</p>
         <div className="flex gap-3 w-full">
@@ -224,9 +228,6 @@ const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) =>
   );
 };
 
-// ==========================================
-// MODAL DE SOLICITUD DE OFERTA (COMPRA/VENTA)
-// ==========================================
 const UserOfferModal = ({ isOpen, offerType, user, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ nombres: "", apellidos: "", cuit: "", telefono: "", email: "", monto: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -532,12 +533,11 @@ const LoginView = ({ users, setView, setCurrentUser, showGlobalMessage }: any) =
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v51</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v52</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
         
-        {/* Formulario con ancho máximo restringido para evitar que toque los bordes */}
         <form onSubmit={handleLogin} className="space-y-5 max-w-[260px] mx-auto w-full">
           <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
           <InputField icon={IconLock} label="Contraseña" type="password" placeholder="••••••••" value={password} onChange={(e: any) => setPassword(e.target.value)} required />
@@ -626,9 +626,6 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) 
   );
 };
 
-// ==========================================
-// VISTA DEL DASHBOARD PARA INVITADOS
-// ==========================================
 const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, onSaveUserOffer, showGlobalMessage }: any) => {
   const [offerModalConfig, setOfferModalConfig] = useState<{isOpen: boolean, type: string}>({ isOpen: false, type: "COMPRA" });
   const ofertasOrdenadas = [...ofertas].sort((a, b) => Number(a.monto) - Number(b.monto));
@@ -661,16 +658,11 @@ const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, on
         
         <Card className="p-6 bg-slate-100/50 border-2 border-slate-300 border-t-4 border-t-violet-500">
           <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_180px] gap-4 lg:h-[520px]">
-            
-            {/* Cuadrante: Gráfico */}
             <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 overflow-hidden shadow-sm h-full bg-white flex flex-col">
                <MarketChart operaciones={operaciones} simplified={true} savedConfig={chartConfigData} />
             </div>
-
-            {/* Cuadrante: Ofertas */}
             <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
                <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles</h4>
-               
                <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                   {ofertasOrdenadas.length > 0 ? (
                     ofertasOrdenadas.map((of: any) => (
@@ -698,23 +690,18 @@ const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, on
                   )}
                </div>
             </div>
-
-            {/* Cuadrante: Botón Compra (Funcional) */}
             <div className="lg:col-span-1 lg:row-span-1 h-full">
                <button onClick={() => setOfferModalConfig({ isOpen: true, type: "COMPRA" })} className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl group cursor-pointer">
                  <IconShoppingCart className="w-10 h-10 text-violet-600 group-hover:scale-110 transition-transform" />
                  <span className="text-base font-bold text-center leading-tight">Hacer oferta de<br/>compra de CDP</span>
                </button>
             </div>
-
-            {/* Cuadrante: Botón Venta (Bloqueado para Invitados) */}
             <div className="lg:col-span-1 lg:row-span-1 h-full">
                <button onClick={handleVentaClick} className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-slate-200 text-slate-400 border border-slate-300 transition-colors rounded-2xl cursor-not-allowed shadow-inner">
                  <IconTag className="w-10 h-10 text-slate-400 opacity-70" />
                  <span className="text-base font-bold text-center leading-tight opacity-70">Hacer oferta de<br/>Venta de CDP</span>
                </button>
             </div>
-
           </div>
         </Card>
       </main>
@@ -740,7 +727,6 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
 
   const bovedaDocsFiltered = selectedBovedaCdp ? boveda.filter((d:any) => String(d.cdpNumber) === String(selectedBovedaCdp)) : [];
 
-  // Ordenar ofertas de menor a mayor monto
   const ofertasOrdenadas = [...ofertas].sort((a, b) => Number(a.monto) - Number(b.monto));
 
   return (
@@ -759,7 +745,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                 Panel Admin
               </Button>
             ) : null}
-            <button onClick={handleLogout} className="flex items-center gap-2 text-slate-500 hover:text-red-500 font-semibold transition-colors">
+            <button onClick={() => handleLogout(false)} className="flex items-center gap-2 text-slate-500 hover:text-red-500 font-semibold transition-colors">
               <IconLogOut className="w-5 h-5" /> <span className="hidden sm:inline">Salir</span>
             </button>
           </div>
@@ -768,8 +754,6 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
 
       <main className="max-w-[1400px] mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* COLUMNA IZQUIERDA (Mensaje, Credencial, Legajo) */}
           <div className="lg:col-span-4 space-y-6">
             <div className="mb-2">
               <h2 className="text-3xl font-bold text-slate-800">Bienvenido, {user.nombres}</h2>
@@ -815,10 +799,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
             </Card>
           </div>
 
-          {/* COLUMNA DERECHA (Mercado, Bóveda, CDPs) */}
           <div className="lg:col-span-8 space-y-6">
-            
-            {/* SECCIÓN 1: MERCADO ACTIVO */}
             <Card className="p-6 bg-slate-100/50 border-2 border-slate-300 border-t-4 border-t-violet-500">
               <div className="mb-6 border-b border-slate-200 pb-4">
                   <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
@@ -828,43 +809,33 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[1fr_1fr_180px] gap-4 lg:h-[520px]">
-                
-                {/* Cuadrante: Gráfico */}
                 <div className="lg:col-span-2 lg:row-span-2 rounded-2xl border border-slate-200 overflow-hidden shadow-sm h-full bg-white flex flex-col">
                    <MarketChart operaciones={operaciones} simplified={true} savedConfig={chartConfigData} />
                 </div>
 
-                {/* Cuadrante: Ofertas */}
                 <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
                    <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Venta</h4>
-                   
-                   {/* Scroll Window para las tarjetas de Ofertas */}
                    <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                       {ofertasOrdenadas.length > 0 ? (
                         ofertasOrdenadas.map((of: any) => (
                           <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col justify-between group relative overflow-hidden min-h-[85px] gap-3">
-                             
                              <div className="flex justify-between items-start gap-2 w-full">
                                <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">
                                  Oferta de Venta
                                </span>
-                               
                                <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">
                                  CDP {of.cdpNumber}
                                </span>
                              </div>
-
                              <div className="flex justify-between items-end gap-2 w-full">
                                <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
                                  <span className="text-[11px] font-black">U$S</span>
                                  <span className="text-[22px] font-black leading-none">{Number(of.monto).toLocaleString()}</span>
                                </div>
-                               
                                <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mb-0.5">
                                   <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
                                </span>
                              </div>
-
                           </div>
                         ))
                       ) : (
@@ -876,7 +847,6 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    </div>
                 </div>
 
-                {/* Cuadrante: Botón Compra */}
                 <div className="lg:col-span-1 lg:row-span-1 h-full">
                    <button onClick={() => setOfferModalConfig({ isOpen: true, type: "COMPRA" })} className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-white border-2 border-violet-600 text-violet-700 hover:bg-violet-50 transition-colors shadow-sm rounded-2xl group cursor-pointer">
                      <IconShoppingCart className="w-10 h-10 text-violet-600 group-hover:scale-110 transition-transform" />
@@ -884,18 +854,15 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    </button>
                 </div>
 
-                {/* Cuadrante: Botón Venta */}
                 <div className="lg:col-span-1 lg:row-span-1 h-full">
                    <button onClick={() => setOfferModalConfig({ isOpen: true, type: "VENTA" })} className="w-full h-full min-h-[140px] flex flex-col items-center justify-center gap-3 bg-violet-600 hover:bg-violet-700 text-white transition-colors shadow-md shadow-violet-500/30 rounded-2xl group cursor-pointer">
                      <IconTag className="w-10 h-10 text-white group-hover:scale-110 transition-transform" />
                      <span className="text-base font-bold text-center leading-tight">Hacer oferta de<br/>Venta de CDP</span>
                    </button>
                 </div>
-
               </div>
             </Card>
 
-            {/* SECCIÓN 2: BÓVEDA DOCUMENTOS */}
             <Card className="p-6 border-2 border-slate-300 border-t-4 border-t-blue-500">
               <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4">
                 <div>
@@ -947,7 +914,6 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                  </div>
               )}
 
-              {/* Cuadro informativo de Bóveda */}
               <div className="mt-6 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl flex items-start gap-4 shadow-sm">
                  <IconInfo className="w-6 h-6 shrink-0 mt-0.5" />
                  <div className="text-sm leading-relaxed font-medium">
@@ -955,10 +921,8 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    <p className="mt-1">En caso de querer ver más documentación en la bóveda de documentos, por favor solicitarlo al Whatsapp 2614722618.</p>
                  </div>
               </div>
-
             </Card>
 
-            {/* SECCIÓN 3: MIS CDPS ASIGNADOS */}
             <Card className="p-6 border-2 border-slate-300 border-t-4 border-t-violet-500">
               <div className="flex justify-between items-center mb-6">
                 <div>
@@ -993,7 +957,6 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
         </div>
       </main>
 
-      {/* MODAL DE COMPRA/VENTA PARA USUARIOS */}
       <UserOfferModal 
         isOpen={offerModalConfig.isOpen} 
         offerType={offerModalConfig.type} 
@@ -1188,7 +1151,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
           </div>
         )}
 
-        {/* NUEVA PESTAÑA: SOLICITUDES DE USUARIOS */}
+        {/* PESTAÑA: SOLICITUDES DE USUARIOS */}
         {activeTab === "solicitudes" && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -1441,7 +1404,7 @@ const MercadoApp = () => {
       await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas', id), { 
         ...data, 
         id, 
-        userId: currentUser ? currentUser.id : 'GUEST', // Registramos como GUEST si no hay usuario logueado
+        userId: currentUser ? currentUser.id : 'GUEST', 
         fechaSolicitud: new Date().toISOString(),
         estado: 'PENDIENTE'
       }); 
@@ -1452,11 +1415,54 @@ const MercadoApp = () => {
 
   const handleSaveChartConfig = async (configData: any) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart'), configData); } catch (e) { console.error(e); } };
 
-  const showGlobalMessage = (type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
+  const showGlobalMessage = useCallback((type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
     setModalConfig({ isOpen: true, type, title, message, confirmText, cancelText: "Cancelar", onConfirm: () => { setModalConfig((prev: any) => ({ ...prev, isOpen: false })); if (onConfirmCallback) onConfirmCallback(); }, onCancel: () => { setModalConfig((prev: any) => ({ ...prev, isOpen: false })); if (onCancelCallback) onCancelCallback(); } });
-  };
+  }, []);
 
-  const handleLogout = () => { showGlobalMessage("confirm", "Cerrar Sesión", "¿Estás seguro de que deseas salir de tu cuenta?", () => { sessionStorage.removeItem(SESSION_KEY); setCurrentUser(null); setCurrentView("login"); }); };
+  const handleLogout = useCallback((isAutomatic = false) => { 
+    if (isAutomatic) {
+      sessionStorage.removeItem(SESSION_KEY); 
+      setCurrentUser(null); 
+      setCurrentView("login");
+      showGlobalMessage("warning", "Sesión Cerrada por Inactividad", "Por motivos de seguridad, hemos cerrado tu cuenta automáticamente tras 5 minutos sin actividad.", null, null, "Entendido");
+    } else {
+      showGlobalMessage("confirm", "Cerrar Sesión", "¿Estás seguro de que deseas salir de tu cuenta?", () => { sessionStorage.removeItem(SESSION_KEY); setCurrentUser(null); setCurrentView("login"); }); 
+    }
+  }, [showGlobalMessage]);
+
+  // ==========================================
+  // SEGURIDAD: TIMEOUT POR INACTIVIDAD (v52)
+  // ==========================================
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const resetInactivityTimer = () => {
+      clearTimeout(timeoutId);
+      // Solo aplicamos el timeout si el usuario está logueado y NO está en la pantalla de login o invitado
+      if (currentUser && currentView !== "login" && currentView !== "guest_dashboard") {
+        timeoutId = setTimeout(() => {
+          handleLogout(true); // true indica que es un cierre automático
+        }, INACTIVITY_TIMEOUT_MS);
+      }
+    };
+
+    // Escuchamos eventos de interacción básicos
+    window.addEventListener('mousemove', resetInactivityTimer);
+    window.addEventListener('keydown', resetInactivityTimer);
+    window.addEventListener('click', resetInactivityTimer);
+    window.addEventListener('scroll', resetInactivityTimer);
+
+    // Iniciar el temporizador al cargar el componente
+    resetInactivityTimer();
+
+    return () => {
+      window.removeEventListener('mousemove', resetInactivityTimer);
+      window.removeEventListener('keydown', resetInactivityTimer);
+      window.removeEventListener('click', resetInactivityTimer);
+      window.removeEventListener('scroll', resetInactivityTimer);
+      clearTimeout(timeoutId);
+    };
+  }, [currentUser, currentView, handleLogout]);
 
   if (!firebaseConfig) return <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}><h2 style={{ color: '#d97706', fontSize: '1.5rem', fontWeight: 'bold' }}>¡Casi listo!</h2></div>;
   if (dbError) return <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}><h2 style={{ color: '#dc2626', fontSize: '1.5rem', fontWeight: 'bold' }}>Error de conexión</h2><button onClick={() => window.location.reload()}>Reintentar</button></div>;
@@ -1468,7 +1474,6 @@ const MercadoApp = () => {
       {currentView === "register" && <RegisterView users={users} onRegister={handleRegisterUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       {currentView === "validation" && <ValidationView user={currentUser} cdps={computedCdps} onUpdate={handleUpdateUser} setView={setCurrentView} setCurrentUser={setCurrentUser} showGlobalMessage={showGlobalMessage} />}
       
-      {/* NUEVA VISTA PARA INVITADOS */}
       {currentView === "guest_dashboard" && <GuestDashboardView operaciones={operaciones} ofertas={ofertas} chartConfigData={chartConfigData} setView={setCurrentView} onSaveUserOffer={handleSaveUserOffer} showGlobalMessage={showGlobalMessage} />}
 
       {currentView === "dashboard" && <DashboardView user={currentUser} cdps={computedCdps} operaciones={operaciones} ofertas={ofertas} boveda={boveda} chartConfigData={chartConfigData} setView={setCurrentView} handleLogout={handleLogout} onSaveUserOffer={handleSaveUserOffer} showGlobalMessage={showGlobalMessage} />}
