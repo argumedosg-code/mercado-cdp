@@ -31,40 +31,40 @@ const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
 // ==========================================
 // ÍCONOS INTEGRADOS
 // ==========================================
-const SvgIcon = ({ children, ...props }) => (
+const SvgIcon = ({ children, ...props }: any) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     {children}
   </svg>
 );
 
-const IconMail = (props) => <SvgIcon {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></SvgIcon>;
-const IconLock = (props) => <SvgIcon {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></SvgIcon>;
-const IconUser = (props) => <SvgIcon {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></SvgIcon>;
-const IconPhone = (props) => <SvgIcon {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></SvgIcon>;
-const IconFileText = (props) => <SvgIcon {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></SvgIcon>;
-const IconChevronRight = (props) => <SvgIcon {...props}><path d="m9 18 6-6-6-6" /></SvgIcon>;
-const IconLogOut = (props) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></SvgIcon>;
-const IconShield = (props) => <SvgIcon {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></SvgIcon>;
-const IconCheckCircle = (props) => <SvgIcon {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></SvgIcon>;
-const IconAlertCircle = (props) => <SvgIcon {...props}><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></SvgIcon>;
-const IconTrash2 = (props) => <SvgIcon {...props}><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></SvgIcon>;
-const IconEdit = (props) => <SvgIcon {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></SvgIcon>;
-const IconCreditCard = (props) => <SvgIcon {...props}><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></SvgIcon>;
-const IconBuilding = (props) => <SvgIcon {...props}><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /><path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" /><path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" /><path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" /></SvgIcon>;
-const IconSettings = (props) => <SvgIcon {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></SvgIcon>;
-const IconX = (props) => <SvgIcon {...props}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></SvgIcon>;
-const IconInfo = (props) => <SvgIcon {...props}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></SvgIcon>;
-const IconCloud = (props) => <SvgIcon {...props}><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></SvgIcon>;
-const IconGrid = (props) => <SvgIcon {...props}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></SvgIcon>;
-const IconList = (props) => <SvgIcon {...props}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></SvgIcon>;
-const IconDollarSign = (props) => <SvgIcon {...props}><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></SvgIcon>;
-const IconTag = (props) => <SvgIcon {...props}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></SvgIcon>;
-const IconFolder = (props) => <SvgIcon {...props}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></SvgIcon>;
-const IconTrendingUp = (props) => <SvgIcon {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></SvgIcon>;
-const IconExternalLink = (props) => <SvgIcon {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></SvgIcon>;
-const IconClock = (props) => <SvgIcon {...props}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></SvgIcon>;
-const IconSave = (props) => <SvgIcon {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></SvgIcon>;
-const IconShoppingCart = (props) => <SvgIcon {...props}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></SvgIcon>;
+const IconMail = (props: any) => <SvgIcon {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></SvgIcon>;
+const IconLock = (props: any) => <SvgIcon {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></SvgIcon>;
+const IconUser = (props: any) => <SvgIcon {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></SvgIcon>;
+const IconPhone = (props: any) => <SvgIcon {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></SvgIcon>;
+const IconFileText = (props: any) => <SvgIcon {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></SvgIcon>;
+const IconChevronRight = (props: any) => <SvgIcon {...props}><path d="m9 18 6-6-6-6" /></SvgIcon>;
+const IconLogOut = (props: any) => <SvgIcon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></SvgIcon>;
+const IconShield = (props: any) => <SvgIcon {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></SvgIcon>;
+const IconCheckCircle = (props: any) => <SvgIcon {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></SvgIcon>;
+const IconAlertCircle = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></SvgIcon>;
+const IconTrash2 = (props: any) => <SvgIcon {...props}><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></SvgIcon>;
+const IconEdit = (props: any) => <SvgIcon {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></SvgIcon>;
+const IconCreditCard = (props: any) => <SvgIcon {...props}><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></SvgIcon>;
+const IconBuilding = (props: any) => <SvgIcon {...props}><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /><path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" /><path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" /><path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" /></SvgIcon>;
+const IconSettings = (props: any) => <SvgIcon {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></SvgIcon>;
+const IconX = (props: any) => <SvgIcon {...props}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></SvgIcon>;
+const IconInfo = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></SvgIcon>;
+const IconCloud = (props: any) => <SvgIcon {...props}><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></SvgIcon>;
+const IconGrid = (props: any) => <SvgIcon {...props}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></SvgIcon>;
+const IconList = (props: any) => <SvgIcon {...props}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></SvgIcon>;
+const IconDollarSign = (props: any) => <SvgIcon {...props}><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></SvgIcon>;
+const IconTag = (props: any) => <SvgIcon {...props}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></SvgIcon>;
+const IconFolder = (props: any) => <SvgIcon {...props}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></SvgIcon>;
+const IconTrendingUp = (props: any) => <SvgIcon {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></SvgIcon>;
+const IconExternalLink = (props: any) => <SvgIcon {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></SvgIcon>;
+const IconClock = (props: any) => <SvgIcon {...props}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></SvgIcon>;
+const IconSave = (props: any) => <SvgIcon {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></SvgIcon>;
+const IconShoppingCart = (props: any) => <SvgIcon {...props}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></SvgIcon>;
 
 // ==========================================
 // CONFIGURACIÓN DE BASE DE DATOS FIREBASE
@@ -78,34 +78,34 @@ const codeSandboxFirebaseConfig = {
   appId: "1:1035972951086:web:6ff86cbf17dd4c1a0533bf"
 };
 
-const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : codeSandboxFirebaseConfig;
+const firebaseConfig = typeof (window as any).__firebase_config !== 'undefined' ? JSON.parse((window as any).__firebase_config) : codeSandboxFirebaseConfig;
 
-let app, auth, db, appId;
+let app: any, auth: any, db: any, appId: string;
 
 if (firebaseConfig) {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
-  appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'mi-mercado-cdp';
+  appId = typeof (window as any).__app_id !== 'undefined' ? (window as any).__app_id : 'mi-mercado-cdp';
 }
 
-const formatId = (num) => `#${String(num).padStart(4, "0")}`;
+const formatId = (num: number) => `#${String(num).padStart(4, "0")}`;
 
 const getLocalDateString = () => {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 };
 
-const formatDateForDisplay = (dateStr) => {
+const formatDateForDisplay = (dateStr: string) => {
   if (!dateStr) return "";
   const parts = dateStr.split('-');
   if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
   return dateStr;
 };
 
-const getUserRole = (user, cdps) => {
+const getUserRole = (user: any, cdps: any[]) => {
   if (user.isAdmin || user.correlativeId === 1) return ROLES.ADMIN;
-  const ownsCdp = cdps.some((c) => c.ownerId === user.id);
+  const ownsCdp = cdps.some((c: any) => c.ownerId === user.id);
   return ownsCdp ? ROLES.FIDUCIANTE : ROLES.NO_FIDUCIANTE;
 };
 
@@ -113,16 +113,16 @@ const getUserRole = (user, cdps) => {
 // COMPONENTES UI REUTILIZABLES
 // ==========================================
 
-const Spinner = ({ className = "w-5 h-5" }) => (
+const Spinner = ({ className = "w-5 h-5" }: any) => (
   <svg className={`animate-spin ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
   </svg>
 );
 
-const Button = ({ children, variant = "primary", isLoading = false, icon: Icon, className = "", ...props }) => {
+const Button = ({ children, variant = "primary", isLoading = false, icon: Icon, className = "", ...props }: any) => {
   const baseStyle = "flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed";
-  const variants = {
+  const variants: any = {
     primary: "bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/30 hover:shadow-lg hover:shadow-violet-500/40",
     secondary: "bg-slate-800 hover:bg-slate-900 text-white shadow-md shadow-slate-900/20",
     danger: "bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/30",
@@ -137,7 +137,7 @@ const Button = ({ children, variant = "primary", isLoading = false, icon: Icon, 
   );
 };
 
-const InputField = ({ label, icon: Icon, error, ...props }) => (
+const InputField = ({ label, icon: Icon, error, ...props }: any) => (
   <div className="flex flex-col gap-1 w-full">
     {label && <label className="text-sm font-semibold text-slate-600 ml-1">{label}</label>}
     <div className="relative">
@@ -151,7 +151,7 @@ const InputField = ({ label, icon: Icon, error, ...props }) => (
   </div>
 );
 
-const Card = ({ children, className = "" }) => (
+const Card = ({ children, className = "" }: any) => (
   <div className={`bg-white rounded-3xl shadow-xl shadow-slate-200/50 ${className}`}>
     {children}
   </div>
@@ -161,9 +161,9 @@ const Card = ({ children, className = "" }) => (
 // MODALES GLOBALES Y ESPECÍFICOS
 // ==========================================
 
-const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confirmText = "Aceptar", cancelText = "Cancelar" }) => {
+const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confirmText = "Aceptar", cancelText = "Cancelar" }: any) => {
   if (!isOpen) return null;
-  const icons = {
+  const icons: any = {
     success: <IconCheckCircle className="w-12 h-12 text-green-500" />,
     error: <IconAlertCircle className="w-12 h-12 text-red-500" />,
     info: <IconInfo className="w-12 h-12 text-violet-500" />,
@@ -186,11 +186,11 @@ const GlobalModal = ({ isOpen, type, title, message, onConfirm, onCancel, confir
   );
 };
 
-const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }) => {
+const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ ...user });
   const [isLoading, setIsLoading] = useState(false);
-  const handleChange = (e) => setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  const handleSubmit = async (e) => { 
+  const handleChange = (e: any) => setFormData((prev: any) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleSubmit = async (e: any) => { 
     e.preventDefault(); 
     setIsLoading(true); 
     await onUpdate(user.id, formData); 
@@ -203,39 +203,39 @@ const AdminEditModal = ({ user, onClose, onUpdate, showGlobalMessage }) => {
   );
 };
 
-const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }) => {
+const OperacionModal = ({ operacion, users, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState(operacion || { numero: "", cdpNumber: "", vendedorId: "", compradorId: "", monto: "", fecha: getLocalDateString() });
   const [isLoading, setIsLoading] = useState(false);
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleSubmit = async (e) => { e.preventDefault(); if (formData.vendedorId === formData.compradorId && formData.vendedorId !== "") { showGlobalMessage("error", "Error", "El vendedor y comprador no pueden ser el mismo."); return; } setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Operación Registrada", "El registro se guardó correctamente."); onClose(); };
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleSubmit = async (e: any) => { e.preventDefault(); if (formData.vendedorId === formData.compradorId && formData.vendedorId !== "") { showGlobalMessage("error", "Error", "El vendedor y comprador no pueden ser el mismo."); return; } setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Operación Registrada", "El registro se guardó correctamente."); onClose(); };
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{operacion ? "Editar Operación" : "Nueva Operación"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="grid grid-cols-1 sm:grid-cols-3 gap-4"><InputField label="Nº Operación" type="number" name="numero" value={formData.numero} onChange={handleChange} required /><InputField label="Nº CDP" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required /><InputField label="Fecha" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /></div><div className="flex flex-col gap-1 w-full mt-2"><label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="vendedorId" value={formData.vendedorId} onChange={handleChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><div className="flex flex-col gap-1 w-full mt-2"><label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Comprador</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="compradorId" value={formData.compradorId} onChange={handleChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><InputField icon={IconDollarSign} label="Monto (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar</Button></div></form></div></div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{operacion ? "Editar Operación" : "Nueva Operación"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="grid grid-cols-1 sm:grid-cols-3 gap-4"><InputField label="Nº Operación" type="number" name="numero" value={formData.numero} onChange={handleChange} required /><InputField label="Nº CDP" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required /><InputField label="Fecha" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /></div><div className="flex flex-col gap-1 w-full mt-2"><label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Vendedor</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="vendedorId" value={formData.vendedorId} onChange={handleChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u: any) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><div className="flex flex-col gap-1 w-full mt-2"><label className="text-sm font-semibold text-slate-600 ml-1">Fiduciante Comprador</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="compradorId" value={formData.compradorId} onChange={handleChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u: any) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><InputField icon={IconDollarSign} label="Monto (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar</Button></div></form></div></div>
   );
 };
 
-const OfertaModal = ({ oferta, users, cdps, nextOfertaNum, onClose, onSave, showGlobalMessage }) => {
+const OfertaModal = ({ oferta, users, cdps, nextOfertaNum, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState(oferta || { numero: String(nextOfertaNum), cdpNumber: "", vendedorId: "", monto: "", fecha: getLocalDateString(), vencimiento: getLocalDateString() });
   const [isLoading, setIsLoading] = useState(false);
-  const handleSubmit = async (e) => { e.preventDefault(); setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Oferta Registrada", "La oferta fue publicada."); onClose(); };
-  const handleCdpChange = (e) => { const val = e.target.value; const num = Number(val); let newVendedorId = formData.vendedorId; if (num >= 1 && num <= TOTAL_CDPS) { const cdp = cdps.find((c) => c.number === num); if (cdp) newVendedorId = cdp.ownerId; } setFormData({ ...formData, cdpNumber: val, vendedorId: newVendedorId }); };
-  const handleVendedorChange = (e) => { setFormData({ ...formData, vendedorId: e.target.value, cdpNumber: "" }); };
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Oferta Registrada", "La oferta fue publicada."); onClose(); };
+  const handleCdpChange = (e: any) => { const val = e.target.value; const num = Number(val); let newVendedorId = formData.vendedorId; if (num >= 1 && num <= TOTAL_CDPS) { const cdp = cdps.find((c:any) => c.number === num); if (cdp) newVendedorId = cdp.ownerId; } setFormData({ ...formData, cdpNumber: val, vendedorId: newVendedorId }); };
+  const handleVendedorChange = (e: any) => { setFormData({ ...formData, vendedorId: e.target.value, cdpNumber: "" }); };
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{oferta ? "Editar Oferta" : "Nueva Oferta"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="bg-violet-50 p-4 rounded-xl border border-violet-100 mb-2"><InputField label="Nº de Oferta (Automático)" type="number" name="numero" value={formData.numero} onChange={handleChange} required /></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Vendedor</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="vendedorId" value={formData.vendedorId} onChange={handleVendedorChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Nº CDP a la venta</label>{formData.vendedorId ? (<select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="cdpNumber" value={formData.cdpNumber} onChange={handleCdpChange} required><option value="">-- Seleccionar CDP --</option>{cdps.filter((c) => c.ownerId === formData.vendedorId).map((c) => <option key={c.number} value={c.number}>CDP Nº {c.number}</option>)}</select>) : (<input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleCdpChange} placeholder="Escriba el Nº de CDP..." required />)}</div><InputField icon={IconDollarSign} label="Monto Solicitado (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><InputField label="Publicación" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /><InputField label="Vencimiento" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required /></div><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Oferta</Button></div></form></div></div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{oferta ? "Editar Oferta" : "Nueva Oferta"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><div className="bg-violet-50 p-4 rounded-xl border border-violet-100 mb-2"><InputField label="Nº de Oferta (Automático)" type="number" name="numero" value={formData.numero} onChange={handleChange} required /></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Vendedor</label><select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="vendedorId" value={formData.vendedorId} onChange={handleVendedorChange} required><option value="">-- Seleccionar --</option><option value="base_owner_sergio">Sergio Gabriel Argumedo Rosello</option>{users.map((u: any) => <option key={u.id} value={u.id}>{u.nombres} {u.apellidos}</option>)}</select></div><div className="flex flex-col gap-1 w-full"><label className="text-sm font-semibold text-slate-600 ml-1">Nº CDP a la venta</label>{formData.vendedorId ? (<select className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" name="cdpNumber" value={formData.cdpNumber} onChange={handleCdpChange} required><option value="">-- Seleccionar CDP --</option>{cdps.filter((c:any) => c.ownerId === formData.vendedorId).map((c:any) => <option key={c.number} value={c.number}>CDP Nº {c.number}</option>)}</select>) : (<input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleCdpChange} placeholder="Escriba el Nº de CDP..." required />)}</div><InputField icon={IconDollarSign} label="Monto Solicitado (USD)" type="number" name="monto" min="0" step="0.01" value={formData.monto} onChange={handleChange} required /><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><InputField label="Publicación" type="date" name="fecha" value={formData.fecha} onChange={handleChange} required /><InputField label="Vencimiento" type="date" name="vencimiento" value={formData.vencimiento} onChange={handleChange} required /></div><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar Oferta</Button></div></form></div></div>
   );
 };
 
-const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }) => {
+const BovedaModal = ({ bovedaItem, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState(bovedaItem || { cdpNumber: "", titulo: "", url: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const handleSubmit = async (e) => { e.preventDefault(); setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Guardado", "Documento vinculado exitosamente."); onClose(); };
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); await onSave(formData); setIsLoading(false); showGlobalMessage("success", "Guardado", "Documento vinculado exitosamente."); onClose(); };
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4"><div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div><div className="bg-white rounded-3xl p-8 max-w-lg w-full relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">{bovedaItem ? "Editar Doc" : "Vincular Doc"}</h2><button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><IconX className="w-6 h-6 text-slate-500" /></button></div><form onSubmit={handleSubmit} className="space-y-4"><InputField label="Nº CDP Asociado" type="number" name="cdpNumber" min="1" max={TOTAL_CDPS} value={formData.cdpNumber} onChange={handleChange} required /><InputField icon={IconFileText} label="Título del Archivo" name="titulo" value={formData.titulo} onChange={handleChange} required /><InputField icon={IconCloud} label="Enlace Web (URL)" type="url" name="url" placeholder="https://drive.google.com/..." value={formData.url} onChange={handleChange} required /><div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button><Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar</Button></div></form></div></div>
   );
 };
 
-const UserOfferModal = ({ isOpen, offerType, user, onClose, onSave, showGlobalMessage }) => {
+const UserOfferModal = ({ isOpen, offerType, user, onClose, onSave, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ nombres: "", apellidos: "", cuit: "", telefono: "", email: "", monto: "" });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -254,9 +254,9 @@ const UserOfferModal = ({ isOpen, offerType, user, onClose, onSave, showGlobalMe
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
   
-  const handleSubmit = async (e) => { 
+  const handleSubmit = async (e: any) => { 
     e.preventDefault(); 
     setIsLoading(true); 
     await onSave({ ...formData, tipo: offerType }); 
@@ -310,8 +310,8 @@ const UserOfferModal = ({ isOpen, offerType, user, onClose, onSave, showGlobalMe
 // ==========================================
 // COMPONENTE: GRÁFICO DE MERCADO
 // ==========================================
-const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSaveConfig = null, showGlobalMessage = null }) => {
-  const [hoveredPoint, setHoveredPoint] = useState(null);
+const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSaveConfig = null, showGlobalMessage = null }: any) => {
+  const [hoveredPoint, setHoveredPoint] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   
   const defaultConfig = { filterYear: "Todos", yMin: "", yMax: "", yStep: "", xMin: "", xMax: "", xStep: "30" };
@@ -323,16 +323,16 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
 
   const activeConfig = simplified ? (savedConfig || defaultConfig) : localConfig;
 
-  const opsConMonto = operaciones.filter((op) => op.monto && op.fecha && !isNaN(Number(op.monto)));
-  const aniosDisponibles = ["Todos", ...Array.from(new Set(opsConMonto.map((op) => op.fecha.substring(0,4)))).sort().reverse()];
+  const opsConMonto = operaciones.filter((op:any) => op.monto && op.fecha && !isNaN(Number(op.monto)));
+  const aniosDisponibles = ["Todos", ...Array.from(new Set(opsConMonto.map((op:any) => op.fecha.substring(0,4)))).sort().reverse()];
 
   const dataFiltrada = activeConfig.filterYear === "Todos"
       ? opsConMonto
-      : opsConMonto.filter((op) => op.fecha.startsWith(activeConfig.filterYear));
+      : opsConMonto.filter((op:any) => op.fecha.startsWith(activeConfig.filterYear));
 
   const data = dataFiltrada
-      .map((op) => ({ dateMs: new Date(op.fecha + "T00:00:00").getTime(), monto: Number(op.monto), fechaStr: formatDateForDisplay(op.fecha), id: op.id }))
-      .sort((a, b) => a.dateMs - b.dateMs);
+      .map((op:any) => ({ dateMs: new Date(op.fecha + "T00:00:00").getTime(), monto: Number(op.monto), fechaStr: formatDateForDisplay(op.fecha), id: op.id }))
+      .sort((a:any, b:any) => a.dateMs - b.dateMs);
 
   if (data.length < 2) {
       return (
@@ -349,8 +349,8 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
   const paddingX = simplified ? 55 : 70;
   const paddingY = simplified ? 25 : 50;
 
-  const dataMinY = Math.min(...data.map((d) => d.monto));
-  const dataMaxY = Math.max(...data.map((d) => d.monto));
+  const dataMinY = Math.min(...data.map((d:any) => d.monto));
+  const dataMaxY = Math.max(...data.map((d:any) => d.monto));
   const rangeYData = dataMaxY - dataMinY || 100;
 
   const dataMinX = data[0].dateMs;
@@ -365,8 +365,8 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
   const usedXMax = activeConfig.xMax !== "" ? new Date(activeConfig.xMax + "T00:00:00").getTime() : dataMaxX;
   const usedXStepMs = activeConfig.xStep !== "" ? Math.max(1, Number(activeConfig.xStep)) * 86400000 : rangeXData / 4;
 
-  const getX = (dateMs) => paddingX + ((dateMs - usedXMin) / (usedXMax - usedXMin || 1)) * (width - paddingX * 2);
-  const getY = (monto) => height - paddingY - ((monto - usedYMin) / (usedYMax - usedYMin || 1)) * (height - paddingY * 2);
+  const getX = (dateMs: number) => paddingX + ((dateMs - usedXMin) / (usedXMax - usedXMin || 1)) * (width - paddingX * 2);
+  const getY = (monto: number) => height - paddingY - ((monto - usedYMin) / (usedYMax - usedYMin || 1)) * (height - paddingY * 2);
 
   const yLines = [];
   if (usedYStep > 0) { for(let y = usedYMin; y <= usedYMax; y += usedYStep) yLines.push(y); }
@@ -374,9 +374,9 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
   const xLines = [];
   if (usedXStepMs > 0) { for(let x = usedXMin; x <= usedXMax; x += usedXStepMs) xLines.push(x); }
 
-  const pointsStr = data.map((d) => `${getX(d.dateMs)},${getY(d.monto)}`).join(" ");
+  const pointsStr = data.map((d:any) => `${getX(d.dateMs)},${getY(d.monto)}`).join(" ");
 
-  const handleChangeConfig = (e) => setLocalConfig({ ...localConfig, [e.target.name]: e.target.value });
+  const handleChangeConfig = (e: any) => setLocalConfig({ ...localConfig, [e.target.name]: e.target.value });
 
   const handleSave = async () => {
     if (onSaveConfig) {
@@ -403,7 +403,7 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
             <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
                <IconTrendingUp className="w-5 h-5 text-slate-400" />
                <select name="filterYear" value={localConfig.filterYear} onChange={handleChangeConfig} className="bg-white border border-slate-300 rounded-lg px-2 py-1.5 font-bold outline-none focus:ring-2 focus:ring-violet-500">
-                  {aniosDisponibles.map((a) => <option key={a} value={a}>{a}</option>)}
+                  {aniosDisponibles.map((a:any) => <option key={a} value={a}>{a}</option>)}
                </select>
             </div>
             
@@ -466,7 +466,7 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
 
            <polyline points={pointsStr} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md" />
 
-           {data.map((d, i) => {
+           {data.map((d:any, i:number) => {
                const cx = getX(d.dateMs);
                const cy = getY(d.monto);
                if (cx < 0 || cx > width || cy < 0 || cy > height) return null;
@@ -513,12 +513,12 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
 // VISTAS DE LA APLICACIÓN
 // ==========================================
 
-const LoginView = ({ setView, onLoginAuth, onForgotPassword, showGlobalMessage }) => {
+const LoginView = ({ setView, onLoginAuth, onForgotPassword, showGlobalMessage }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
     const result = await onLoginAuth(email, password);
@@ -562,8 +562,8 @@ const LoginView = ({ setView, onLoginAuth, onForgotPassword, showGlobalMessage }
         </div>
         
         <form onSubmit={handleLogin} className="space-y-5 max-w-[260px] mx-auto w-full">
-          <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <InputField icon={IconLock} label="Contraseña" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <InputField icon={IconMail} label="Correo Electrónico" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
+          <InputField icon={IconLock} label="Contraseña" type="password" placeholder="••••••••" value={password} onChange={(e: any) => setPassword(e.target.value)} required />
           
           <div className="flex justify-center mt-2">
             <button type="button" onClick={handleForgot} disabled={isLoading} className="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">¿Olvidaste tu contraseña?</button>
@@ -581,11 +581,11 @@ const LoginView = ({ setView, onLoginAuth, onForgotPassword, showGlobalMessage }
   );
 };
 
-const RegisterView = ({ setView, onRegisterAuth, showGlobalMessage }) => {
+const RegisterView = ({ setView, onRegisterAuth, showGlobalMessage }: any) => {
   const [formData, setFormData] = useState({ nombres: "", apellidos: "", cuit: "", telefono: "", email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault(); setIsLoading(true);
     
     const result = await onRegisterAuth(formData.email, formData.password, formData);
@@ -605,11 +605,11 @@ const RegisterView = ({ setView, onRegisterAuth, showGlobalMessage }) => {
         <h2 className="text-3xl font-bold text-slate-800 mb-2">Solicitud de Alta</h2>
         <p className="text-slate-500 mb-8">Completa tus datos para ingresar al Mercado de CDP.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField icon={IconUser} label="Nombres" value={formData.nombres} onChange={(e) => setFormData({ ...formData, nombres: e.target.value })} required /><InputField icon={IconUser} label="Apellidos" value={formData.apellidos} onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })} required /></div>
-          <InputField icon={IconFileText} label="CUIT / CUIL" value={formData.cuit} onChange={(e) => setFormData({ ...formData, cuit: e.target.value })} required />
-          <InputField icon={IconPhone} label="Teléfono (WhatsApp)" value={formData.telefono} onChange={(e) => setFormData({ ...formData, telefono: e.target.value })} required />
-          <InputField icon={IconMail} label="Correo Electrónico" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
-          <InputField icon={IconLock} label="Contraseña segura" type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField icon={IconUser} label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required /><InputField icon={IconUser} label="Apellidos" value={formData.apellidos} onChange={(e: any) => setFormData({ ...formData, apellidos: e.target.value })} required /></div>
+          <InputField icon={IconFileText} label="CUIT / CUIL" value={formData.cuit} onChange={(e: any) => setFormData({ ...formData, cuit: e.target.value })} required />
+          <InputField icon={IconPhone} label="Teléfono (WhatsApp)" value={formData.telefono} onChange={(e: any) => setFormData({ ...formData, telefono: e.target.value })} required />
+          <InputField icon={IconMail} label="Correo Electrónico" type="email" value={formData.email} onChange={(e: any) => setFormData({ ...formData, email: e.target.value })} required />
+          <InputField icon={IconLock} label="Contraseña segura" type="password" value={formData.password} onChange={(e: any) => setFormData({ ...formData, password: e.target.value })} required />
           <Button type="submit" className="w-full mt-6" isLoading={isLoading}>Registrarme de forma segura</Button>
         </form>
       </Card>
@@ -617,12 +617,12 @@ const RegisterView = ({ setView, onRegisterAuth, showGlobalMessage }) => {
   );
 };
 
-const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }) => {
+const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }: any) => {
   const [formData, setFormData] = useState({ nombres: user.nombres, apellidos: user.apellidos, cuit: user.cuit, telefono: user.telefono });
   const [isLoading, setIsLoading] = useState(false);
   const currentRole = getUserRole(user, cdps);
 
-  const handleSubmit = async (e) => { e.preventDefault(); setIsLoading(true); const updatedUser = { ...user, ...formData, isValidated: true }; await onUpdate(user.id, updatedUser); setCurrentUser(updatedUser); setView("dashboard"); setIsLoading(false); };
+  const handleSubmit = async (e: any) => { e.preventDefault(); setIsLoading(true); const updatedUser = { ...user, ...formData, isValidated: true }; await onUpdate(user.id, updatedUser); setCurrentUser(updatedUser); setView("dashboard"); setIsLoading(false); };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
@@ -637,9 +637,9 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }) => {
             <div className="text-center md:text-right"><span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Categoría Oficial</span><span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${currentRole === ROLES.ADMIN ? "bg-violet-100 text-violet-700" : currentRole === ROLES.NO_FIDUCIANTE ? "bg-slate-200 text-slate-600" : "bg-blue-100 text-blue-700"}`}>{currentRole === ROLES.ADMIN && <IconShield className="w-4 h-4" />}{currentRole}</span><div className="mt-2 text-xl font-black text-slate-800 tracking-tight">Socio Nº {formatId(user.correlativeId)}</div></div>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField label="Nombres" value={formData.nombres} onChange={(e) => setFormData({ ...formData, nombres: e.target.value })} required /><InputField label="Apellidos" value={formData.apellidos} onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })} required /></div>
-            <InputField label="CUIT / CUIL" value={formData.cuit} onChange={(e) => setFormData({ ...formData, cuit: e.target.value })} required />
-            <InputField label="Teléfono de Contacto" value={formData.telefono} onChange={(e) => setFormData({ ...formData, telefono: e.target.value })} required />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><InputField label="Nombres" value={formData.nombres} onChange={(e: any) => setFormData({ ...formData, nombres: e.target.value })} required /><InputField label="Apellidos" value={formData.apellidos} onChange={(e: any) => setFormData({ ...formData, apellidos: e.target.value })} required /></div>
+            <InputField label="CUIT / CUIL" value={formData.cuit} onChange={(e: any) => setFormData({ ...formData, cuit: e.target.value })} required />
+            <InputField label="Teléfono de Contacto" value={formData.telefono} onChange={(e: any) => setFormData({ ...formData, telefono: e.target.value })} required />
             <div className="pt-6"><Button type="submit" className="w-full" isLoading={isLoading} icon={IconCheckCircle}>Confirmo que mis datos son correctos</Button></div>
           </form>
         </Card>
@@ -648,8 +648,8 @@ const ValidationView = ({ user, cdps, onUpdate, setView, setCurrentUser }) => {
   );
 };
 
-const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, onSaveUserOffer, showGlobalMessage }) => {
-  const [offerModalConfig, setOfferModalConfig] = useState({ isOpen: false, type: "COMPRA" });
+const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, onSaveUserOffer, showGlobalMessage }: any) => {
+  const [offerModalConfig, setOfferModalConfig] = useState<{isOpen: boolean, type: string}>({ isOpen: false, type: "COMPRA" });
   const ofertasOrdenadas = [...ofertas].sort((a, b) => Number(a.monto) - Number(b.monto));
 
   const handleVentaClick = () => {
@@ -687,7 +687,7 @@ const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, on
                <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles</h4>
                <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                   {ofertasOrdenadas.length > 0 ? (
-                    ofertasOrdenadas.map((of) => (
+                    ofertasOrdenadas.map((of: any) => (
                       <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col justify-between min-h-[85px] gap-3">
                          <div className="flex justify-between items-start gap-2 w-full">
                            <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">Oferta Venta</span>
@@ -741,13 +741,13 @@ const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, on
 };
 
 
-const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigData, setView, handleLogout, onSaveUserOffer, showGlobalMessage }) => {
-  const misCdps = cdps.filter((c) => c.ownerId === user.id);
+const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigData, setView, handleLogout, onSaveUserOffer, showGlobalMessage }: any) => {
+  const misCdps = cdps.filter((c: any) => c.ownerId === user.id);
   const currentRole = getUserRole(user, cdps);
   const [selectedBovedaCdp, setSelectedBovedaCdp] = useState("");
-  const [offerModalConfig, setOfferModalConfig] = useState({ isOpen: false, type: "COMPRA" });
+  const [offerModalConfig, setOfferModalConfig] = useState<{isOpen: boolean, type: string}>({ isOpen: false, type: "COMPRA" });
 
-  const bovedaDocsFiltered = selectedBovedaCdp ? boveda.filter((d) => String(d.cdpNumber) === String(selectedBovedaCdp)) : [];
+  const bovedaDocsFiltered = selectedBovedaCdp ? boveda.filter((d:any) => String(d.cdpNumber) === String(selectedBovedaCdp)) : [];
 
   const ofertasOrdenadas = [...ofertas].sort((a, b) => Number(a.monto) - Number(b.monto));
 
@@ -839,7 +839,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                    <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Venta</h4>
                    <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                       {ofertasOrdenadas.length > 0 ? (
-                        ofertasOrdenadas.map((of) => (
+                        ofertasOrdenadas.map((of: any) => (
                           <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col justify-between group relative overflow-hidden min-h-[85px] gap-3">
                              <div className="flex justify-between items-start gap-2 w-full">
                                <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">
@@ -904,7 +904,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                      onChange={(e) => setSelectedBovedaCdp(e.target.value)}
                    >
                      <option value="">-- Mis CDPs Asignados --</option>
-                     {misCdps.map((c) => <option key={c.number} value={c.number}>Certificado Nº {c.number}</option>)}
+                     {misCdps.map((c:any) => <option key={c.number} value={c.number}>Certificado Nº {c.number}</option>)}
                    </select>
                  </div>
               </div>
@@ -912,7 +912,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
               {selectedBovedaCdp ? (
                 bovedaDocsFiltered.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-300">
-                     {bovedaDocsFiltered.map((doc) => (
+                     {bovedaDocsFiltered.map((doc:any) => (
                         <a key={doc.id} href={doc.url} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 hover:border-blue-300 rounded-2xl transition-all group shadow-sm">
                            <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-500">
@@ -960,7 +960,7 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
 
               {misCdps.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {misCdps.map((cdp) => (
+                  {misCdps.map((cdp: any) => (
                     <div key={cdp.id} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center group hover:border-violet-400 hover:shadow-md transition-all">
                       <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Activo</p>
                       <p className="font-bold text-slate-800 text-lg">CDP {cdp.number}</p>
@@ -992,39 +992,39 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
   );
 };
 
-const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, chartConfigData, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, onDeleteSolicitud, onSaveChartConfig, showGlobalMessage }) => {
+const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, chartConfigData, setView, currentUser, setCurrentUser, onUpdateUser, onDeleteUser, onSaveOperacion, onDeleteOperacion, onSaveOferta, onDeleteOferta, onSaveBoveda, onDeleteBoveda, onDeleteSolicitud, onSaveChartConfig, showGlobalMessage }: any) => {
   const [activeTab, setActiveTab] = useState("fiduciantes"); 
-  const [editingUser, setEditingUser] = useState(undefined);
-  const [editingOperacion, setEditingOperacion] = useState(undefined);
-  const [editingOferta, setEditingOferta] = useState(undefined);
-  const [editingBoveda, setEditingBoveda] = useState(undefined);
+  const [editingUser, setEditingUser] = useState<any>(undefined);
+  const [editingOperacion, setEditingOperacion] = useState<any>(undefined);
+  const [editingOferta, setEditingOferta] = useState<any>(undefined);
+  const [editingBoveda, setEditingBoveda] = useState<any>(undefined);
 
-  const nextOfertaNum = ofertas.length > 0 ? Math.max(...ofertas.map((o) => Number(o.numero) || 0)) + 1 : 1;
+  const nextOfertaNum = ofertas.length > 0 ? Math.max(...ofertas.map((o:any) => Number(o.numero) || 0)) + 1 : 1;
 
-  const handleDeleteUserRequest = (userToDelete) => {
+  const handleDeleteUserRequest = (userToDelete: any) => {
     if (userToDelete.id === currentUser.id) { showGlobalMessage("error", "Acción Denegada", "No puedes eliminar tu propia cuenta de administrador."); return; }
     showGlobalMessage("confirm", "Eliminar Fiduciante", `¿Estás seguro de que deseas eliminar a ${userToDelete.nombres}?`, async () => { await onDeleteUser(userToDelete.id); showGlobalMessage("success", "Usuario Eliminado", "El registro fue borrado exitosamente."); }, null, "Sí, Eliminar");
   };
 
-  const handleDeleteOperacionRequest = (operacion) => {
+  const handleDeleteOperacionRequest = (operacion: any) => {
     showGlobalMessage("confirm", "Eliminar Operación", `¿Estás seguro de que deseas eliminar la operación #${operacion.numero}?`, async () => { await onDeleteOperacion(operacion.id); showGlobalMessage("success", "Operación Eliminada", "El registro fue borrado exitosamente."); }, null, "Sí, Eliminar");
   };
 
-  const handleDeleteOfertaRequest = (oferta) => {
+  const handleDeleteOfertaRequest = (oferta: any) => {
     showGlobalMessage("confirm", "Eliminar Oferta", `¿Estás seguro de que deseas eliminar la oferta #${oferta.numero}?`, async () => { await onDeleteOferta(oferta.id); showGlobalMessage("success", "Oferta Eliminada", "La oferta fue removida del mercado."); }, null, "Sí, Eliminar");
   };
 
-  const handleDeleteBovedaRequest = (docInfo) => {
+  const handleDeleteBovedaRequest = (docInfo: any) => {
     showGlobalMessage("confirm", "Desvincular Documento", `¿Estás seguro de que deseas borrar este documento del CDP #${docInfo.cdpNumber}?`, async () => { await onDeleteBoveda(docInfo.id); showGlobalMessage("success", "Documento Borrado", "El enlace se desvinculó de la bóveda."); }, null, "Sí, Borrar");
   };
 
-  const handleDeleteSolicitudRequest = (solicitud) => {
+  const handleDeleteSolicitudRequest = (solicitud: any) => {
     showGlobalMessage("confirm", "Eliminar Solicitud", `¿Eliminar la solicitud de ${solicitud.nombres} ${solicitud.apellidos}?`, async () => { await onDeleteSolicitud(solicitud.id); showGlobalMessage("success", "Solicitud Eliminada", "La solicitud fue borrada del sistema."); }, null, "Sí, Eliminar");
   };
 
-  const getUserName = (id) => {
+  const getUserName = (id: string) => {
     if (id === "base_owner_sergio") return "Sergio Gabriel Argumedo Rosello";
-    const user = users.find((u) => u.id === id);
+    const user = users.find((u: any) => u.id === id);
     return user ? `${user.nombres} ${user.apellidos}` : "Usuario Desconocido";
   };
 
@@ -1063,7 +1063,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">ID</th><th className="p-4 font-semibold">Fiduciante</th><th className="p-4 font-semibold">Categoría Oficial</th><th className="p-4 font-semibold">Contacto</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
-                    {users.map((u) => {
+                    {users.map((u: any) => {
                       const uRole = getUserRole(u, cdps);
                       return (
                         <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
@@ -1094,7 +1094,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {Array.from({ length: TOTAL_CDPS }, (_, i) => i + 1).map(num => {
-                const cdpInfo = cdps.find((c) => c.number === num);
+                const cdpInfo = cdps.find((c: any) => c.number === num);
                 const currentOwnerId = cdpInfo ? cdpInfo.ownerId : "";
                 const ownerName = getUserName(currentOwnerId);
                 const isBaseOwner = currentOwnerId === "base_owner_sergio" || ownerName.toLowerCase().includes("argumedo");
@@ -1120,7 +1120,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº Oper.</th><th className="p-4 font-semibold">Fecha</th><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Vendedor</th><th className="p-4 font-semibold">Comprador</th><th className="p-4 font-semibold text-right">Monto (USD)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
-                    {operaciones.length === 0 ? <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td></tr> : operaciones.map((op) => (
+                    {operaciones.length === 0 ? <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay operaciones registradas aún.</td></tr> : operaciones.map((op: any) => (
                         <tr key={op.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{op.numero}</span></td>
                           <td className="p-4 align-middle text-sm text-slate-600 font-medium">{formatDateForDisplay(op.fecha)}</td>
@@ -1152,7 +1152,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº Oferta</th><th className="p-4 font-semibold">Publicada</th><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Vendedor</th><th className="p-4 font-semibold">Vencimiento</th><th className="p-4 font-semibold text-right">Monto (USD)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
-                    {ofertas.length === 0 ? <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay ofertas de venta activas.</td></tr> : ofertas.map((of) => (
+                    {ofertas.length === 0 ? <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-medium">No hay ofertas de venta activas.</td></tr> : ofertas.map((of: any) => (
                         <tr key={of.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="font-bold text-slate-800">#{of.numero}</span></td>
                           <td className="p-4 align-middle text-sm text-slate-600">{formatDateForDisplay(of.fecha)}</td>
@@ -1199,7 +1199,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
                     {solicitudes.length === 0 ? (
                       <tr><td colSpan={6} className="p-8 text-center text-slate-500 font-medium">No hay solicitudes pendientes en este momento.</td></tr>
                     ) : (
-                      solicitudes.map((sol) => (
+                      solicitudes.map((sol: any) => (
                         <tr key={sol.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle text-sm font-medium text-slate-600">
                             {new Date(sol.fechaSolicitud).toLocaleDateString()}
@@ -1246,7 +1246,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider"><th className="p-4 font-semibold">Nº CDP</th><th className="p-4 font-semibold">Título del Documento</th><th className="p-4 font-semibold">Enlace (URL)</th><th className="p-4 font-semibold text-right">Acciones</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
-                    {boveda.length === 0 ? <tr><td colSpan={4} className="p-8 text-center text-slate-500 font-medium">La bóveda de documentos está vacía.</td></tr> : boveda.map((doc) => (
+                    {boveda.length === 0 ? <tr><td colSpan={4} className="p-8 text-center text-slate-500 font-medium">La bóveda de documentos está vacía.</td></tr> : boveda.map((doc: any) => (
                         <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 align-middle"><span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">CDP {doc.cdpNumber}</span></td>
                           <td className="p-4 align-middle text-sm font-bold text-slate-800">{doc.titulo}</td>
@@ -1268,7 +1268,7 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
 
       </main>
 
-      {editingUser && <AdminEditModal user={editingUser} onClose={() => setEditingUser(undefined)} onUpdate={(id, data) => { onUpdateUser(id, data); if (id === currentUser.id) { setCurrentUser(data); if (!data.isAdmin) setView("dashboard"); } }} showGlobalMessage={showGlobalMessage} />}
+      {editingUser && <AdminEditModal user={editingUser} onClose={() => setEditingUser(undefined)} onUpdate={(id: string, data: any) => { onUpdateUser(id, data); if (id === currentUser.id) { setCurrentUser(data); if (!data.isAdmin) setView("dashboard"); } }} showGlobalMessage={showGlobalMessage} />}
       {editingOperacion !== undefined && <OperacionModal operacion={editingOperacion} users={users} onClose={() => setEditingOperacion(undefined)} onSave={onSaveOperacion} showGlobalMessage={showGlobalMessage} />}
       {editingOferta !== undefined && <OfertaModal oferta={editingOferta} users={users} cdps={cdps} nextOfertaNum={nextOfertaNum} onClose={() => setEditingOferta(undefined)} onSave={onSaveOferta} showGlobalMessage={showGlobalMessage} />}
       {editingBoveda !== undefined && <BovedaModal bovedaItem={editingBoveda} onClose={() => setEditingBoveda(undefined)} onSave={onSaveBoveda} showGlobalMessage={showGlobalMessage} />}
@@ -1282,29 +1282,29 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
 
 const MercadoApp = () => {
   const [currentView, setCurrentView] = useState("login");
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   
-  const [firebaseUser, setFirebaseUser] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [computedCdps, setComputedCdps] = useState([]);
-  const [operaciones, setOperaciones] = useState([]);
-  const [ofertas, setOfertas] = useState([]);
-  const [boveda, setBoveda] = useState([]);
-  const [solicitudes, setSolicitudes] = useState([]);
-  const [chartConfigData, setChartConfigData] = useState(null);
+  const [firebaseUser, setFirebaseUser] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [computedCdps, setComputedCdps] = useState<any[]>([]);
+  const [operaciones, setOperaciones] = useState<any[]>([]);
+  const [ofertas, setOfertas] = useState<any[]>([]);
+  const [boveda, setBoveda] = useState<any[]>([]);
+  const [solicitudes, setSolicitudes] = useState<any[]>([]);
+  const [chartConfigData, setChartConfigData] = useState<any>(null);
   
   const [isDbReady, setIsDbReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [dbError, setDbError] = useState(null);
+  const [dbError, setDbError] = useState<string | null>(null);
 
-  const [modalConfig, setModalConfig] = useState({ isOpen: false, type: "info", title: "", message: "", onConfirm: null, onCancel: null, confirmText: "Aceptar", cancelText: "Cancelar" });
+  const [modalConfig, setModalConfig] = useState<any>({ isOpen: false, type: "info", title: "", message: "", onConfirm: null, onCancel: null, confirmText: "Aceptar", cancelText: "Cancelar" });
 
   useEffect(() => {
     if (!firebaseConfig) return;
     const initAuth = async () => {
       try {
-        if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
-          await signInWithCustomToken(auth, window.__initial_auth_token);
+        if (typeof (window as any).__initial_auth_token !== 'undefined' && (window as any).__initial_auth_token) {
+          await signInWithCustomToken(auth, (window as any).__initial_auth_token);
         } else {
           // Si no hay sesión, entramos como anónimos por defecto para poder leer la DB pública
           await signInAnonymously(auth);
@@ -1315,7 +1315,7 @@ const MercadoApp = () => {
       }
     };
     initAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => setFirebaseUser(user));
+    const unsubscribe = onAuthStateChanged(auth, (user: any) => setFirebaseUser(user));
     return () => unsubscribe();
   }, []);
 
@@ -1323,16 +1323,16 @@ const MercadoApp = () => {
     if (!firebaseConfig || !firebaseUser) return;
     
     const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'fiduciantes');
-    const uUnsubscribe = onSnapshot(usersRef, (snapshot) => {
-      setUsers(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    const uUnsubscribe = onSnapshot(usersRef, (snapshot: any) => {
+      setUsers(snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })));
       setIsDbReady(true);
       setDbError(null);
     }, () => { setDbError("Error de permisos."); setIsInitializing(false); });
 
     const operacionesRef = collection(db, 'artifacts', appId, 'public', 'data', 'operaciones');
-    const oUnsubscribe = onSnapshot(operacionesRef, (snapshot) => {
-      const ops = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      ops.sort((a, b) => {
+    const oUnsubscribe = onSnapshot(operacionesRef, (snapshot: any) => {
+      const ops = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      ops.sort((a: any, b: any) => {
           const dateDiff = new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
           return dateDiff === 0 ? Number(b.numero) - Number(a.numero) : dateDiff;
       });
@@ -1340,28 +1340,28 @@ const MercadoApp = () => {
     });
 
     const ofertasRef = collection(db, 'artifacts', appId, 'public', 'data', 'ofertas');
-    const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot) => {
-      const ofs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      ofs.sort((a, b) => Number(b.numero) - Number(a.numero));
+    const ofUnsubscribe = onSnapshot(ofertasRef, (snapshot: any) => {
+      const ofs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      ofs.sort((a: any, b: any) => Number(b.numero) - Number(a.numero));
       setOfertas(ofs);
     });
 
     const bovedaRef = collection(db, 'artifacts', appId, 'public', 'data', 'boveda');
-    const bovUnsubscribe = onSnapshot(bovedaRef, (snapshot) => {
-      const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      docs.sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
+    const bovUnsubscribe = onSnapshot(bovedaRef, (snapshot: any) => {
+      const docs = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      docs.sort((a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
       setBoveda(docs);
     });
 
     const solicitudesRef = collection(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas');
-    const solUnsubscribe = onSnapshot(solicitudesRef, (snapshot) => {
-      const sols = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      sols.sort((a, b) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime());
+    const solUnsubscribe = onSnapshot(solicitudesRef, (snapshot: any) => {
+      const sols = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      sols.sort((a: any, b: any) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime());
       setSolicitudes(sols);
     });
 
     const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart');
-    const cUnsubscribe = onSnapshot(configRef, (docSnap) => {
+    const cUnsubscribe = onSnapshot(configRef, (docSnap: any) => {
       if (docSnap.exists()) {
         setChartConfigData(docSnap.data());
       }
@@ -1376,7 +1376,7 @@ const MercadoApp = () => {
     const sergio = users.find(u => u.nombres?.toLowerCase().includes("sergio") && u.apellidos?.toLowerCase().includes("argumedo"));
     if (sergio) baseOwnerId = sergio.id;
 
-    let ownershipMap = {};
+    let ownershipMap: Record<number, string> = {};
     for (let i = 1; i <= TOTAL_CDPS; i++) ownershipMap[i] = baseOwnerId;
 
     const chronologicalOps = [...operaciones].sort((a, b) => {
@@ -1396,7 +1396,7 @@ const MercadoApp = () => {
     if (isDbReady && isInitializing) {
       const sessionId = sessionStorage.getItem(SESSION_KEY);
       if (sessionId) {
-        const user = users.find((u) => u.id === sessionId);
+        const user = users.find((u: any) => u.id === sessionId);
         if (user) {
           setCurrentUser(user);
           setCurrentView(user.isValidated ? "dashboard" : "validation");
@@ -1412,11 +1412,11 @@ const MercadoApp = () => {
   // FUNCIONES DE SEGURIDAD (FIREBASE AUTH)
   // ==========================================
 
-  const handleLoginAuth = async (email, pass) => {
+  const handleLoginAuth = async (email: string, pass: string) => {
     try {
       // 1. Intentamos login estándar con Firebase Auth
       await signInWithEmailAndPassword(auth, email, pass);
-      const userDoc = users.find((u) => u.email === email.toLowerCase());
+      const userDoc = users.find((u: any) => u.email === email.toLowerCase());
       if (userDoc) {
         sessionStorage.setItem(SESSION_KEY, userDoc.id);
         setCurrentUser(userDoc);
@@ -1424,10 +1424,10 @@ const MercadoApp = () => {
       } else {
         return { success: false, error: "Usuario autenticado pero no encontrado en los registros fiduciarios." };
       }
-    } catch (error) {
+    } catch (error: any) {
       // 2. MIGRACIÓN SILENCIOSA: Si el usuario no existe en Auth pero sí en nuestra DB antigua
       if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
-         const legacyUser = users.find((u) => u.email === email.toLowerCase() && u.password === pass);
+         const legacyUser = users.find((u: any) => u.email === email.toLowerCase() && u.password === pass);
          if (legacyUser) {
             try {
                // Creamos su cuenta en Auth con su misma contraseña
@@ -1444,9 +1444,9 @@ const MercadoApp = () => {
     }
   };
 
-  const handleRegisterAuth = async (email, pass, formData) => {
+  const handleRegisterAuth = async (email: string, pass: string, formData: any) => {
     const emailLower = email.toLowerCase();
-    if (users.some((u) => u.email === emailLower)) { 
+    if (users.some((u: any) => u.email === emailLower)) { 
        return { success: false, error: "El correo ya está registrado en el sistema." }; 
     }
     try {
@@ -1474,23 +1474,23 @@ const MercadoApp = () => {
       setCurrentUser(newUser);
       
       return { success: true, user: newUser };
-    } catch (e) {
+    } catch (e: any) {
       if (e.code === 'auth/email-already-in-use') return { success: false, error: "El correo ya existe en la nube." };
       if (e.code === 'auth/weak-password') return { success: false, error: "La contraseña es muy débil. Usa al menos 6 caracteres." };
       return { success: false, error: "Fallo de conexión segura. Intenta nuevamente." };
     }
   };
 
-  const handleForgotPassword = async (email) => {
+  const handleForgotPassword = async (email: string) => {
      try {
        await sendPasswordResetEmail(auth, email.toLowerCase());
        return { success: true };
-     } catch (e) {
+     } catch (e: any) {
        return { success: false, error: "Verifica que el correo esté bien escrito." };
      }
   };
 
-  const handleUpdateUser = async (id, data) => { 
+  const handleUpdateUser = async (id: string, data: any) => { 
     try { 
       const cleanData = {...data};
       delete cleanData.password; // Aseguramos no guardar password al editar
@@ -1498,18 +1498,18 @@ const MercadoApp = () => {
     } catch (e) {} 
   };
   
-  const handleDeleteUser = async (id) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id)); } catch (e) {} };
+  const handleDeleteUser = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fiduciantes', id)); } catch (e) {} };
 
-  const handleSaveOperacion = async (data) => { try { const id = data.id || `op_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
-  const handleDeleteOperacion = async (id) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', id)); } catch (e) {} };
+  const handleSaveOperacion = async (data: any) => { try { const id = data.id || `op_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
+  const handleDeleteOperacion = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'operaciones', id)); } catch (e) {} };
 
-  const handleSaveOferta = async (data) => { try { const id = data.id || `of_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
-  const handleDeleteOferta = async (id) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas', id)); } catch (e) {} };
+  const handleSaveOferta = async (data: any) => { try { const id = data.id || `of_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
+  const handleDeleteOferta = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ofertas', id)); } catch (e) {} };
 
-  const handleSaveBoveda = async (data) => { try { const id = data.id || `doc_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
-  const handleDeleteBoveda = async (id) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id)); } catch (e) {} };
+  const handleSaveBoveda = async (data: any) => { try { const id = data.id || `doc_${Date.now()}`; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id), { ...data, id, updatedAt: new Date().toISOString() }); } catch (e) {} };
+  const handleDeleteBoveda = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'boveda', id)); } catch (e) {} };
 
-  const handleSaveUserOffer = async (data) => { 
+  const handleSaveUserOffer = async (data: any) => { 
     try { 
       const id = `solicitud_${Date.now()}`; 
       await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas', id), { 
@@ -1522,12 +1522,12 @@ const MercadoApp = () => {
     } catch (e) { console.error(e); } 
   };
   
-  const handleDeleteSolicitud = async (id) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas', id)); } catch (e) {} };
+  const handleDeleteSolicitud = async (id: string) => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'solicitudes_ofertas', id)); } catch (e) {} };
 
-  const handleSaveChartConfig = async (configData) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart'), configData); } catch (e) { console.error(e); } };
+  const handleSaveChartConfig = async (configData: any) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'marketChart'), configData); } catch (e) { console.error(e); } };
 
-  const showGlobalMessage = useCallback((type, title, message, onConfirmCallback = null, onCancelCallback = null, confirmText = "Aceptar") => {
-    setModalConfig({ isOpen: true, type, title, message, confirmText, cancelText: "Cancelar", onConfirm: () => { setModalConfig((prev) => ({ ...prev, isOpen: false })); if (onConfirmCallback) onConfirmCallback(); }, onCancel: () => { setModalConfig((prev) => ({ ...prev, isOpen: false })); if (onCancelCallback) onCancelCallback(); } });
+  const showGlobalMessage = useCallback((type: string, title: string, message: string, onConfirmCallback: any = null, onCancelCallback: any = null, confirmText = "Aceptar") => {
+    setModalConfig({ isOpen: true, type, title, message, confirmText, cancelText: "Cancelar", onConfirm: () => { setModalConfig((prev: any) => ({ ...prev, isOpen: false })); if (onConfirmCallback) onConfirmCallback(); }, onCancel: () => { setModalConfig((prev: any) => ({ ...prev, isOpen: false })); if (onCancelCallback) onCancelCallback(); } });
   }, []);
 
   const handleLogout = useCallback(async (isAutomatic = false) => { 
@@ -1551,7 +1551,7 @@ const MercadoApp = () => {
   // SEGURIDAD: TIMEOUT POR INACTIVIDAD
   // ==========================================
   useEffect(() => {
-    let timeoutId;
+    let timeoutId: any; // <--- AQUÍ ESTÁ EL CAMBIO. Evita el conflicto de tipos en el compilador.
 
     const resetInactivityTimer = () => {
       clearTimeout(timeoutId);
