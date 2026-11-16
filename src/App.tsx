@@ -427,12 +427,12 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
       {/* SVG Container */}
       <div className="flex-1 flex items-center justify-center overflow-hidden w-full h-full relative p-2">
          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto max-h-full min-w-[500px]">
-           
-           <text x={width / 2} y={simplified ? 18 : 25} textAnchor="middle" className={`font-bold fill-slate-300 ${simplified ? 'text-[22px]' : 'text-[28px]'}`}>
-              Precio de los CDP y fecha de operación
-           </text>
+            
+            <text x={width / 2} y={simplified ? 18 : 25} textAnchor="middle" className={`font-bold fill-slate-300 ${simplified ? 'text-[22px]' : 'text-[28px]'}`}>
+               Precio de los CDP y fecha de operación
+            </text>
 
-           {yLines.map((val, idx) => {
+            {yLines.map((val, idx) => {
                const y = getY(val);
                if(y < 0 || y > height) return null;
                return (
@@ -441,9 +441,9 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                      <text x={paddingX - 10} y={y + 5} textAnchor="end" className="text-[16px] fill-slate-400 font-mono font-bold">${Math.round(val)}</text>
                    </g>
                )
-           })}
+            })}
 
-           {xLines.map((val, idx) => {
+            {xLines.map((val, idx) => {
                const x = getX(val);
                if(x < paddingX || x > width - paddingX) return null;
                const dateObj = new Date(val);
@@ -462,11 +462,11 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                       </text>
                    </g>
                )
-           })}
+            })}
 
-           <polyline points={pointsStr} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md" />
+            <polyline points={pointsStr} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md" />
 
-           {data.map((d:any, i:number) => {
+            {data.map((d:any, i:number) => {
                const cx = getX(d.dateMs);
                const cy = getY(d.monto);
                if (cx < 0 || cx > width || cy < 0 || cy > height) return null;
@@ -493,16 +493,16 @@ const MarketChart = ({ operaciones, simplified = false, savedConfig = null, onSa
                    }}
                />
                )
-           })}
+            })}
 
-           {hoveredPoint && (
+            {hoveredPoint && (
                <g transform={`translate(${hoveredPoint.x}, ${Math.max(65, hoveredPoint.y - 65)})`} className="pointer-events-none transition-all duration-100 ease-out">
                    <rect x="-95" y="-55" width="190" height="65" rx="8" fill="#ffffff" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))" />
                    <polygon points="-8,10 8,10 0,18" fill="#ffffff" />
                    <text x="0" y="-25" textAnchor="middle" fill="#0f172a" className="text-[20px] font-black">USD {hoveredPoint.monto.toLocaleString()}</text>
                    <text x="0" y="2" textAnchor="middle" fill="#64748b" className="text-[16px] font-mono font-bold">{hoveredPoint.fechaStr}</text>
                </g>
-           )}
+            )}
          </svg>
       </div>
     </div>
@@ -556,7 +556,7 @@ const LoginView = ({ setView, onLoginAuth, onForgotPassword, showGlobalMessage }
           </div>
           <h1 className="font-bold text-slate-800 flex flex-row items-center justify-center gap-3">
             <span className="text-4xl tracking-tight">Mercado de CDP</span>
-            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v53</span>
+            <span className="text-lg text-violet-600 bg-violet-100 px-3 py-0.5 rounded-full font-black tracking-widest uppercase mt-1">v54</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium italic">&quot;Club de Campo Viñas en las Violetas&quot;</p>
         </div>
@@ -686,30 +686,30 @@ const GuestDashboardView = ({ operaciones, ofertas, chartConfigData, setView, on
             <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
                <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles</h4>
                <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
-                  {ofertasOrdenadas.length > 0 ? (
-                    ofertasOrdenadas.map((of: any) => (
-                      <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col justify-between min-h-[85px] gap-3">
-                         <div className="flex justify-between items-start gap-2 w-full">
-                           <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">Oferta Venta</span>
-                           <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">CDP {of.cdpNumber}</span>
-                         </div>
-                         <div className="flex justify-between items-end gap-2 w-full">
-                           <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
-                             <span className="text-[11px] font-black">U$S</span>
-                             <span className="text-[22px] font-black leading-none">{Number(of.monto).toLocaleString()}</span>
-                           </div>
-                           <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mb-0.5">
-                              <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
-                           </span>
-                         </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                       <IconTag className="w-8 h-8 text-slate-300 mb-2" />
-                       <p className="text-slate-400 text-sm font-medium">No hay ofertas publicadas.</p>
-                    </div>
-                  )}
+                 {ofertasOrdenadas.length > 0 ? (
+                   ofertasOrdenadas.map((of: any) => (
+                     <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col justify-between min-h-[85px] gap-3">
+                        <div className="flex justify-between items-start gap-2 w-full">
+                          <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">Oferta Venta</span>
+                          <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">CDP {of.cdpNumber}</span>
+                        </div>
+                        <div className="flex justify-between items-end gap-2 w-full">
+                          <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
+                            <span className="text-[11px] font-black">U$S</span>
+                            <span className="text-[22px] font-black leading-none">{Number(of.monto).toLocaleString()}</span>
+                          </div>
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mb-0.5">
+                             <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
+                          </span>
+                        </div>
+                     </div>
+                   ))
+                 ) : (
+                   <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                      <IconTag className="w-8 h-8 text-slate-300 mb-2" />
+                      <p className="text-slate-400 text-sm font-medium">No hay ofertas publicadas.</p>
+                   </div>
+                 )}
                </div>
             </div>
             <div className="lg:col-span-1 lg:row-span-1 h-full">
@@ -838,34 +838,34 @@ const DashboardView = ({ user, cdps, operaciones, ofertas, boveda, chartConfigDa
                 <div className="lg:col-span-1 lg:row-span-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[500px] lg:h-full">
                    <h4 className="font-bold text-slate-800 mb-4 shrink-0 border-b border-slate-100 pb-2">CDPs Disponibles para Venta</h4>
                    <div className="overflow-y-auto space-y-3 flex-1 pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
-                      {ofertasOrdenadas.length > 0 ? (
-                        ofertasOrdenadas.map((of: any) => (
-                          <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col justify-between group relative overflow-hidden min-h-[85px] gap-3">
-                             <div className="flex justify-between items-start gap-2 w-full">
-                               <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">
-                                 Oferta de Venta
-                               </span>
-                               <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">
-                                 CDP {of.cdpNumber}
-                               </span>
-                             </div>
-                             <div className="flex justify-between items-end gap-2 w-full">
-                               <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
-                                 <span className="text-[11px] font-black">U$S</span>
-                                 <span className="text-[22px] font-black leading-none">{Number(of.monto).toLocaleString()}</span>
-                               </div>
-                               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mb-0.5">
-                                  <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
-                               </span>
-                             </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                           <IconTag className="w-8 h-8 text-slate-300 mb-2" />
-                           <p className="text-slate-400 text-sm font-medium">No hay ofertas publicadas.</p>
-                        </div>
-                      )}
+                     {ofertasOrdenadas.length > 0 ? (
+                       ofertasOrdenadas.map((of: any) => (
+                         <div key={of.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 shadow-sm hover:border-violet-400 transition-all flex flex-col justify-between group relative overflow-hidden min-h-[85px] gap-3">
+                            <div className="flex justify-between items-start gap-2 w-full">
+                              <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded uppercase tracking-widest border border-violet-200 whitespace-nowrap mt-0.5">
+                                Oferta de Venta
+                              </span>
+                              <span className="text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded uppercase tracking-widest whitespace-nowrap">
+                                CDP {of.cdpNumber}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-end gap-2 w-full">
+                              <div className="flex items-baseline gap-1 text-slate-800 whitespace-nowrap">
+                                <span className="text-[11px] font-black">U$S</span>
+                                <span className="text-[22px] font-black leading-none">{Number(of.monto).toLocaleString()}</span>
+                              </div>
+                              <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase whitespace-nowrap text-right mb-0.5">
+                                 <IconClock className="w-3 h-3 shrink-0" /> Vence {formatDateForDisplay(of.vencimiento)}
+                              </span>
+                            </div>
+                         </div>
+                       ))
+                     ) : (
+                       <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                          <IconTag className="w-8 h-8 text-slate-300 mb-2" />
+                          <p className="text-slate-400 text-sm font-medium">No hay ofertas publicadas.</p>
+                       </div>
+                     )}
                    </div>
                 </div>
 
@@ -1028,6 +1028,52 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
     return user ? `${user.nombres} ${user.apellidos}` : "Usuario Desconocido";
   };
 
+  const handleDownloadBackup = () => {
+    try {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const fileName = `Backup_Mercado_CDP ( IA REV ${yyyy} ${mm} ${dd} ).json`;
+
+      const toMap = (arr: any[]) => {
+        const map: Record<string, any> = {};
+        (arr || []).forEach((item: any) => {
+          if (item && item.id) map[item.id] = item;
+        });
+        return map;
+      };
+
+      const backupData = {
+        fecha: now.toISOString(),
+        proyecto: "mercado-cdp-violetas",
+        colecciones: {
+          boveda: toMap(boveda),
+          cdps: toMap(cdps),
+          config: { marketChart: chartConfigData || {} },
+          fiduciantes: toMap(users),
+          ofertas: toMap(ofertas),
+          operaciones: toMap(operaciones),
+          solicitudes_ofertas: toMap(solicitudes)
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showGlobalMessage("success", "Backup Generado", `Se descargó correctamente el archivo: ${fileName}`);
+    } catch (e) {
+      showGlobalMessage("error", "Error de Respaldo", "No se pudo generar el archivo de backup.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30">
@@ -1036,7 +1082,12 @@ const AdminView = ({ users, cdps, operaciones, ofertas, boveda, solicitudes, cha
             <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center relative"><IconSettings className="w-5 h-5 text-violet-400" /><div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-slate-900" title="En vivo"></div></div>
             <h1 className="text-xl font-bold hidden sm:block">Administración General</h1>
           </div>
-          <Button variant="secondary" className="!py-2 !px-4 !rounded-xl text-sm border border-slate-700" onClick={() => setView("dashboard")}>Volver al Dashboard</Button>
+          <div className="flex items-center gap-3">
+            <Button variant="primary" icon={IconSave} className="!py-2 !px-4 !rounded-xl text-sm !bg-emerald-600 hover:!bg-emerald-700" onClick={handleDownloadBackup}>
+              Backup JSON
+            </Button>
+            <Button variant="secondary" className="!py-2 !px-4 !rounded-xl text-sm border border-slate-700" onClick={() => setView("dashboard")}>Volver al Dashboard</Button>
+          </div>
         </div>
       </header>
 
